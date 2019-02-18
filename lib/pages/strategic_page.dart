@@ -1,43 +1,64 @@
 import 'package:flutter/material.dart';
 
+import 'package:scoped_model/scoped_model.dart';
+
 import '../widgets/side_drawer.dart';
 import '../widgets/task_card.dart';
+import '../entities/task_entity.dart';
+import '../scoped_model/task_model.dart';
 
-class StrategicPage extends StatelessWidget {
-  
+// import 'package:unicorndial/unicorndial.dart';
+
+class StrategicPage extends StatefulWidget {
+  @override
+  _StrategicPage createState() {
+    return _StrategicPage();
+  }
+}
+
+class _StrategicPage extends State<StrategicPage> {
+  Widget _buildListView(List<TaskEntity> taskList, Function removeTask) {
+    return ListView.builder(
+        itemBuilder: (BuildContext context, int index) => TaskCard(
+            taskList[index].name,
+            taskList[index].dueDate,
+            removeTask,
+            index),
+        itemCount: taskList.length,
+      );
+  }
+
+  FloatingActionButton _buildFloatingActionButton(Function addTask) {
+    return FloatingActionButton(
+      child: Icon(Icons.add),
+      backgroundColor: Colors.red,
+      onPressed: () {
+        // TODO: Create a function to add goals and tasks.
+        addTask();
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      // Title of the app bar
-      appBar: AppBar(
-        title: Text('Strategic'),
-      ),
+    return ScopedModelDescendant<TaskModel>(
+      builder: (BuildContext context, Widget child, TaskModel model) {
+        return Scaffold(
+          // Title of the app bar
+          appBar: AppBar(
+            title: Text('Strategic'),
+          ),
 
-      // Side drawer
-      drawer: SideDrawer(4),
+          // Side drawer
+          drawer: SideDrawer(4),
 
-      body: ListView(
-        shrinkWrap: true,
-        children: <Widget>[
-          TaskCard('Do push ups', DateTime(2019, 02, 18)),
-          TaskCard('Go shopping', DateTime(2019, 02, 18)),
-          TaskCard('Clean the car', DateTime(2019, 02, 18)),
-          TaskCard('Study ML', DateTime(2019, 02, 18)),
-          TaskCard('Make dinner', DateTime(2019, 02, 18)),
-          TaskCard('Check emails', DateTime(2019, 02, 18)),
-          TaskCard('Call parents', DateTime(2019, 02, 18)),
-        ],
-      ),
+          // Display the task which currently exist
+          body: _buildListView(model.getTaskList(), model.removeTask),
 
-      // Floating action button for adding new tasks and goals
-      floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.add),
-        backgroundColor: Colors.red,
-        onPressed: () {
-          // TODO: Create a function to add goals and tasks.
-        },
-      ),
+          // Floating action button for adding new tasks and goals
+          floatingActionButton: _buildFloatingActionButton(model.addTask),
+        );
+      },
     );
   }
 }

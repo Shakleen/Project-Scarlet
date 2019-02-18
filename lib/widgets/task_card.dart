@@ -6,16 +6,19 @@ import './ui_elements/default_date.dart';
 class TaskCard extends StatelessWidget {
   final String _title;
   final DateTime _dateTime;
+  final Function removeTask;
+  final int index;
 
-  TaskCard(this._title, this._dateTime);
+  TaskCard(this._title, this._dateTime, this.removeTask, this.index);
 
   BoxDecoration _buildDecorations() {
     return BoxDecoration(
-      color: Colors.white,
+      // color: Colors.blueAccent,
       gradient: new LinearGradient(
-          colors: [Colors.red[100], Colors.blue[100]],
+          colors: [Colors.red[50], Colors.cyan[50]],
           begin: Alignment.centerRight,
-          end: new Alignment(-1.0, -1.0)),
+          end: new Alignment(-1.0, -1.0),
+      ),
       border: Border.all(
         color: Colors.black,
         width: .5,
@@ -54,7 +57,9 @@ class TaskCard extends StatelessWidget {
         IconButton(
           icon: Icon(Icons.delete),
           color: Colors.red,
-          onPressed: () {},
+          onPressed: () {
+            removeTask(index);
+          },
         ),
       ],
     );
@@ -62,12 +67,6 @@ class TaskCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final String _displayDate = _dateTime.year.toString() +
-        "/" +
-        _dateTime.month.toString() +
-        "/" +
-        _dateTime.day.toString();
-
     return Container(
       decoration: _buildDecorations(),
       margin: EdgeInsets.all(5.0),
@@ -77,7 +76,7 @@ class TaskCard extends StatelessWidget {
           DefaultTitle(_title),
 
           // Task due date
-          DefaultDate(_displayDate),
+          DefaultDate(_dateTime),
 
           // Buttons to interact with a task
           _buildButtonBar(), 
