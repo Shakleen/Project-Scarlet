@@ -6,20 +6,22 @@ import './side_drawer_list_tile.dart';
 /// Class for generating a side drawer that has the same overall structure for seven different pages.
 /// 
 /// The widget is used in all the pages and provides means of navigation to the user.
-/// [activeNumber] - page number currently active. Starts from 0 to total number of pages - 1.
+/// [_activeNumber] - page number currently active. Starts from 0 to total number of pages - 1.
 class SideDrawer extends StatelessWidget {
-  final int activeNumber;
+  final int _activeNumber;
 
-  SideDrawer(this.activeNumber);
+  SideDrawer(this._activeNumber);
 
   @override
   Widget build(BuildContext context) {
     final List<bool> _activeElement = [false, false, false, false, false, false, false, false];
 
-    _activeElement[activeNumber] = true;
+    _activeElement[_activeNumber] = true;
 
     return Drawer(
-      child: Column(
+      child: ListView(
+        shrinkWrap: true,
+        padding: const EdgeInsets.symmetric(vertical: 5.0),
         children: <Widget>[
           AppBar(
             automaticallyImplyLeading: false,
