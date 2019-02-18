@@ -8,11 +8,11 @@ class StrategicPage extends StatelessWidget {
     return Scaffold(
       // Title of the app bar
       appBar: AppBar(
-        title: Text('Strategic Page'),
+        title: Text('Strategic'),
       ),
 
       // Side drawer
-      drawer: SideDrawer(),
+      drawer: SideDrawer(4),
 
       body: Center(
         child: Text('This is the Strategic page!'),

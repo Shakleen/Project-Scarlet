@@ -9,6 +9,7 @@ import 'pages/resistance_page.dart';
 import 'pages/strategic_page.dart';
 import 'pages/about_page.dart';
 import 'pages/settings_page.dart';
+import 'pages/play_game_page.dart';
 
 main() {
   runApp(MyApp());
@@ -41,6 +42,7 @@ class _MyApp extends State<MyApp> {
         '/wisdom': (BuildContext context) => WisdomPage(),
         '/resistance': (BuildContext context) => ResistancePage(),
         '/strategic': (BuildContext context) => StrategicPage(),
+        '/playgame': (BuildContext context) => PlayGamePage(),
         '/settings': (BuildContext context) => SettingsPage(),
         '/about': (BuildContext context) => AboutPage(),
       },

@@ -8,11 +8,11 @@ class WisdomPage extends StatelessWidget {
     return Scaffold(
       // Title of the app bar
       appBar: AppBar(
-        title: Text('Wisdom Page'),
+        title: Text('Wisdom'),
       ),
 
       // Side drawer
-      drawer: SideDrawer(),
+      drawer: SideDrawer(2),
 
       body: Center(
         child: Text('This is the wisdom page!'),

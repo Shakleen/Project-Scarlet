@@ -8,11 +8,11 @@ class StrengthPage extends StatelessWidget {
     return Scaffold(
       // Title of the app bar
       appBar: AppBar(
-        title: Text('Strength Page'),
+        title: Text('Strength'),
       ),
 
       // Side drawer
-      drawer: SideDrawer(),
+      drawer: SideDrawer(1),
 
       body: Center(
         child: Text('This is the strength page!'),

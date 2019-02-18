@@ -8,11 +8,11 @@ class ResistancePage extends StatelessWidget {
     return Scaffold(
       // Title of the app bar
       appBar: AppBar(
-        title: Text('Resistance Page'),
+        title: Text('Resistance'),
       ),
 
       // Side drawer
-      drawer: SideDrawer(),
+      drawer: SideDrawer(3),
 
       body: Center(
         child: Text('This is the Resistance page!'),
