@@ -18,7 +18,23 @@ class StrategicPage extends StatefulWidget {
   }
 }
 
+/// Stateless widget class for our Strategy page.
+/// 
+/// The class implments a task management system. Each task is shown
+/// as a card. The cards are tiled columnwise. The user may interact 
+/// with each Task Card in 3 ways.
+/// 'Long Press' - Edit task.
+/// 'Swipe left' - remove task.
+/// 'Press tick button' - Complete task.
+/// Each task card shows the name and date of the task.
+/// Further more there is a floating action button which enable the user
+/// to add more tasks.
 class _StrategicPage extends State<StrategicPage> {
+  /// Method for creating the list of task card. Each task card
+  /// contains the name and due date of the task entity housed within
+  /// it. The list of task entities is passed in as [taskList]. Each
+  /// card has the swipe functionality to dismiss it. It is implemented
+  /// into the cards. The dismiss to delete uses [removeTask] function.
   Widget _buildListView(List<TaskEntity> taskList, Function removeTask) {
     return ListView.builder(
       itemBuilder: (BuildContext context, int index) {
@@ -45,17 +61,16 @@ class _StrategicPage extends State<StrategicPage> {
           direction: DismissDirection.endToStart,
           dismissThresholds: {DismissDirection.endToStart: 0.6},
           // Main task component
-          child: TaskCard(
-            taskList[index],
-            index,
-            removeTask
-          ),
+          child: TaskCard(taskList[index], index, removeTask),
         );
       },
       itemCount: taskList.length,
     );
   }
 
+  /// Method for building the floating action button. It generates a new
+  /// form for creating a new task. The button passes in [addTask] to the
+  /// form for adding the new task to the list of tasks.
   FloatingActionButton _buildFloatingActionButton(
       Function addTask, BuildContext context) {
     return FloatingActionButton(

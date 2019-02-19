@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 /// Class for list tiles used in the SideDrawer class.
-/// 
+///
 /// This is a widget that is used in SideDrawer widget.
 /// [titleText] - title of the ListTile.
 /// [leadingIcon] - icon of the ListTile.
@@ -12,21 +12,47 @@ class SideDrawerListTile extends StatelessWidget {
   final IconData leadingIcon;
   final String navigatorRoute;
   final bool active;
+  final Color itemColor;
 
-  SideDrawerListTile(this.titleText, this.leadingIcon, this.navigatorRoute, this.active);
+  SideDrawerListTile(
+    this.titleText,
+    this.leadingIcon,
+    this.navigatorRoute,
+    this.active,
+    this.itemColor,
+  );
 
-  @override
-  Widget build(BuildContext context) {
+  ListTile _buildListTile(BuildContext context) {
     return ListTile(
-      leading: Icon(leadingIcon),
-      title: Text(titleText),
+      leading: Icon(
+        leadingIcon,
+        color: active ? Colors.white : itemColor,
+      ),
+      title: Text(
+        titleText,
+        style: TextStyle(
+          fontFamily: 'Roboto',
+          fontSize: 14,
+          color: active ? Colors.white : itemColor,
+        ),
+      ),
       selected: active,
       onTap: () {
         // Change only if inactive.
-        if (active == false){
+        if (active == false) {
           Navigator.pushReplacementNamed(context, navigatorRoute);
         }
       },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: active ? Colors.blue : Colors.white,
+      ),
+      child: _buildListTile(context),
     );
   }
 }
