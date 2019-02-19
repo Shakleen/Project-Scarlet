@@ -31,6 +31,7 @@ class _StrategicPage extends State<StrategicPage> {
                 Icon(
                   Icons.delete,
                   size: 35.0,
+                  color: Colors.white,
                 )
               ],
               mainAxisAlignment: MainAxisAlignment.end,
@@ -42,13 +43,12 @@ class _StrategicPage extends State<StrategicPage> {
             removeTask(index);
           },
           direction: DismissDirection.endToStart,
-          dismissThresholds: {DismissDirection.endToStart: 0.4},
+          dismissThresholds: {DismissDirection.endToStart: 0.6},
           // Main task component
           child: TaskCard(
-            taskList[index].getName(),
-            taskList[index].getDueDate(),
-            removeTask,
+            taskList[index],
             index,
+            removeTask
           ),
         );
       },
@@ -64,7 +64,7 @@ class _StrategicPage extends State<StrategicPage> {
       onPressed: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => TaskForm()),
+          MaterialPageRoute(builder: (context) => TaskForm(null, null)),
         );
         // addTask();
       },

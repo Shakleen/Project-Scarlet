@@ -9,6 +9,11 @@ import '../entities/task_entity.dart';
 import '../scoped_model/task_model.dart';
 
 class TaskForm extends StatefulWidget {
+  final TaskEntity inputTask;
+  final int inputIndex;
+
+  TaskForm(this.inputTask, this.inputIndex);
+
   @override
   _TaskForm createState() {
     return _TaskForm();
@@ -73,7 +78,9 @@ class _TaskForm extends State<TaskForm> {
   /// the past.
   Widget _buildDueDateField(TaskEntity task) {
     final formats = {
-      InputType.both: DateFormat("EEEE, MMMM d, yyyy 'at' h:mma"),
+      // InputType.both: DateFormat("EEEE, MMMM d, yyyy 'at' h:mma"),
+      InputType.both: DateFormat("yyyy-MM-dd hh:mm:ss.SSS"),
+      //2019-02-23 18:00:00.000
     };
 
     InputType inputType = InputType.both;
@@ -198,17 +205,19 @@ class _TaskForm extends State<TaskForm> {
   }
 
   /// Method for building a button for submitting the form of task creation.
-  /// 
+  ///
   /// The button calls the _submitForm when clicked!
-  Widget _buildSubmitButton() {
+  Widget _buildSubmitButton(TaskEntity inputTask, int inputIndex) {
+    String buttonText = inputTask == null ? 'Add new task' : 'Update task';
+    
     return ScopedModelDescendant<TaskModel>(
       builder: (BuildContext context, Widget child, TaskModel model) {
         return RaisedButton(
-          child: Text('Add new task'),
+          child: Text(buttonText),
           color: Colors.blueAccent,
           textColor: Colors.white,
           onPressed: () {
-            _submitForm(model.addTask);
+            _submitForm(model.addTask, model.updateTask, inputTask, inputIndex);
           },
         );
       },
@@ -217,20 +226,32 @@ class _TaskForm extends State<TaskForm> {
 
   /// This method creates and saves the task by using the [addTask] function
   /// passed into it.
-  void _submitForm(Function addTask) {
+  void _submitForm(Function addTask, Function updateTask, TaskEntity inputTask,
+      int inputIndex) {
     if (!_formKey.currentState.validate()) {
       return;
     }
     _formKey.currentState.save();
 
     // Add mode
-    addTask(
-      _formData['name'],
-      _formData['dueDate'],
-      _formData['description'],
-      _formData['priority'],
-      _formData['location'],
-    );
+    if (inputTask == null) {
+      addTask(
+        _formData['name'],
+        _formData['dueDate'],
+        _formData['description'],
+        _formData['priority'],
+        _formData['location'],
+      );
+    } else if (inputIndex != null){
+      updateTask(
+        inputIndex,
+        _formData['name'],
+        _formData['dueDate'],
+        _formData['description'],
+        _formData['priority'],
+        _formData['location'],
+      );
+    }
 
     // Navigator.pushReplacementNamed(context, '/home').then((_) => setSelectedProduct(null));
   }
@@ -247,23 +268,23 @@ class _TaskForm extends State<TaskForm> {
         child: ListView(
           padding: EdgeInsets.symmetric(horizontal: targetPadding / 2.0),
           children: <Widget>[
-            _buildNameTextField(null),
+            _buildNameTextField(widget.inputTask),
             SizedBox(
               height: 10.0,
             ),
-            _buildDueDateField(null),
+            _buildDueDateField(widget.inputTask),
             SizedBox(
               height: 10.0,
             ),
-            _buildDescriptionTextField(null),
+            _buildDescriptionTextField(widget.inputTask),
             SizedBox(
               height: 10.0,
             ),
-            _buildLocationTextField(null),
+            _buildLocationTextField(widget.inputTask),
             SizedBox(
               height: 10.0,
             ),
-            _buildSubmitButton(),
+            _buildSubmitButton(widget.inputTask, widget.inputIndex),
           ],
         ),
       ),

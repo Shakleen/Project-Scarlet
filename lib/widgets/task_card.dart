@@ -3,30 +3,27 @@ import 'package:flutter/material.dart';
 import './ui_elements/default_title.dart';
 import './ui_elements/default_date.dart';
 
-class TaskCard extends StatelessWidget {
-  final String _title;
-  final DateTime _dateTime;
-  final Function removeTask;
-  final int index;
+import '../pages/task_form_page.dart';
+import '../entities/task_entity.dart';
 
-  TaskCard(this._title, this._dateTime, this.removeTask, this.index);
+class TaskCard extends StatelessWidget {
+  final TaskEntity _task;
+  final Function removeTask;
+  final int _index;
+
+  TaskCard(this._task, this._index, this.removeTask);
 
   BoxDecoration _buildDecorations() {
     return BoxDecoration(
-      // color: Colors.blueAccent,
-      gradient: new LinearGradient(
-        colors: [Colors.red[50], Colors.cyan[50]],
-        begin: Alignment.centerRight,
-        end: new Alignment(-1.0, -1.0),
-      ),
       boxShadow: [
         BoxShadow(
           color: Colors.grey,
-          offset: Offset(1.5, 1.5),
-          blurRadius: 0.5,
-          spreadRadius: 0.5,
+          offset: Offset(0, 1.5),
+          blurRadius: 1.0,
+          spreadRadius: .5,
         ),
       ],
+      color: Colors.white,
     );
   }
 
@@ -45,14 +42,22 @@ class TaskCard extends StatelessWidget {
                 color: Colors.green,
               ),
               color: Colors.blueAccent,
-              onPressed: () {},
+              onPressed: () => removeTask(_index),
             ),
-            title: DefaultTitle(_title),
-            trailing: DefaultDate(_dateTime),
+            title: DefaultTitle(_task.getName()),
+            trailing: DefaultDate(_task.getDueDate()),
+            enabled: true,
+            onLongPress: () {
+              print(_task.getDueDate());
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => TaskForm(_task, _index)),
+              );
+            },
           ),
         ],
       ),
-      margin: EdgeInsets.symmetric(vertical: 5.0),
+      margin: EdgeInsets.only(bottom: 5.0),
     );
   }
 }

@@ -41,6 +41,18 @@ class TaskModel extends Model {
     notifyListeners();
   }
 
+  void updateTask(int index, String name, DateTime dueDate,
+      [String description = 'None',
+      int priority = 0,
+      String location = 'Unspecified']) {
+    _taskList[index].setName(name);
+    _taskList[index].setDate(dueDate);
+    _taskList[index].setDescription(description);
+    _taskList[index].setPriority(priority);
+    _taskList[index].setLocation(location);
+    notifyListeners();
+  }
+
   void removeTask(int index) {
     _taskList.removeAt(index);
 
