@@ -8,7 +8,7 @@ class DefaultDate extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // If the task due is before our current date, show red color. Otherwise green.
-    final Color _boxColor =
+    final Color _boxColor = //Colors.green;
         (_dateTime.compareTo(DateTime.now()) < 0) ? Colors.red : Colors.green;
     
     // Convert our date into string of format YYYY/MM/DD

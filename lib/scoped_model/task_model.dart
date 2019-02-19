@@ -4,14 +4,14 @@ import 'package:scoped_model/scoped_model.dart';
 import '../entities/task_entity.dart';
 
 class TaskModel extends Model {
-  List<TaskEntity> _taskList = [
-    TaskEntity(name: 'Do push ups', dueDate: DateTime(2019, 02, 28)),
-    TaskEntity(name: 'Go shopping', dueDate: DateTime(2019, 02, 19)),
-    TaskEntity(name: 'Clean the car', dueDate: DateTime(2019, 02, 8)),
-    TaskEntity(name: 'Study ML', dueDate: DateTime(2019, 02, 14)),
-    TaskEntity(name: 'Make dinner', dueDate: DateTime(2019, 02, 22)),
-    TaskEntity(name: 'Check emails', dueDate: DateTime(2019, 02, 11)),
-    TaskEntity(name: 'Call parents', dueDate: DateTime(2019, 02, 1))
+  final List<TaskEntity> _taskList = [
+    TaskEntity('Do push ups', DateTime(2019, 02, 28)),
+    TaskEntity('Go shopping', DateTime(2019, 02, 19)),
+    TaskEntity('Clean the car', DateTime(2019, 02, 8)),
+    TaskEntity('Study ML', DateTime(2019, 02, 14)),
+    TaskEntity('Make dinner', DateTime(2019, 02, 22)),
+    TaskEntity('Check emails', DateTime(2019, 02, 11)),
+    TaskEntity('Call parents', DateTime(2019, 02, 1))
   ];
   int _selectedTask = null;
 
@@ -32,19 +32,12 @@ class TaskModel extends Model {
     return _taskList[index];
   }
 
-  void addTask(
-      {@required String name,
-      @required DateTime dueDate,
-      String description = 'None',
-      String priority = 'Normal',
-      String location = 'Unspecified'}) {
-    _taskList.add(TaskEntity(
-        name: name,
-        dueDate: dueDate,
-        description: description,
-        priority: priority,
-        location: location));
-
+  void addTask(String name, DateTime dueDate,
+      [String description = 'None',
+      int priority = 0,
+      String location = 'Unspecified']) {
+    _taskList
+        .add(new TaskEntity(name, dueDate, description, priority, location));
     notifyListeners();
   }
 

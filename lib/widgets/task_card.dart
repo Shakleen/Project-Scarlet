@@ -15,14 +15,9 @@ class TaskCard extends StatelessWidget {
     return BoxDecoration(
       // color: Colors.blueAccent,
       gradient: new LinearGradient(
-          colors: [Colors.red[50], Colors.cyan[50]],
-          begin: Alignment.centerRight,
-          end: new Alignment(-1.0, -1.0),
-      ),
-      border: Border.all(
-        color: Colors.black,
-        width: .5,
-        style: BorderStyle.solid,
+        colors: [Colors.red[50], Colors.cyan[50]],
+        begin: Alignment.centerRight,
+        end: new Alignment(-1.0, -1.0),
       ),
       boxShadow: [
         BoxShadow(
@@ -35,53 +30,29 @@ class TaskCard extends StatelessWidget {
     );
   }
 
-  ButtonBar _buildButtonBar() {
-    return ButtonBar(
-      alignment: MainAxisAlignment.center,
-      children: <Widget>[
-        IconButton(
-          icon: Icon(Icons.done),
-          color: Colors.blueAccent,
-          onPressed: () {},
-        ),
-        IconButton(
-          icon: Icon(Icons.snooze),
-          color: Colors.green,
-          onPressed: () {},
-        ),
-        IconButton(
-          icon: Icon(Icons.info),
-          color: Colors.orange,
-          onPressed: () {},
-        ),
-        IconButton(
-          icon: Icon(Icons.delete),
-          color: Colors.red,
-          onPressed: () {
-            removeTask(index);
-          },
-        ),
-      ],
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: _buildDecorations(),
-      margin: EdgeInsets.all(5.0),
       child: Column(
         children: <Widget>[
-          // Task title
-          DefaultTitle(_title),
-
-          // Task due date
-          DefaultDate(_dateTime),
-
-          // Buttons to interact with a task
-          _buildButtonBar(), 
+          // Contains a task
+          ListTile(
+            leading: IconButton(
+              icon: Icon(
+                Icons.done,
+                size: 30,
+                color: Colors.green,
+              ),
+              color: Colors.blueAccent,
+              onPressed: () {},
+            ),
+            title: DefaultTitle(_title),
+            trailing: DefaultDate(_dateTime),
+          ),
         ],
       ),
+      margin: EdgeInsets.symmetric(vertical: 5.0),
     );
   }
 }
