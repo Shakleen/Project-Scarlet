@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import '../widgets/helper/ensure-visible.dart';
+import '../../widgets/helper/ensure-visible.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
 
-import '../entities/task_entity.dart';
-import '../scoped_model/task_model.dart';
+import '../../entities/task_entity.dart';
+import '../../scoped_model/task_model.dart';
 
 class TaskForm extends StatefulWidget {
   final TaskEntity inputTask;

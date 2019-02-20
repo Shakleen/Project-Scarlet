@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../widgets/side_drawer.dart';
+import '../widgets/ui_elements/side_drawer.dart';
 
 class PlayGamePage extends StatelessWidget {
   @override

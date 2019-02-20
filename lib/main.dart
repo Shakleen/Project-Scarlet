@@ -7,7 +7,7 @@ import 'pages/home_page.dart';
 import 'pages/strength_page.dart';
 import 'pages/wisdom_page.dart';
 import 'pages/resistance_page.dart';
-import 'pages/strategic_page.dart';
+import 'pages/strategy_pages/strategic_page.dart';
 import 'pages/about_page.dart';
 import 'pages/settings_page.dart';
 import 'pages/play_game_page.dart';

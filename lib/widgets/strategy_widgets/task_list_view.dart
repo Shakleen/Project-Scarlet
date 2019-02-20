@@ -1,41 +1,32 @@
 import 'package:flutter/material.dart';
 
-import 'package:scoped_model/scoped_model.dart';
+import '../../entities/task_entity.dart';
+import './task_card.dart';
+import '../../pages/strategy_pages/task_form_page.dart';
+import '../ui_elements/side_drawer.dart';
 
-import '../widgets/side_drawer.dart';
-import '../widgets/task_card.dart';
-import '../entities/task_entity.dart';
-import '../scoped_model/task_model.dart';
+class TaskListView extends StatefulWidget {
+  final int _tabNumber;
+  final List<TaskEntity> _taskList;
+  final Function _removeTask;
+  final Function _addTask;
+  final Function _completeTask;
 
-import '../pages/task_form_page.dart';
-
-// import 'package:unicorndial/unicorndial.dart';
-
-class StrategicPage extends StatefulWidget {
+  TaskListView(this._tabNumber, this._taskList, this._removeTask, this._addTask, this._completeTask);
+  
   @override
-  _StrategicPage createState() {
-    return _StrategicPage();
+  _TaskListViewState createState() {
+    return _TaskListViewState();
   }
 }
 
-/// Stateless widget class for our Strategy page.
-/// 
-/// The class implments a task management system. Each task is shown
-/// as a card. The cards are tiled columnwise. The user may interact 
-/// with each Task Card in 3 ways.
-/// 'Long Press' - Edit task.
-/// 'Swipe left' - remove task.
-/// 'Press tick button' - Complete task.
-/// Each task card shows the name and date of the task.
-/// Further more there is a floating action button which enable the user
-/// to add more tasks.
-class _StrategicPage extends State<StrategicPage> {
+class _TaskListViewState extends State<TaskListView> {
   /// Method for creating the list of task card. Each task card
   /// contains the name and due date of the task entity housed within
   /// it. The list of task entities is passed in as [taskList]. Each
   /// card has the swipe functionality to dismiss it. It is implemented
   /// into the cards. The dismiss to delete uses [removeTask] function.
-  Widget _buildListView(List<TaskEntity> taskList, Function removeTask) {
+  Widget _buildListView(List<TaskEntity> taskList, Function removeTask, Function completeTask) {
     return ListView.builder(
       itemBuilder: (BuildContext context, int index) {
         return Dismissible(
@@ -61,7 +52,7 @@ class _StrategicPage extends State<StrategicPage> {
           direction: DismissDirection.endToStart,
           dismissThresholds: {DismissDirection.endToStart: 0.6},
           // Main task component
-          child: TaskCard(taskList[index], index, removeTask),
+          child: TaskCard(taskList[index], index, removeTask, completeTask),
         );
       },
       itemCount: taskList.length,
@@ -88,25 +79,14 @@ class _StrategicPage extends State<StrategicPage> {
 
   @override
   Widget build(BuildContext context) {
-    return ScopedModelDescendant<TaskModel>(
-      builder: (BuildContext context, Widget child, TaskModel model) {
-        return Scaffold(
-          // Title of the app bar
-          appBar: AppBar(
-            title: Text('Strategic'),
-          ),
-
-          // Side drawer
-          drawer: SideDrawer(4),
+    return Scaffold(
 
           // Display the task which currently exist
-          body: _buildListView(model.getTaskList(), model.removeTask),
+          body: _buildListView(widget._taskList, widget._removeTask, widget._completeTask),
 
           // Floating action button for adding new tasks and goals
-          floatingActionButton:
-              _buildFloatingActionButton(model.addTask, context),
+          floatingActionButton: widget._tabNumber == 0 ? 
+              _buildFloatingActionButton(widget._addTask, context) : null,
         );
-      },
-    );
   }
 }

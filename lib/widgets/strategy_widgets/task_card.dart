@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 
-import './ui_elements/default_title.dart';
-import './ui_elements/default_date.dart';
+import '../ui_elements/default_title.dart';
+import '../ui_elements/default_date.dart';
 
-import '../pages/task_form_page.dart';
-import '../entities/task_entity.dart';
+import '../../pages/strategy_pages/task_form_page.dart';
+import '../../entities/task_entity.dart';
 
 class TaskCard extends StatelessWidget {
   final TaskEntity _task;
-  final Function removeTask;
+  final Function _removeTask;
+  final Function _completeTask;
   final int _index;
 
-  TaskCard(this._task, this._index, this.removeTask);
+  TaskCard(this._task, this._index, this._removeTask, this._completeTask);
 
   BoxDecoration _buildDecorations() {
     return BoxDecoration(
@@ -33,7 +34,7 @@ class TaskCard extends StatelessWidget {
         color: Colors.green,
       ),
       color: Colors.blueAccent,
-      onPressed: () => removeTask(_index),
+      onPressed: () => _completeTask(_task),
     );
   }
 
@@ -42,7 +43,7 @@ class TaskCard extends StatelessWidget {
         children: <Widget>[
           // Contains a task
           ListTile(
-            leading: _buildIconButton(),
+            leading: _task.getCompleteDate() == null ? _buildIconButton() : null,
             title: DefaultTitle(_task.getName()),
             trailing: DefaultDate(_task.getDueDate()),
             enabled: true,

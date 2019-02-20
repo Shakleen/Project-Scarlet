@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../presentation/custom_icons.dart';
+import '../../presentation/custom_icons.dart';
 import './side_drawer_list_tile.dart';
 
 /// Class for generating a side drawer that has the same overall structure for seven different pages.
@@ -68,7 +68,7 @@ class SideDrawer extends StatelessWidget {
       ),
       SideDrawerListTile(
         'Play Game',
-        Icons.play_arrow,
+        CustomIcons.gamepad_solid,
         '/playgame',
         _activeElement[5],
         Colors.indigoAccent,
