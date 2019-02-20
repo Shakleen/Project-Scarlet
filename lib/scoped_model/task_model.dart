@@ -12,13 +12,13 @@ import '../entities/task_entity.dart';
 /// can be used to get the whole list or just one task respectively.
 class TaskModel extends Model {
   final List<TaskEntity> _taskList = [
-    TaskEntity('Do push ups', DateTime(2019, 02, 28)),
-    TaskEntity('Go shopping', DateTime(2019, 02, 19)),
-    TaskEntity('Clean the car', DateTime(2019, 02, 8)),
-    TaskEntity('Study ML', DateTime(2019, 02, 14)),
-    TaskEntity('Make dinner', DateTime(2019, 02, 22)),
-    TaskEntity('Check emails', DateTime(2019, 02, 11)),
-    TaskEntity('Call parents', DateTime(2019, 02, 1))
+    TaskEntity('Do push ups', DateTime(2019, 02, 28, 5, 45)),
+    TaskEntity('Go shopping', DateTime(2019, 02, 19, 4, 25)),
+    TaskEntity('Clean the car', DateTime(2019, 02, 8, 6, 18)),
+    TaskEntity('Study ML', DateTime(2019, 02, 14, 20, 24)),
+    TaskEntity('Make dinner', DateTime(2019, 02, 22, 12, 34)),
+    TaskEntity('Check emails', DateTime(2019, 02, 11, 18, 54)),
+    TaskEntity('Call parents', DateTime(2019, 02, 1, 0, 24))
   ];
 
   /// Returns the filtered list of upcoming tasks as a new varaible.
@@ -114,7 +114,7 @@ class TaskModel extends Model {
   /// checking before proceeding. Throws exception if checking shows error.
   void completeTask(TaskEntity task) {
     int index =_taskList.indexOf(task);
-    
+
     if (index >= 0 && index < _taskList.length) {
       if (_taskList[index].getCompleteDate() == null) {
         print(_taskList[index].getName() + ' was completed');

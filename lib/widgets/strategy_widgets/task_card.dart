@@ -11,8 +11,9 @@ class TaskCard extends StatelessWidget {
   final Function _removeTask;
   final Function _completeTask;
   final int _index;
+  final int _tabNumber;
 
-  TaskCard(this._task, this._index, this._removeTask, this._completeTask);
+  TaskCard(this._task, this._index, this._removeTask, this._completeTask, this._tabNumber);
 
   BoxDecoration _buildDecorations() {
     return BoxDecoration(
@@ -45,7 +46,7 @@ class TaskCard extends StatelessWidget {
           ListTile(
             leading: _task.getCompleteDate() == null ? _buildIconButton() : null,
             title: DefaultTitle(_task.getName()),
-            trailing: DefaultDate(_task.getDueDate()),
+            trailing: DefaultDate(_task.getDueDate(), _tabNumber),
             enabled: true,
             onLongPress: () => Navigator.push(
                   context,

@@ -18,7 +18,7 @@ class TaskEntity {
 
 
   TaskEntity(this._name, this._dueDate,
-      [this._description, this._priority, this._location]);
+      [this._description = 'None', this._priority = 0, this._location = 'Unspecified']);
 
   String getName() {
     return this._name;

@@ -28,6 +28,13 @@ class _TaskForm extends State<TaskForm> {
     'priority': 0,
     'location': null
   };
+  final Map<int, String> _priorityLevels = {
+    0: 'Low',
+    1: 'Normal',
+    2: 'Important',
+    3: 'Urgent'
+  };
+
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final _nameFocusNode = FocusNode();
   final _descriptionFocusNode = FocusNode();
@@ -63,6 +70,7 @@ class _TaskForm extends State<TaskForm> {
         },
         onSaved: (String value) {
           _formData['name'] = value;
+          value = "";
         },
       ),
     );
@@ -79,7 +87,7 @@ class _TaskForm extends State<TaskForm> {
   Widget _buildDueDateField(TaskEntity task) {
     final formats = {
       // InputType.both: DateFormat("EEEE, MMMM d, yyyy 'at' h:mma"),
-      InputType.both: DateFormat("yyyy-MM-dd hh:mm:ss.SSS"),
+      InputType.both: DateFormat("dd/MM/yyyy hh:mm"),
       //2019-02-23 18:00:00.000
     };
 
@@ -142,13 +150,6 @@ class _TaskForm extends State<TaskForm> {
   }
 
   Widget _buildPriorityField(TaskEntity task) {
-    final Map<int, String> _priorityLevels = {
-      0: 'Low',
-      1: 'Normal',
-      2: 'Important',
-      3: 'Urgent'
-    };
-
     return EnsureVisibleWhenFocused(
       focusNode: _priorityFocusNode,
       child: TextFormField(
@@ -209,7 +210,7 @@ class _TaskForm extends State<TaskForm> {
   /// The button calls the _submitForm when clicked!
   Widget _buildSubmitButton(TaskEntity inputTask, int inputIndex) {
     String buttonText = inputTask == null ? 'Add new task' : 'Update task';
-    
+
     return ScopedModelDescendant<TaskModel>(
       builder: (BuildContext context, Widget child, TaskModel model) {
         return RaisedButton(
@@ -242,7 +243,7 @@ class _TaskForm extends State<TaskForm> {
         _formData['priority'],
         _formData['location'],
       );
-    } else if (inputIndex != null){
+    } else if (inputIndex != null) {
       updateTask(
         inputIndex,
         _formData['name'],
@@ -253,7 +254,7 @@ class _TaskForm extends State<TaskForm> {
       );
     }
 
-    // Navigator.pushReplacementNamed(context, '/home').then((_) => setSelectedProduct(null));
+    Navigator.pop(context);
   }
 
   Widget _buildForm(BuildContext context) {
@@ -291,6 +292,76 @@ class _TaskForm extends State<TaskForm> {
     );
   }
 
+  // Widget _buildHeaderText(String header) {
+  //   return Padding(
+  //     child: Text(
+  //       header,
+  //       style: TextStyle(
+  //         fontFamily: 'Roboto',
+  //         fontWeight: FontWeight.w600,
+  //         fontSize: 24,
+  //       ),
+  //     ),
+  //     padding: EdgeInsets.symmetric(
+  //       vertical: 5.0,
+  //       horizontal: 10.0,
+  //     ),
+  //   );
+  // }
+
+  // Widget _buildContentText(String content) {
+  //   return Padding(
+  //     child: Text(
+  //       content,
+  //       style: TextStyle(
+  //         fontFamily: 'Roboto',
+  //         fontSize: 16,
+  //       ),
+  //     ),
+  //     padding: EdgeInsets.only(right: 10.0, left: 10.0, top: 2.0, bottom: 5.0),
+  //   );
+  // }
+
+  // Widget _buildFormView() {
+  //   return Container(
+  //     child: ListView(
+  //       children: <Widget>[
+  //         _buildHeaderText('Name'),
+  //         _buildContentText(widget.inputTask.getName()),
+  //         Divider(color: Colors.black,),
+  //         _buildHeaderText('Date/Time'),
+  //         _buildContentText(widget.inputTask.getDueDate().toString()),
+  //         Divider(color: Colors.black,),
+  //         _buildHeaderText('Description'),
+  //         _buildContentText(widget.inputTask.getDescription()),
+  //         Divider(color: Colors.black,),
+  //         _buildHeaderText('Priority'),
+  //         _buildContentText(_priorityLevels[widget.inputTask.getPriority()]),
+  //         Divider(color: Colors.black,),
+  //         _buildHeaderText('Location'),
+  //         _buildContentText(widget.inputTask.getLocation()),
+  //         Divider(color: Colors.black,),
+  //       ],
+  //       // crossAxisAlignment: CrossAxisAlignment.start,
+  //     ),
+  //   );
+  // }
+
+  // /// Method for building the floating action button. It generates a new
+  // /// form for creating a new task. The button passes in [addTask] to the
+  // /// form for adding the new task to the list of tasks.
+  // FloatingActionButton _buildFloatingActionButton(BuildContext context) {
+  //   return FloatingActionButton(
+  //     child: Icon(widget.editState ? Icons.cancel : Icons.edit),
+  //     backgroundColor: Colors.red,
+  //     onPressed: () {
+  //       setState(() {
+  //         widget.editState = true;
+  //       });
+  //     },
+  //   );
+  // }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -300,7 +371,7 @@ class _TaskForm extends State<TaskForm> {
       child: Material(
         child: Scaffold(
           appBar: AppBar(
-            title: Text('Add new Task'),
+            title: Text('Edit task details'),
           ),
           body: _buildForm(context),
         ),

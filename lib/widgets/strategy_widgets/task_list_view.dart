@@ -52,7 +52,7 @@ class _TaskListViewState extends State<TaskListView> {
           direction: DismissDirection.endToStart,
           dismissThresholds: {DismissDirection.endToStart: 0.6},
           // Main task component
-          child: TaskCard(taskList[index], index, removeTask, completeTask),
+          child: TaskCard(taskList[index], index, removeTask, completeTask, widget._tabNumber),
         );
       },
       itemCount: taskList.length,
