@@ -3,7 +3,6 @@ import 'package:intl/intl.dart';
 
 import '../../widgets/helper/ensure-visible.dart';
 import 'package:scoped_model/scoped_model.dart';
-import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
 import '../../widgets/ui_elements/combo_box.dart';
 
 import '../../entities/task_entity.dart';
@@ -28,21 +27,48 @@ class _TaskForm extends State<TaskForm> {
     'priority': 0,
     'location': null
   };
-  final Map<int, String> _priorityLevels = {
-    0: 'Low',
-    1: 'Normal',
-    2: 'Important',
-    3: 'Urgent'
-  };
-
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final _nameFocusNode = FocusNode();
   final _descriptionFocusNode = FocusNode();
-  final _priorityFocusNode = FocusNode();
   final _locationFocusNode = FocusNode();
   final TextStyle labelStyle =
       TextStyle(color: Colors.blueAccent, fontFamily: 'Roboto');
   ComboBox comboBox;
+  DateTime dateTime;
+
+  _TaskForm() {
+    comboBox = null;
+    dateTime = null;
+  }
+
+  void _selectDateTime(
+      BuildContext context, DateTime initDate, TimeOfDay initTime) async {
+    final DateTime pickedDate = await showDatePicker(
+      context: context,
+      initialDate: initDate,
+      firstDate: DateTime(2015, 8),
+      lastDate: DateTime(2101),
+    );
+
+    if (pickedDate != null) {
+      final TimeOfDay pickedTime = await showTimePicker(
+        context: context,
+        initialTime: initTime,
+      );
+
+      if (pickedTime != null) {
+        setState(() {
+          dateTime = DateTime(
+            pickedDate.year,
+            pickedDate.month,
+            pickedDate.day,
+            pickedTime.hour,
+            pickedTime.minute,
+          );
+        });
+      }
+    }
+  }
 
   /// Method for building a text field for name property.
   ///
@@ -85,33 +111,65 @@ class _TaskForm extends State<TaskForm> {
   ///
   /// The condition for acceptance is that the due date can't be in
   /// the past.
-  Widget _buildDueDateField(TaskEntity task) {
-    final formats = {
-      // InputType.both: DateFormat("EEEE, MMMM d, yyyy 'at' h:mma"),
-      InputType.both: DateFormat("dd/MM/yyyy hh:mm"),
-      //2019-02-23 18:00:00.000
-    };
+  Widget _buildDueDateField(TaskEntity task, BuildContext context) {
+    if (dateTime == null) {
+      dateTime = widget.inputTask == null
+          ? DateTime.now()
+          : widget.inputTask.getDueDate();
+    }
 
-    InputType inputType = InputType.both;
+    final String dateTimeString = dateTime.day.toString() +
+        '/' +
+        dateTime.month.toString() +
+        '/' +
+        dateTime.year.toString() +
+        " at " +
+        dateTime.hour.toString() +
+        ':' +
+        dateTime.minute.toString();
 
-    return DateTimePickerFormField(
-      inputType: inputType,
-      format: formats[inputType],
-      editable: true,
-      decoration: InputDecoration(
-        labelText: 'Date/Time',
-        labelStyle: labelStyle,
-        hasFloatingPlaceholder: false,
+    return Container(
+      child: Column(
+        children: <Widget>[
+          Text(
+            'Date/Time',
+            style: labelStyle,
+          ),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Text(
+                dateTimeString,
+                style: TextStyle(
+                  fontFamily: 'Roboto',
+                  fontSize: 20,
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 10.0),
+              ),
+              RaisedButton(
+                onPressed: () {
+                  return _selectDateTime(
+                    context,
+                    dateTime,
+                    TimeOfDay(
+                      hour: dateTime.hour,
+                      minute: dateTime.minute,
+                    ),
+                  );
+                },
+                child: Text(
+                  'Pick Date/Time',
+                  style: TextStyle(color: Colors.white),
+                ),
+                color: Colors.blue,
+              ),
+            ],
+          )
+        ],
+        crossAxisAlignment: CrossAxisAlignment.start,
       ),
-      initialDate: task == null ? DateTime.now() : task.getDueDate(),
-      validator: (DateTime value) {
-        if (value.compareTo(DateTime.now()) < 0) {
-          return "Due date can't be in the past!";
-        }
-      },
-      onSaved: (DateTime value) {
-        _formData['dueDate'] = value;
-      },
     );
   }
 
@@ -235,6 +293,7 @@ class _TaskForm extends State<TaskForm> {
     _formKey.currentState.save();
 
     _formData['priority'] = comboBox.choice;
+    _formData['dueDate'] = dateTime;
 
     // Add mode
     if (inputTask == null) {
@@ -245,7 +304,8 @@ class _TaskForm extends State<TaskForm> {
         _formData['priority'],
         _formData['location'],
       );
-    } else { // Update mode
+    } else {
+      // Update mode
       updateTask(
         widget.inputTask,
         _formData['name'],
@@ -277,7 +337,7 @@ class _TaskForm extends State<TaskForm> {
               SizedBox(
                 height: 10.0,
               ),
-              _buildDueDateField(widget.inputTask),
+              _buildDueDateField(widget.inputTask, context),
               SizedBox(
                 height: 10.0,
               ),
