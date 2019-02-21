@@ -6,14 +6,15 @@ import '../../pages/strategy_pages/task_form_page.dart';
 import '../ui_elements/side_drawer.dart';
 
 class TaskListView extends StatefulWidget {
-  final int _tabNumber;
-  final List<TaskEntity> _taskList;
-  final Function _removeTask;
-  final Function _addTask;
-  final Function _completeTask;
+  final int tabNumber;
+  final List<TaskEntity> taskList;
+  final Function removeTask;
+  final Function addTask;
+  final Function completeTask;
 
-  TaskListView(this._tabNumber, this._taskList, this._removeTask, this._addTask, this._completeTask);
-  
+  TaskListView(this.tabNumber, this.taskList, this.removeTask, this.addTask,
+      this.completeTask);
+
   @override
   _TaskListViewState createState() {
     return _TaskListViewState();
@@ -21,38 +22,52 @@ class TaskListView extends StatefulWidget {
 }
 
 class _TaskListViewState extends State<TaskListView> {
+  Widget _buildContainer() {
+    return Container(
+      color: Colors.red,
+      child: Row(
+        children: <Widget>[
+          Icon(
+            Icons.delete,
+            size: 35.0,
+            color: Colors.white,
+          )
+        ],
+        mainAxisAlignment: MainAxisAlignment.end,
+      ),
+      padding: EdgeInsets.symmetric(horizontal: 25.0),
+    );
+  }
+
   /// Method for creating the list of task card. Each task card
   /// contains the name and due date of the task entity housed within
   /// it. The list of task entities is passed in as [taskList]. Each
   /// card has the swipe functionality to dismiss it. It is implemented
   /// into the cards. The dismiss to delete uses [removeTask] function.
-  Widget _buildListView(List<TaskEntity> taskList, Function removeTask, Function completeTask) {
+  Widget _buildListView(
+      List<TaskEntity> taskList, Function removeTask, Function completeTask) {
     return ListView.builder(
       itemBuilder: (BuildContext context, int index) {
+        // Dissmissible is needed for swapping to delete from right to left.
         return Dismissible(
           // Setting up the background color that will be seen after swapping to dismiss
-          background: Container(
-            color: Colors.red,
-            child: Row(
-              children: <Widget>[
-                Icon(
-                  Icons.delete,
-                  size: 35.0,
-                  color: Colors.white,
-                )
-              ],
-              mainAxisAlignment: MainAxisAlignment.end,
-            ),
-            padding: EdgeInsets.symmetric(horizontal: 25.0),
-          ),
+          background: _buildContainer(),
           key: Key(taskList[index].getName()),
           onDismissed: (DismissDirection direction) {
-            removeTask(index);
+            setState(() {
+              removeTask(taskList[index]);
+            });
           },
           direction: DismissDirection.endToStart,
           dismissThresholds: {DismissDirection.endToStart: 0.6},
           // Main task component
-          child: TaskCard(taskList[index], index, removeTask, completeTask, widget._tabNumber),
+          child: TaskCard(
+            taskList[index],
+            index,
+            removeTask,
+            completeTask,
+            widget.tabNumber,
+          ),
         );
       },
       itemCount: taskList.length,
@@ -80,13 +95,14 @@ class _TaskListViewState extends State<TaskListView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // Display the task which currently exist
+      body: _buildListView(
+          widget.taskList, widget.removeTask, widget.completeTask),
 
-          // Display the task which currently exist
-          body: _buildListView(widget._taskList, widget._removeTask, widget._completeTask),
-
-          // Floating action button for adding new tasks and goals
-          floatingActionButton: widget._tabNumber == 0 ? 
-              _buildFloatingActionButton(widget._addTask, context) : null,
-        );
+      // Floating action button for adding new tasks and goals
+      floatingActionButton: widget.tabNumber == 0
+          ? _buildFloatingActionButton(widget.addTask, context)
+          : null,
+    );
   }
 }

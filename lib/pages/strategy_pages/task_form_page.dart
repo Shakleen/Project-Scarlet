@@ -243,9 +243,9 @@ class _TaskForm extends State<TaskForm> {
         _formData['priority'],
         _formData['location'],
       );
-    } else if (inputIndex != null) {
+    } else {
       updateTask(
-        inputIndex,
+        widget.inputTask,
         _formData['name'],
         _formData['dueDate'],
         _formData['description'],

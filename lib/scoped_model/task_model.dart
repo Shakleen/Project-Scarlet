@@ -83,37 +83,45 @@ class TaskModel extends Model {
 
   /// Used to update a new task to the list. Performs proper checking
   /// before proceeding. Throws exception if checking shows error.
-  void updateTask(int index, String name, DateTime dueDate,
+  void updateTask(TaskEntity task, String name, DateTime dueDate,
       [String description = 'None',
       int priority = 0,
       String location = 'Unspecified']) {
-    if (name != null && dueDate != null) {
-      _taskList[index].setName(name);
-      _taskList[index].setDueDate(dueDate);
-      _taskList[index].setDescription(description);
-      _taskList[index].setPriority(priority);
-      _taskList[index].setLocation(location);
-      notifyListeners();
+    int index = _taskList.indexOf(task);
+
+    if (index >= 0 && index < _taskList.length) {
+      if (name != null && dueDate != null) {
+        _taskList[index].setName(name);
+        _taskList[index].setDueDate(dueDate);
+        _taskList[index].setDescription(description);
+        _taskList[index].setPriority(priority);
+        _taskList[index].setLocation(location);
+        notifyListeners();
+      } else {
+        throw Exception('TaskModel - updateTask - name and/or dueDate is null');
+      }
     } else {
-      throw Exception('TaskModel - updateTask - name and/or dueDate is null');
+      throw Exception('TaskModel - updateTask - task not found');
     }
   }
 
-  /// Removes the task at position [index] in the list. Performs proper
+  /// Removes the [task] in the list. Performs proper
   /// checking before proceeding. Throws exception if checking shows error.
-  void removeTask(int index) {
+  void removeTask(TaskEntity task) {
+    int index = _taskList.indexOf(task);
+
     if (index >= 0 && index < _taskList.length) {
       _taskList.removeAt(index);
       notifyListeners();
     } else {
-      throw Exception('TaskModel - removeTask - index out of bounds');
+      throw Exception('TaskModel - removeTask - task not found');
     }
   }
 
-  /// Completes the task at position [index] in the list. Performs proper
+  /// Completes the [task]  in the list. Performs proper
   /// checking before proceeding. Throws exception if checking shows error.
   void completeTask(TaskEntity task) {
-    int index =_taskList.indexOf(task);
+    int index = _taskList.indexOf(task);
 
     if (index >= 0 && index < _taskList.length) {
       if (_taskList[index].getCompleteDate() == null) {
@@ -124,7 +132,7 @@ class TaskModel extends Model {
         throw Exception('TaskModel - completeTask - task previously completed');
       }
     } else {
-      throw Exception('TaskModel - completeTask - index out of bounds');
+      throw Exception('TaskModel - completeTask - task not found');
     }
   }
 }

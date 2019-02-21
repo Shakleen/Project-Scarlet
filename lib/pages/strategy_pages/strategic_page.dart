@@ -15,9 +15,9 @@ class StrategicPage extends StatefulWidget {
 }
 
 /// Stateless widget class for our Strategy page.
-/// 
+///
 /// The class implments a task management system. Each task is shown
-/// as a card. The cards are tiled columnwise. The user may interact 
+/// as a card. The cards are tiled columnwise. The user may interact
 /// with each Task Card in 3 ways.
 /// 'Long Press' - Edit task.
 /// 'Swipe left' - remove task.
@@ -26,6 +26,25 @@ class StrategicPage extends StatefulWidget {
 /// Further more there is a floating action button which enable the user
 /// to add more tasks.
 class _StrategicPage extends State<StrategicPage> {
+  Widget _buildTabBar() {
+    return TabBar(
+      tabs: <Widget>[
+        Tab(
+          icon: Icon(CustomIcons.calendar_alt_regular),
+          text: 'Upcoming',
+        ),
+        Tab(
+          icon: Icon(CustomIcons.calendar_times_regular),
+          text: 'Overdue',
+        ),
+        Tab(
+          icon: Icon(CustomIcons.calendar_check_regular),
+          text: 'Completed',
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return ScopedModelDescendant<TaskModel>(
@@ -34,32 +53,33 @@ class _StrategicPage extends State<StrategicPage> {
           length: 3,
           child: Scaffold(
             drawer: SideDrawer(4),
-
             appBar: AppBar(
               title: Text('Strategy'),
-              bottom: TabBar(
-                tabs: <Widget>[
-                  Tab(
-                    icon: Icon(CustomIcons.calendar_alt_regular),
-                    text: 'Upcoming',
-                  ),
-                  Tab(
-                    icon: Icon(CustomIcons.calendar_times_regular),
-                    text: 'Overdue',
-                  ),
-                  Tab(
-                    icon: Icon(CustomIcons.calendar_check_regular),
-                    text: 'Completed',
-                  ),
-                ],
-              ),
+              bottom: _buildTabBar(),
             ),
-
             body: TabBarView(
               children: <Widget>[
-                TaskListView(0, model.getUpcomingTaskList(), model.removeTask, model.addTask, model.completeTask),
-                TaskListView(1, model.getOverdueTaskList(), model.removeTask, model.addTask, model.completeTask),
-                TaskListView(2, model.getCompletedTaskList(), model.removeTask, model.addTask, model.completeTask),
+                TaskListView(
+                  0,
+                  model.getUpcomingTaskList(),
+                  model.removeTask,
+                  model.addTask,
+                  model.completeTask,
+                ),
+                TaskListView(
+                  1,
+                  model.getOverdueTaskList(),
+                  model.removeTask,
+                  model.addTask,
+                  model.completeTask,
+                ),
+                TaskListView(
+                  2,
+                  model.getCompletedTaskList(),
+                  model.removeTask,
+                  model.addTask,
+                  model.completeTask,
+                ),
               ],
             ),
           ),
