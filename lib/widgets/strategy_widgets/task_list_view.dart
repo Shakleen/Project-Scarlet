@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../../entities/task_entity.dart';
 import './task_card.dart';
 import '../../pages/strategy_pages/task_form_page.dart';
-import '../ui_elements/side_drawer.dart';
 
 class TaskListView extends StatefulWidget {
   final int tabNumber;
@@ -22,18 +21,19 @@ class TaskListView extends StatefulWidget {
 }
 
 class _TaskListViewState extends State<TaskListView> {
-  Widget _buildContainer() {
+  Widget _buildContainer(
+      Color color, IconData icon, MainAxisAlignment alignment) {
     return Container(
-      color: Colors.red,
+      color: color,
       child: Row(
         children: <Widget>[
           Icon(
-            Icons.delete,
+            icon,
             size: 35.0,
             color: Colors.white,
           )
         ],
-        mainAxisAlignment: MainAxisAlignment.end,
+        mainAxisAlignment: alignment,
       ),
       padding: EdgeInsets.symmetric(horizontal: 25.0),
     );
@@ -51,21 +51,33 @@ class _TaskListViewState extends State<TaskListView> {
         // Dissmissible is needed for swapping to delete from right to left.
         return Dismissible(
           // Setting up the background color that will be seen after swapping to dismiss
-          background: _buildContainer(),
+          background: _buildContainer(
+            Colors.green,
+            Icons.check,
+            MainAxisAlignment.start,
+          ),
+          secondaryBackground: _buildContainer(
+            Colors.red,
+            Icons.delete,
+            MainAxisAlignment.end,
+          ),
           key: Key(taskList[index].getName()),
           onDismissed: (DismissDirection direction) {
             setState(() {
-              removeTask(taskList[index]);
+              if (direction == DismissDirection.endToStart) {
+                removeTask(taskList[index]);
+              } else if (direction == DismissDirection.startToEnd) {
+                completeTask(taskList[index]);
+              }
             });
           },
-          direction: DismissDirection.endToStart,
-          dismissThresholds: {DismissDirection.endToStart: 0.6},
+          dismissThresholds: {
+            DismissDirection.endToStart: 0.6,
+            DismissDirection.startToEnd: 0.6,
+          },
           // Main task component
           child: TaskCard(
             taskList[index],
-            index,
-            removeTask,
-            completeTask,
             widget.tabNumber,
           ),
         );
@@ -85,7 +97,7 @@ class _TaskListViewState extends State<TaskListView> {
       onPressed: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => TaskForm(null, null)),
+          MaterialPageRoute(builder: (context) => TaskForm(null)),
         );
         // addTask();
       },

@@ -4,15 +4,15 @@ import 'package:intl/intl.dart';
 import '../../widgets/helper/ensure-visible.dart';
 import 'package:scoped_model/scoped_model.dart';
 import 'package:datetime_picker_formfield/datetime_picker_formfield.dart';
+import '../../widgets/ui_elements/combo_box.dart';
 
 import '../../entities/task_entity.dart';
 import '../../scoped_model/task_model.dart';
 
 class TaskForm extends StatefulWidget {
   final TaskEntity inputTask;
-  final int inputIndex;
 
-  TaskForm(this.inputTask, this.inputIndex);
+  TaskForm(this.inputTask);
 
   @override
   _TaskForm createState() {
@@ -42,6 +42,7 @@ class _TaskForm extends State<TaskForm> {
   final _locationFocusNode = FocusNode();
   final TextStyle labelStyle =
       TextStyle(color: Colors.blueAccent, fontFamily: 'Roboto');
+  ComboBox comboBox;
 
   /// Method for building a text field for name property.
   ///
@@ -149,24 +150,26 @@ class _TaskForm extends State<TaskForm> {
     );
   }
 
-  Widget _buildPriorityField(TaskEntity task) {
-    return EnsureVisibleWhenFocused(
-      focusNode: _priorityFocusNode,
-      child: TextFormField(
-        focusNode: _priorityFocusNode,
-        decoration: InputDecoration(labelText: 'Task Priority'),
-        initialValue: task == null
-            ? _priorityLevels[0]
-            : _priorityLevels[task.getPriority()],
-        validator: (String value) {
-          if (value.length > 200) {
-            return "Description can't be above 200 character";
-          }
-        },
-        onSaved: (String value) {
-          _formData['description'] = value;
-        },
+  Widget _buildPriorityField(TaskEntity task, Map<int, String> priorityLevels) {
+    if (task == null) {
+      comboBox = ComboBox(priorityLevels);
+    } else {
+      comboBox = ComboBox(priorityLevels, task.getPriority());
+    }
+
+    return Container(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: <Widget>[
+          Text(
+            "Priority",
+            style: labelStyle,
+          ),
+          comboBox,
+        ],
       ),
+      padding: EdgeInsets.only(top: 10.0, right: 10.0),
     );
   }
 
@@ -208,31 +211,30 @@ class _TaskForm extends State<TaskForm> {
   /// Method for building a button for submitting the form of task creation.
   ///
   /// The button calls the _submitForm when clicked!
-  Widget _buildSubmitButton(TaskEntity inputTask, int inputIndex) {
+  Widget _buildSubmitButton(
+      TaskEntity inputTask, Function addTask, Function updateTask) {
     String buttonText = inputTask == null ? 'Add new task' : 'Update task';
 
-    return ScopedModelDescendant<TaskModel>(
-      builder: (BuildContext context, Widget child, TaskModel model) {
-        return RaisedButton(
-          child: Text(buttonText),
-          color: Colors.blueAccent,
-          textColor: Colors.white,
-          onPressed: () {
-            _submitForm(model.addTask, model.updateTask, inputTask, inputIndex);
-          },
-        );
+    return RaisedButton(
+      child: Text(buttonText),
+      color: Colors.blueAccent,
+      textColor: Colors.white,
+      onPressed: () {
+        _submitForm(addTask, updateTask, inputTask);
       },
     );
   }
 
   /// This method creates and saves the task by using the [addTask] function
   /// passed into it.
-  void _submitForm(Function addTask, Function updateTask, TaskEntity inputTask,
-      int inputIndex) {
+  void _submitForm(
+      Function addTask, Function updateTask, TaskEntity inputTask) {
     if (!_formKey.currentState.validate()) {
       return;
     }
     _formKey.currentState.save();
+
+    _formData['priority'] = comboBox.choice;
 
     // Add mode
     if (inputTask == null) {
@@ -243,7 +245,7 @@ class _TaskForm extends State<TaskForm> {
         _formData['priority'],
         _formData['location'],
       );
-    } else {
+    } else { // Update mode
       updateTask(
         widget.inputTask,
         _formData['name'],
@@ -262,105 +264,43 @@ class _TaskForm extends State<TaskForm> {
     final double targetWidth = deviceWidth > 550.0 ? 500.0 : deviceWidth * 0.95;
     final double targetPadding = deviceWidth - targetWidth;
 
-    return Container(
-      margin: EdgeInsets.all(10.0),
-      child: Form(
-        key: _formKey,
-        child: ListView(
-          padding: EdgeInsets.symmetric(horizontal: targetPadding / 2.0),
-          children: <Widget>[
-            _buildNameTextField(widget.inputTask),
-            SizedBox(
-              height: 10.0,
-            ),
-            _buildDueDateField(widget.inputTask),
-            SizedBox(
-              height: 10.0,
-            ),
-            _buildDescriptionTextField(widget.inputTask),
-            SizedBox(
-              height: 10.0,
-            ),
-            _buildLocationTextField(widget.inputTask),
-            SizedBox(
-              height: 10.0,
-            ),
-            _buildSubmitButton(widget.inputTask, widget.inputIndex),
-          ],
+    return ScopedModelDescendant<TaskModel>(
+        builder: (BuildContext context, Widget child, TaskModel model) {
+      return Container(
+        margin: EdgeInsets.all(10.0),
+        child: Form(
+          key: _formKey,
+          child: ListView(
+            padding: EdgeInsets.symmetric(horizontal: targetPadding / 2.0),
+            children: <Widget>[
+              _buildNameTextField(widget.inputTask),
+              SizedBox(
+                height: 10.0,
+              ),
+              _buildDueDateField(widget.inputTask),
+              SizedBox(
+                height: 10.0,
+              ),
+              _buildDescriptionTextField(widget.inputTask),
+              SizedBox(
+                height: 10.0,
+              ),
+              _buildLocationTextField(widget.inputTask),
+              SizedBox(
+                height: 10.0,
+              ),
+              _buildPriorityField(widget.inputTask, model.getPriorityLevels()),
+              SizedBox(
+                height: 10.0,
+              ),
+              _buildSubmitButton(
+                  widget.inputTask, model.addTask, model.updateTask),
+            ],
+          ),
         ),
-      ),
-    );
+      );
+    });
   }
-
-  // Widget _buildHeaderText(String header) {
-  //   return Padding(
-  //     child: Text(
-  //       header,
-  //       style: TextStyle(
-  //         fontFamily: 'Roboto',
-  //         fontWeight: FontWeight.w600,
-  //         fontSize: 24,
-  //       ),
-  //     ),
-  //     padding: EdgeInsets.symmetric(
-  //       vertical: 5.0,
-  //       horizontal: 10.0,
-  //     ),
-  //   );
-  // }
-
-  // Widget _buildContentText(String content) {
-  //   return Padding(
-  //     child: Text(
-  //       content,
-  //       style: TextStyle(
-  //         fontFamily: 'Roboto',
-  //         fontSize: 16,
-  //       ),
-  //     ),
-  //     padding: EdgeInsets.only(right: 10.0, left: 10.0, top: 2.0, bottom: 5.0),
-  //   );
-  // }
-
-  // Widget _buildFormView() {
-  //   return Container(
-  //     child: ListView(
-  //       children: <Widget>[
-  //         _buildHeaderText('Name'),
-  //         _buildContentText(widget.inputTask.getName()),
-  //         Divider(color: Colors.black,),
-  //         _buildHeaderText('Date/Time'),
-  //         _buildContentText(widget.inputTask.getDueDate().toString()),
-  //         Divider(color: Colors.black,),
-  //         _buildHeaderText('Description'),
-  //         _buildContentText(widget.inputTask.getDescription()),
-  //         Divider(color: Colors.black,),
-  //         _buildHeaderText('Priority'),
-  //         _buildContentText(_priorityLevels[widget.inputTask.getPriority()]),
-  //         Divider(color: Colors.black,),
-  //         _buildHeaderText('Location'),
-  //         _buildContentText(widget.inputTask.getLocation()),
-  //         Divider(color: Colors.black,),
-  //       ],
-  //       // crossAxisAlignment: CrossAxisAlignment.start,
-  //     ),
-  //   );
-  // }
-
-  // /// Method for building the floating action button. It generates a new
-  // /// form for creating a new task. The button passes in [addTask] to the
-  // /// form for adding the new task to the list of tasks.
-  // FloatingActionButton _buildFloatingActionButton(BuildContext context) {
-  //   return FloatingActionButton(
-  //     child: Icon(widget.editState ? Icons.cancel : Icons.edit),
-  //     backgroundColor: Colors.red,
-  //     onPressed: () {
-  //       setState(() {
-  //         widget.editState = true;
-  //       });
-  //     },
-  //   );
-  // }
 
   @override
   Widget build(BuildContext context) {

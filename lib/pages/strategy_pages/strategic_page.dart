@@ -45,46 +45,50 @@ class _StrategicPage extends State<StrategicPage> {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildTabBarView() {
     return ScopedModelDescendant<TaskModel>(
       builder: (BuildContext context, Widget child, TaskModel model) {
-        return DefaultTabController(
-          length: 3,
-          child: Scaffold(
-            drawer: SideDrawer(4),
-            appBar: AppBar(
-              title: Text('Strategy'),
-              bottom: _buildTabBar(),
+        return TabBarView(
+          children: <Widget>[
+            TaskListView(
+              0,
+              model.getUpcomingTaskList(),
+              model.removeTask,
+              model.addTask,
+              model.completeTask,
             ),
-            body: TabBarView(
-              children: <Widget>[
-                TaskListView(
-                  0,
-                  model.getUpcomingTaskList(),
-                  model.removeTask,
-                  model.addTask,
-                  model.completeTask,
-                ),
-                TaskListView(
-                  1,
-                  model.getOverdueTaskList(),
-                  model.removeTask,
-                  model.addTask,
-                  model.completeTask,
-                ),
-                TaskListView(
-                  2,
-                  model.getCompletedTaskList(),
-                  model.removeTask,
-                  model.addTask,
-                  model.completeTask,
-                ),
-              ],
+            TaskListView(
+              1,
+              model.getOverdueTaskList(),
+              model.removeTask,
+              model.addTask,
+              model.completeTask,
             ),
-          ),
+            TaskListView(
+              2,
+              model.getCompletedTaskList(),
+              model.removeTask,
+              model.addTask,
+              model.completeTask,
+            ),
+          ],
         );
       },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return DefaultTabController(
+      length: 3,
+      child: Scaffold(
+        drawer: SideDrawer(4),
+        appBar: AppBar(
+          title: Text('Strategy'),
+          bottom: _buildTabBar(),
+        ),
+        body: _buildTabBarView(),
+      ),
     );
   }
 }

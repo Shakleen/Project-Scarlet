@@ -3,17 +3,14 @@ import 'package:flutter/material.dart';
 import '../ui_elements/default_title.dart';
 import '../ui_elements/default_date.dart';
 
-import '../../pages/strategy_pages/task_form_page.dart';
+import '../../pages/strategy_pages/task_details_page.dart';
 import '../../entities/task_entity.dart';
 
 class TaskCard extends StatelessWidget {
-  final TaskEntity _task;
-  final Function _removeTask;
-  final Function _completeTask;
-  final int _index;
-  final int _tabNumber;
+  final TaskEntity task;
+  final int tabNumber;
 
-  TaskCard(this._task, this._index, this._removeTask, this._completeTask, this._tabNumber);
+  TaskCard(this.task, this.tabNumber);
 
   BoxDecoration _buildDecorations() {
     return BoxDecoration(
@@ -27,31 +24,19 @@ class TaskCard extends StatelessWidget {
     );
   }
 
-  IconButton _buildIconButton() {
-    return IconButton(
-      icon: Icon(
-        Icons.done,
-        size: 30,
-        color: Colors.green,
-      ),
-      color: Colors.blueAccent,
-      onPressed: () => _completeTask(_task),
-    );
-  }
-
   Column _buildTaskCard(BuildContext context) {
     return Column(
         children: <Widget>[
           // Contains a task
           ListTile(
-            leading: _task.getCompleteDate() == null ? _buildIconButton() : null,
-            title: DefaultTitle(_task.getName()),
-            trailing: DefaultDate(_task.getDueDate(), _tabNumber),
+            // leading: task.getCompleteDate() == null ? _buildIconButton() : null,
+            title: DefaultTitle(task.getName()),
+            trailing: DefaultDate(task.getDueDate(), tabNumber),
             enabled: true,
             onLongPress: () => Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => TaskForm(_task, _index)),
+                      builder: (context) => TaskDetails(task)),
                 ),
           ),
         ],

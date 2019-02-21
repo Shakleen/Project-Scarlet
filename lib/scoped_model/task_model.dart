@@ -21,6 +21,18 @@ class TaskModel extends Model {
     TaskEntity('Call parents', DateTime(2019, 02, 1, 0, 24))
   ];
 
+  final Map<int, String> priorityLevels = const {
+    0: 'Low',
+    1: 'Normal',
+    2: 'Important',
+    3: 'Urgent'
+  };
+
+  /// Method for returning the priority levels map.
+  Map<int, String> getPriorityLevels() {
+    return priorityLevels;
+  }
+
   /// Returns the filtered list of upcoming tasks as a new varaible.
   /// So the original one can't be editted outside the class.
   List<TaskEntity> getUpcomingTaskList() {
