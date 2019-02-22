@@ -16,54 +16,17 @@ class TaskModel extends Model {
   static final Map<int, dynamic> columnNames = const {
     0: ["UUID", "Text"],
     1: ["Name", "Text"],
-    2: ["DueDate", "Text"],
+    2: ["DueDate", "DateTime"],
     3: ["Description", "Text"],
     4: ["Priority", "Number"],
     5: ["Location", "Text"],
-    6: ["CompleteDate", "Text"],
-    7: ["SetDate", "Text"]
+    6: ["CompleteDate", "DateTime"],
+    7: ["SetDate", "DateTime"]
   };
   static final String tableName = "Tasks";
   static final String databaseFileName = "TasksDatabase.db";
-
   static final Uuid _uuid = Uuid();
-  final List<TaskEntity> _taskList = [
-    TaskEntity(
-      id: _uuid.v1(),
-      name: 'Do push ups',
-      dueDate: DateTime(2019, 02, 28, 5, 45),
-    ),
-    TaskEntity(
-      id: _uuid.v1(),
-      name: 'Go shopping',
-      dueDate: DateTime(2019, 02, 19, 4, 25),
-    ),
-    TaskEntity(
-      id: _uuid.v1(),
-      name: 'Clean the car',
-      dueDate: DateTime(2019, 02, 8, 6, 18),
-    ),
-    TaskEntity(
-      id: _uuid.v1(),
-      name: 'Study ML',
-      dueDate: DateTime(2019, 02, 14, 20, 24),
-    ),
-    TaskEntity(
-      id: _uuid.v1(),
-      name: 'Make dinner',
-      dueDate: DateTime(2019, 02, 22, 12, 34),
-    ),
-    TaskEntity(
-      id: _uuid.v1(),
-      name: 'Check emails',
-      dueDate: DateTime(2019, 02, 11, 18, 54),
-    ),
-    TaskEntity(
-      id: _uuid.v1(),
-      name: 'Call parents',
-      dueDate: DateTime(2019, 02, 1, 0, 24),
-    )
-  ];
+  final List<TaskEntity> _taskList = [];
   static final Map<int, String> priorityLevels = const {
     0: 'Low',
     1: 'Normal',
@@ -212,3 +175,44 @@ class TaskModel extends Model {
     }
   }
 }
+
+
+/*
+[
+    TaskEntity(
+      id: _uuid.v1(),
+      name: 'Do push ups',
+      dueDate: DateTime(2019, 02, 28, 5, 45),
+    ),
+    TaskEntity(
+      id: _uuid.v1(),
+      name: 'Go shopping',
+      dueDate: DateTime(2019, 02, 19, 4, 25),
+    ),
+    TaskEntity(
+      id: _uuid.v1(),
+      name: 'Clean the car',
+      dueDate: DateTime(2019, 02, 8, 6, 18),
+    ),
+    TaskEntity(
+      id: _uuid.v1(),
+      name: 'Study ML',
+      dueDate: DateTime(2019, 02, 14, 20, 24),
+    ),
+    TaskEntity(
+      id: _uuid.v1(),
+      name: 'Make dinner',
+      dueDate: DateTime(2019, 02, 22, 12, 34),
+    ),
+    TaskEntity(
+      id: _uuid.v1(),
+      name: 'Check emails',
+      dueDate: DateTime(2019, 02, 11, 18, 54),
+    ),
+    TaskEntity(
+      id: _uuid.v1(),
+      name: 'Call parents',
+      dueDate: DateTime(2019, 02, 1, 0, 24),
+    )
+  ]
+*/

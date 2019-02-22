@@ -36,6 +36,28 @@ class TaskEntity {
     this._completeDate = null;
   }
 
+  dynamic getInfo(int i) {
+    switch (i) {
+      case 0:
+        return this.getID();
+      case 1:
+        return this.getName();
+      case 2:
+        return this.getDueDate();
+      case 3:
+        return this.getDescription();
+      case 4:
+        return this.getPriority();
+      case 5:
+        return this.getLocation();
+      case 6:
+        return this.getCompleteDate();
+      case 7:
+        return this.getSetDate();
+    }
+    return null;
+  }
+
   String getID() {
     return this._id;
   }

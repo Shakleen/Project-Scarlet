@@ -26,8 +26,6 @@ class TaskDatabase {
   Future<void> createDatabase() async {
     if (_database == null) {
       _database = await initDatabase();
-      print("From createDatabase:\n");
-      print(_database);
     }
   }
 
@@ -64,19 +62,52 @@ class TaskDatabase {
       }
     }
 
-    print(statement);
+    print(statement); // TODO REMOVE THIS
 
     return statement;
   }
 
   Future<bool> insertTask(TaskEntity task) async {
-    final int result =
-        await _database.insert(_tableName, TaskModel.toMap(task));
+    final int result = await _database.rawInsert(_insertQueryBuilder(task));
+
     if (result == 1) {
-      print('Successful insertion!');
+      print('Successful insertion!'); // TODO REMOVE THIS
       return true;
     }
     return false;
+  }
+
+  String _insertQueryBuilder(TaskEntity task) {
+    String statement = "INSERT INTO " + _tableName + " (";
+    String values = " VALUES (";
+
+    for (int i = 0; i < TaskModel.columnNames.length; ++i) {
+      statement += TaskModel.columnNames[i][0];
+
+      if (TaskModel.columnNames[i][1] == "Number") {
+        values += task.getInfo(i).toString();
+      } else if (TaskModel.columnNames[i][1] == "Text") {
+        values += "'" + task.getInfo(i).toString() + "'";
+      } else if (TaskModel.columnNames[i][1] == "DateTime" &&
+          task.getInfo(i) != null) {
+        DateTime dateTime = task.getInfo(i);
+        values += "datetime('" + dateTime.toString() + "')";
+      } else {
+        values += 'Null';
+      }
+
+      if (i < TaskModel.columnNames.length - 1) {
+        statement += ", ";
+        values += ", ";
+      } else {
+        statement += ") ";
+        values += ")";
+      }
+    }
+
+    print(statement + values); // TODO REMOVE THIS
+
+    return statement + values;
   }
 
   Future<bool> updateTask(TaskEntity task) async {
@@ -87,38 +118,59 @@ class TaskDatabase {
     return result == 1 ? true : false;
   }
 
-  Future<List<TaskEntity>> getTask(String uuid) async {
+  /// Method for retrieving tasks of three types. Type is
+  /// specified by [type]. The 3 types are:
+  /// Type 1: Upcoming tasks. No complete date and due
+  /// date is after current date.
+  /// Type 2: Overdue tasks. No complete date and due date
+  /// is before current date.
+  /// Type 3: Completed tasks. Has complete date.
+  Future<List<TaskEntity>> getTasks(int type) async {
     List<Map<String, dynamic>> result;
-    
-    if (uuid != null) {
-      result = await _database.query(_tableName,
-          where: TaskModel.columnNames[0][0] + " = ?", whereArgs: [uuid]);
-    } else {
-      result = await _database.query(_tableName);
-    }
+
+    result = await _database.query(_tableName);
 
     if (result != null) {
-      print('TaskDatabase - getTask\n');
+      print('TaskDatabase - getTask\n'); // TODO REMOVE THIS
       final List<TaskEntity> resultList = [];
 
       for (Map<String, dynamic> entry in result) {
-        final TaskEntity taskEntity = TaskEntity(
-          id: entry[TaskModel.columnNames[0][0]],
-          name: entry[TaskModel.columnNames[1][0]],
-          dueDate: DateTime.parse(entry[TaskModel.columnNames[2][0]]),
-          description: entry[TaskModel.columnNames[3][0]],
-          priority: entry[TaskModel.columnNames[4][0]],
-          location: entry[TaskModel.columnNames[5][0]],
-        );
-        taskEntity.setSetDate(DateTime.parse(entry[TaskModel.columnNames[7][0]]));
-        final String completeDate = entry[TaskModel.columnNames[6][0]];
-        taskEntity.setCompleteDate(completeDate == null ? null : DateTime.parse(completeDate));
-        resultList.add(taskEntity);
+        resultList.add(_parseTaskEntity(entry));
       }
 
-      print(resultList.length);
+      print(resultList.length); // TODO REMOVE THIS
 
       return resultList;
     }
+  }
+
+  /// Method to parse and create a TaskEntity type object from
+  /// the map type object [input].
+  TaskEntity _parseTaskEntity(Map<String, dynamic> input) {
+    final String id = input[TaskModel.columnNames[0][0]];
+    final String name = input[TaskModel.columnNames[1][0]];
+    final String dueDate = input[TaskModel.columnNames[2][0]];
+    final String description = input[TaskModel.columnNames[3][0]];
+    final String priority = input[TaskModel.columnNames[4][0]];
+    final String location = input[TaskModel.columnNames[5][0]];
+    final String completeDate = input[TaskModel.columnNames[6][0]];
+    final String setDate = input[TaskModel.columnNames[7][0]];
+
+    final TaskEntity taskEntity = TaskEntity(
+      id: id,
+      name: name,
+      dueDate: DateTime.parse(dueDate),
+      description: description,
+      priority: int.parse(priority),
+      location: location,
+    );
+
+    taskEntity.setSetDate(DateTime.parse(setDate));
+
+    taskEntity.setCompleteDate(
+      completeDate == null ? null : DateTime.parse(completeDate),
+    );
+
+    return taskEntity;
   }
 }

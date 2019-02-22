@@ -35,7 +35,7 @@ class TaskCard extends StatelessWidget {
           trailing: DefaultDate(task.getDueDate(), tabNumber),
           enabled: true,
           onLongPress: () {
-            TaskDatabase.taskDatabase.getTask(task.getID());
+            // TaskDatabase.taskDatabase.getTasks(task.getID());
             Navigator.push(
               context,
               MaterialPageRoute(
