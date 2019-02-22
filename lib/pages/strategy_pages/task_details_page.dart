@@ -41,7 +41,7 @@ class TaskDetails extends StatelessWidget {
     );
   }
 
-  Widget _buildFormView(Map<int, String> priorityLevels) {
+  Widget _buildFormView() {
     final DateTime dateTime = inputTask.getDueDate();
     final String dateTimeString = dateTime.day.toString() +
         '/' +
@@ -72,7 +72,7 @@ class TaskDetails extends StatelessWidget {
             color: Colors.black,
           ),
           _buildHeaderText('Priority'),
-          _buildContentText(priorityLevels[inputTask.getPriority()]),
+          _buildContentText(TaskModel.priorityLevels[inputTask.getPriority()]),
           Divider(
             color: Colors.black,
           ),
@@ -112,7 +112,7 @@ class TaskDetails extends StatelessWidget {
             title: Text('View task details'),
           ),
           // Display the task which currently exist
-          body: _buildFormView(model.getPriorityLevels()),
+          body: _buildFormView(),
 
           // Floating action button for adding new tasks and goals
           floatingActionButton: _buildFloatingActionButton(context),

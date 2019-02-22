@@ -5,6 +5,7 @@ import '../ui_elements/default_date.dart';
 
 import '../../pages/strategy_pages/task_details_page.dart';
 import '../../entities/task_entity.dart';
+import '../../controller/task_database.dart';
 
 class TaskCard extends StatelessWidget {
   final TaskEntity task;
@@ -26,21 +27,25 @@ class TaskCard extends StatelessWidget {
 
   Column _buildTaskCard(BuildContext context) {
     return Column(
-        children: <Widget>[
-          // Contains a task
-          ListTile(
-            // leading: task.getCompleteDate() == null ? _buildIconButton() : null,
-            title: DefaultTitle(task.getName()),
-            trailing: DefaultDate(task.getDueDate(), tabNumber),
-            enabled: true,
-            onLongPress: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => TaskDetails(task)),
-                ),
-          ),
-        ],
-      );
+      children: <Widget>[
+        // Contains a task
+        ListTile(
+          // leading: task.getCompleteDate() == null ? _buildIconButton() : null,
+          title: DefaultTitle(task.getName()),
+          trailing: DefaultDate(task.getDueDate(), tabNumber),
+          enabled: true,
+          onLongPress: () {
+            TaskDatabase.taskDatabase.getTask(task.getID());
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => TaskDetails(task),
+              ),
+            );
+          },
+        ),
+      ],
+    );
   }
 
   @override

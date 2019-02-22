@@ -3,22 +3,42 @@ import 'package:flutter/material.dart';
 /// An entity class that represents a single task.
 ///
 /// Each task in the strategic portion consists of the following things:
-/// [name], [dueDate], [completeDate], [description], [priority] and [location]. 
+/// [name], [dueDate], [completeDate], [description], [priority] and [location].
 /// But only the first two are required to create a task while the others are
 /// optional.
 ///
 /// [priority] values are (0, low), (1, normal), (2, important), (3, urgent)
 class TaskEntity {
+  String _id;
   String _name;
   DateTime _dueDate;
-  DateTime _completeDate = null;
+  DateTime _completeDate;
   String _description;
   int _priority;
   String _location;
+  DateTime _setDate;
 
+  TaskEntity({
+    @required String id,
+    @required String name,
+    @required DateTime dueDate,
+    String description = "None",
+    int priority = 0,
+    String location = "Unspecified",
+  }) {
+    this._id = id;
+    this._name = name;
+    this._dueDate = dueDate;
+    this._setDate = DateTime.now();
+    this._description = description;
+    this._priority = priority;
+    this._location = location;
+    this._completeDate = null;
+  }
 
-  TaskEntity(this._name, this._dueDate,
-      [this._description = 'None', this._priority = 0, this._location = 'Unspecified']);
+  String getID() {
+    return this._id;
+  }
 
   String getName() {
     return this._name;
@@ -55,6 +75,18 @@ class TaskEntity {
   bool setCompleteDate(DateTime completeDate) {
     if (completeDate != null) {
       this._completeDate = completeDate;
+      return true;
+    }
+    return false;
+  }
+
+  DateTime getSetDate() {
+    return this._setDate;
+  }
+
+  bool setSetDate(DateTime setDate) {
+    if (setDate != null) {
+      this._setDate = setDate;
       return true;
     }
     return false;

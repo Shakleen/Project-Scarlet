@@ -41,4 +41,6 @@ Game engine: [Unity](https://unity3d.com/)
 ## License
 Open source software.  
 
-
+## Acknowledgement
+1. [Fonts Awesome](https://fontawesome.com/start)  
+2. [Google Fonts](https://fonts.google.com/)  

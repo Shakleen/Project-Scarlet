@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 import '../../widgets/helper/ensure-visible.dart';
 import 'package:scoped_model/scoped_model.dart';
@@ -208,11 +207,11 @@ class _TaskForm extends State<TaskForm> {
     );
   }
 
-  Widget _buildPriorityField(TaskEntity task, Map<int, String> priorityLevels) {
+  Widget _buildPriorityField(TaskEntity task) {
     if (task == null) {
-      comboBox = ComboBox(priorityLevels);
+      comboBox = ComboBox(TaskModel.priorityLevels);
     } else {
-      comboBox = ComboBox(priorityLevels, task.getPriority());
+      comboBox = ComboBox(TaskModel.priorityLevels, task.getPriority());
     }
 
     return Container(
@@ -349,7 +348,7 @@ class _TaskForm extends State<TaskForm> {
               SizedBox(
                 height: 10.0,
               ),
-              _buildPriorityField(widget.inputTask, model.getPriorityLevels()),
+              _buildPriorityField(widget.inputTask),
               SizedBox(
                 height: 10.0,
               ),

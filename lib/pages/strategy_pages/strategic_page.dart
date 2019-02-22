@@ -6,6 +6,7 @@ import '../../scoped_model/task_model.dart';
 import '../../widgets/ui_elements/side_drawer.dart';
 import '../../presentation/custom_icons.dart';
 import '../../widgets/strategy_widgets/task_list_view.dart';
+import '../../controller/task_database.dart';
 
 class StrategicPage extends StatefulWidget {
   @override
@@ -79,6 +80,8 @@ class _StrategicPage extends State<StrategicPage> {
 
   @override
   Widget build(BuildContext context) {
+    TaskDatabase.taskDatabase.createDatabase();
+
     return DefaultTabController(
       length: 3,
       child: Scaffold(
