@@ -14,18 +14,10 @@ class TaskDatabase {
 
   TaskDatabase._();
 
-  Future<Database> get database async {
-    if (_database != null) {
-      return _database;
-    }
-
-    _database = await initDatabase();
-    return _database;
-  }
-
   Future<void> createDatabase() async {
     if (_database == null) {
       _database = await initDatabase();
+      print('Database created!'); // TODO REMOVE THIS
     }
   }
 
@@ -164,7 +156,9 @@ class TaskDatabase {
 
     result = await _database.rawQuery(statement);
 
-    if (result != null) {
+    print("Result after rawQuery: Length = " + result?.length.toString());// TODO REMOVE THIS
+
+    if (result != null && result?.length > 0) {
       for (Map<String, dynamic> entry in result) {
         resultList.add(_parseTaskEntity(entry));
       }
@@ -182,7 +176,6 @@ class TaskDatabase {
 
     switch (type) {
       case 1: // Upcoming tasks
-        print(statement);
         statement += TaskModel.columnNames[6][0] +
             " is Null AND " +
             TaskModel.columnNames[2][0] +

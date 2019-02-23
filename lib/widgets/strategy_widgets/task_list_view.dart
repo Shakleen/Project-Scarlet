@@ -60,18 +60,19 @@ class _TaskListViewState extends State<TaskListView> {
               ? DismissDirection.endToStart
               : DismissDirection.horizontal,
           onDismissed: (DismissDirection direction) {
-              final TaskEntity task = taskList[index];
-              if (direction == DismissDirection.endToStart) {
-                setState(() {
-                  taskList.remove(task);
-                  removeTask(task);
-                });
-              } else if (direction == DismissDirection.startToEnd) {
-                setState(() {
-                  taskList.remove(task);
-                  completeTask(task);
-                });
-              };
+            final TaskEntity task = taskList[index];
+            if (direction == DismissDirection.endToStart) {
+              setState(() {
+                taskList.remove(task);
+                removeTask(task);
+              });
+            } else if (direction == DismissDirection.startToEnd) {
+              setState(() {
+                taskList.remove(task);
+                completeTask(task);
+              });
+            }
+            ;
           },
           dismissThresholds: {
             DismissDirection.endToStart: 0.6,
@@ -94,18 +95,19 @@ class _TaskListViewState extends State<TaskListView> {
   /// into the cards. The dismiss to delete uses [removeTask] function.
   Widget _buildFuture(
       Function getTaskList, Function removeTask, Function completeTask) {
-    Future<List<TaskEntity>> taskList = getTaskList();
-
     return FutureBuilder<List<TaskEntity>>(
-      future: taskList,
-      builder: (
-        BuildContext context,
-        AsyncSnapshot<List<TaskEntity>> snapshot,
-      ) =>
-          snapshot.hasData
-              ? _buildListView(snapshot.data, removeTask, completeTask)
-              : Center(child: CircularProgressIndicator()),
-    );
+        future: getTaskList(),
+        builder: (
+          BuildContext context,
+          AsyncSnapshot<List<TaskEntity>> snapshot,
+        ) {
+          if (snapshot.connectionState == ConnectionState.done) {
+            final List<TaskEntity> taskList = snapshot.hasData ? snapshot.data : [];
+            return _buildListView(taskList, removeTask, completeTask);
+          } else {
+            return Center(child: CircularProgressIndicator());
+          }
+        });
   }
 
   /// Method for building the floating action button. It generates a new

@@ -3,15 +3,6 @@ import 'package:flutter/material.dart';
 import '../../widgets/ui_elements/side_drawer.dart';
 import '../../presentation/custom_icons.dart';
 import '../../widgets/strategy_widgets/task_list_view.dart';
-import '../../controller/task_database.dart';
-
-// class StrategicPage extends StatefulWidget {
-//   @override
-//   _StrategicPage createState() {
-//     TaskDatabase.taskDatabase.createDatabase();
-//     return _StrategicPage();
-//   }
-// }
 
 /// Stateless widget class for our Strategy page.
 ///
@@ -24,7 +15,6 @@ import '../../controller/task_database.dart';
 /// Each task card shows the name and date of the task.
 /// Further more there is a floating action button which enable the user
 /// to add more tasks.
-// class _StrategicPage extends State<StrategicPage> {
 class StrategicPage extends StatelessWidget {
   Widget _buildTabBar() {
     return TabBar(
@@ -58,8 +48,6 @@ class StrategicPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    TaskDatabase.taskDatabase.createDatabase();
-    
     return DefaultTabController(
       length: 3,
       child: Scaffold(

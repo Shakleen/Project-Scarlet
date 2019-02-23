@@ -11,8 +11,10 @@ import 'pages/strategy_pages/strategic_page.dart';
 import 'pages/about_page.dart';
 import 'pages/settings_page.dart';
 import 'pages/play_game_page.dart';
+import 'controller/task_database.dart';
 
 main() {
+  TaskDatabase.taskDatabase.createDatabase();
   runApp(MyApp());
 }
 
