@@ -19,19 +19,15 @@ class TaskForm extends StatefulWidget {
 }
 
 class _TaskForm extends State<TaskForm> {
-  final Map<String, dynamic> _formData = {
-    'name': null,
-    'dueDate': DateTime.now(),
-    'description': null,
-    'priority': 0,
-    'location': null
-  };
+  final Map<String, dynamic> _formData = TaskModel.taskFormData;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final _nameFocusNode = FocusNode();
   final _descriptionFocusNode = FocusNode();
   final _locationFocusNode = FocusNode();
-  final TextStyle labelStyle =
-      TextStyle(color: Colors.blueAccent, fontFamily: 'Roboto');
+  final TextStyle labelStyle = TextStyle(
+    color: Colors.blueAccent,
+    fontFamily: 'Roboto',
+  );
   ComboBox comboBox;
   DateTime dateTime;
 
@@ -91,12 +87,11 @@ class _TaskForm extends State<TaskForm> {
           if (value.length < 5) {
             return 'Name must be at least 5 characters!';
           } else if (value.length > 100) {
-            return 'Name can be at most 200 characters!';
+            return 'Name can be at most 100 characters!';
           }
         },
         onSaved: (String value) {
           _formData['name'] = value;
-          value = "";
         },
       ),
     );
@@ -197,9 +192,7 @@ class _TaskForm extends State<TaskForm> {
           }
         },
         onSaved: (String value) {
-          if (value.length <= 0) {
-            _formData['description'] = 'None';
-          } else {
+          if (value.length > 0) {
             _formData['description'] = value;
           }
         },
@@ -207,6 +200,12 @@ class _TaskForm extends State<TaskForm> {
     );
   }
 
+  /// Method for building a priority field for the task priority
+  /// property.
+  ///
+  /// The method initializes itself as low if it is for a new
+  /// task, otherwise it displays the priority of the [task] that is
+  /// being updated.
   Widget _buildPriorityField(TaskEntity task) {
     if (task == null) {
       comboBox = ComboBox(TaskModel.priorityLevels);
@@ -257,8 +256,6 @@ class _TaskForm extends State<TaskForm> {
         onSaved: (String value) {
           if (value.length > 0) {
             _formData['location'] = value;
-          } else {
-            _formData['location'] = 'Unspecified';
           }
         },
       ),

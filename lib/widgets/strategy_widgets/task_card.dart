@@ -5,7 +5,6 @@ import '../ui_elements/default_date.dart';
 
 import '../../pages/strategy_pages/task_details_page.dart';
 import '../../entities/task_entity.dart';
-import '../../controller/task_database.dart';
 
 class TaskCard extends StatelessWidget {
   final TaskEntity task;
@@ -25,7 +24,7 @@ class TaskCard extends StatelessWidget {
     );
   }
 
-  Column _buildTaskCard(BuildContext context) {
+  Column _buildTaskCard(BuildContext context, TaskEntity task) {
     return Column(
       children: <Widget>[
         // Contains a task
@@ -52,7 +51,7 @@ class TaskCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: _buildDecorations(),
-      child: _buildTaskCard(context),
+      child: _buildTaskCard(context, task),
       padding: EdgeInsets.symmetric(vertical: 5.0),
     );
   }

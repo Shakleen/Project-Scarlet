@@ -13,6 +13,13 @@ import '../controller/task_database.dart';
 /// of modifying this list. Further more, [getTaskList] and [getSelectedTask]
 /// can be used to get the whole list or just one task respectively.
 class TaskModel extends Model {
+  static final Map<String, dynamic> taskFormData = {
+    'name': null,
+    'dueDate': DateTime.now(),
+    'description': null,
+    'priority': 0,
+    'location': null
+  };
   static final Map<int, dynamic> columnNames = const {
     0: ["UUID", "Text"],
     1: ["Name", "Text"],
@@ -26,7 +33,6 @@ class TaskModel extends Model {
   static final String tableName = "Tasks";
   static final String databaseFileName = "TasksDatabase.db";
   static final Uuid _uuid = Uuid();
-  final List<TaskEntity> _taskList = [];
   static final Map<int, String> priorityLevels = const {
     0: 'Low',
     1: 'Normal',
@@ -51,57 +57,37 @@ class TaskModel extends Model {
 
   /// Returns the filtered list of upcoming tasks as a new varaible.
   /// So the original one can't be editted outside the class.
-  List<TaskEntity> getUpcomingTaskList() {
-    return _taskList.where((TaskEntity task) {
-      final bool isUpcoming = task.getDueDate().compareTo(DateTime.now()) >= 0;
-      final bool isNotCompleted = task.getCompleteDate() == null;
-      return isNotCompleted && isUpcoming;
-    }).toList();
+  Future<List<TaskEntity>> getUpcomingTaskList() {
+    return TaskDatabase.taskDatabase.getTasks(1);
   }
 
   /// Returns the filtered list of completed tasks as a new varaible.
   /// So the original one can't be editted outside the class.
-  List<TaskEntity> getCompletedTaskList() {
-    return _taskList.where((TaskEntity task) {
-      final bool isCompleted = task.getCompleteDate() != null;
-      return isCompleted;
-    }).toList();
+  Future<List<TaskEntity>> getCompletedTaskList() {
+    return TaskDatabase.taskDatabase.getTasks(3);
   }
 
   /// Returns the filtered list of overdue tasks as a new varaible.
   /// So the original one can't be editted outside the class.
-  List<TaskEntity> getOverdueTaskList() {
-    return _taskList.where((TaskEntity task) {
-      final bool isOverdue = task.getDueDate().compareTo(DateTime.now()) < 0;
-      final bool isNotCompleted = task.getCompleteDate() == null;
-      return isNotCompleted && isOverdue;
-    }).toList();
-  }
-
-  /// Returns the total number of tasks in the list of tasks.
-  int getTotalNumberOfTasks() {
-    return _taskList.length;
+  Future<List<TaskEntity>> getOverdueTaskList() {
+    return TaskDatabase.taskDatabase.getTasks(2);
   }
 
   /// Used to get a specific task. The task at [index] in the list
   /// is returned. Performs proper checking before proceeding. Throws
   /// exception if checking shows error.
-  TaskEntity getSelectedTask(int index) {
-    if (index >= 0 && index < _taskList.length) {
-      return _taskList[index];
-    } else {
-      throw Exception('TaskModel - getSelectedTask - index out of bounds');
-    }
+  Future<TaskEntity> getSelectedTask(TaskEntity task) {
+    return TaskDatabase.taskDatabase.getTask(task.getID());
   }
 
   /// Used to add a new task to the list. Performs proper checking
   /// before proceeding. Throws exception if checking shows error.
   void addTask(String name, DateTime dueDate,
-      [String description = 'None',
+      [String description = null,
       int priority = 0,
-      String location = 'Unspecified']) {
+      String location = null]) {
     if (name != null && dueDate != null) {
-      TaskEntity task = new TaskEntity(
+      TaskEntity task = TaskEntity(
         id: _uuid.v1(),
         name: name,
         dueDate: dueDate,
@@ -109,8 +95,6 @@ class TaskModel extends Model {
         priority: priority,
         location: location,
       );
-
-      _taskList.add(task);
 
       TaskDatabase.taskDatabase.insertTask(task);
 
@@ -120,59 +104,35 @@ class TaskModel extends Model {
     }
   }
 
-  /// Used to update a new task to the list. Performs proper checking
-  /// before proceeding. Throws exception if checking shows error.
+  /// Update [task] information.
   void updateTask(TaskEntity task, String name, DateTime dueDate,
-      [String description = 'None',
+      [String description = null,
       int priority = 0,
-      String location = 'Unspecified']) {
-    int index = _taskList.indexOf(task);
+      String location = null]) {
+    TaskEntity newTask =TaskEntity(
+      id: task.getID(),
+      name: name,
+      dueDate: dueDate,
+      description: description,
+      priority: priority,
+      location: location,
+    );
 
-    if (index >= 0 && index < _taskList.length) {
-      if (name != null && dueDate != null) {
-        _taskList[index].setName(name);
-        _taskList[index].setDueDate(dueDate);
-        _taskList[index].setDescription(description);
-        _taskList[index].setPriority(priority);
-        _taskList[index].setLocation(location);
-        notifyListeners();
-      } else {
-        throw Exception('TaskModel - updateTask - name and/or dueDate is null');
-      }
-    } else {
-      throw Exception('TaskModel - updateTask - task not found');
-    }
+    TaskDatabase.taskDatabase.updateTask(newTask, task.getID());
+
+    notifyListeners();
   }
 
-  /// Removes the [task] in the list. Performs proper
-  /// checking before proceeding. Throws exception if checking shows error.
+  /// Removes the [task].
   void removeTask(TaskEntity task) {
-    int index = _taskList.indexOf(task);
-
-    if (index >= 0 && index < _taskList.length) {
-      _taskList.removeAt(index);
-      notifyListeners();
-    } else {
-      throw Exception('TaskModel - removeTask - task not found');
-    }
+    TaskDatabase.taskDatabase.removeTask(task.getID());
   }
 
-  /// Completes the [task]  in the list. Performs proper
-  /// checking before proceeding. Throws exception if checking shows error.
+  /// Completes the [task].
   void completeTask(TaskEntity task) {
-    int index = _taskList.indexOf(task);
-
-    if (index >= 0 && index < _taskList.length) {
-      if (_taskList[index].getCompleteDate() == null) {
-        print(_taskList[index].getName() + ' was completed');
-        _taskList[index].setCompleteDate(DateTime.now());
-        notifyListeners();
-      } else {
-        throw Exception('TaskModel - completeTask - task previously completed');
-      }
-    } else {
-      throw Exception('TaskModel - completeTask - task not found');
-    }
+    task.setCompleteDate(DateTime.now());
+    TaskDatabase.taskDatabase.updateTask(task, task.getID());
+    notifyListeners();
   }
 }
 

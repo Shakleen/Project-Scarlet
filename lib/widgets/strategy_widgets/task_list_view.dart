@@ -1,18 +1,16 @@
 import 'package:flutter/material.dart';
 
+import 'package:scoped_model/scoped_model.dart';
+
+import '../../scoped_model/task_model.dart';
 import '../../entities/task_entity.dart';
 import './task_card.dart';
 import '../../pages/strategy_pages/task_form_page.dart';
 
 class TaskListView extends StatefulWidget {
   final int tabNumber;
-  final List<TaskEntity> taskList;
-  final Function removeTask;
-  final Function addTask;
-  final Function completeTask;
 
-  TaskListView(this.tabNumber, this.taskList, this.removeTask, this.addTask,
-      this.completeTask);
+  TaskListView(this.tabNumber);
 
   @override
   _TaskListViewState createState() {
@@ -39,14 +37,10 @@ class _TaskListViewState extends State<TaskListView> {
     );
   }
 
-  /// Method for creating the list of task card. Each task card
-  /// contains the name and due date of the task entity housed within
-  /// it. The list of task entities is passed in as [taskList]. Each
-  /// card has the swipe functionality to dismiss it. It is implemented
-  /// into the cards. The dismiss to delete uses [removeTask] function.
   Widget _buildListView(
       List<TaskEntity> taskList, Function removeTask, Function completeTask) {
     return ListView.builder(
+      itemCount: taskList.length,
       itemBuilder: (BuildContext context, int index) {
         // Dissmissible is needed for swapping to delete from right to left.
         return Dismissible(
@@ -62,14 +56,22 @@ class _TaskListViewState extends State<TaskListView> {
             MainAxisAlignment.end,
           ),
           key: Key(taskList[index].getName()),
+          direction: widget.tabNumber == 2
+              ? DismissDirection.endToStart
+              : DismissDirection.horizontal,
           onDismissed: (DismissDirection direction) {
-            setState(() {
+              final TaskEntity task = taskList[index];
               if (direction == DismissDirection.endToStart) {
-                removeTask(taskList[index]);
+                setState(() {
+                  taskList.remove(task);
+                  removeTask(task);
+                });
               } else if (direction == DismissDirection.startToEnd) {
-                completeTask(taskList[index]);
-              }
-            });
+                setState(() {
+                  taskList.remove(task);
+                  completeTask(task);
+                });
+              };
           },
           dismissThresholds: {
             DismissDirection.endToStart: 0.6,
@@ -82,7 +84,27 @@ class _TaskListViewState extends State<TaskListView> {
           ),
         );
       },
-      itemCount: taskList.length,
+    );
+  }
+
+  /// Method for creating the list of task card. Each task card
+  /// contains the name and due date of the task entity housed within
+  /// it. The list of task entities is passed in as [taskList]. Each
+  /// card has the swipe functionality to dismiss it. It is implemented
+  /// into the cards. The dismiss to delete uses [removeTask] function.
+  Widget _buildFuture(
+      Function getTaskList, Function removeTask, Function completeTask) {
+    Future<List<TaskEntity>> taskList = getTaskList();
+
+    return FutureBuilder<List<TaskEntity>>(
+      future: taskList,
+      builder: (
+        BuildContext context,
+        AsyncSnapshot<List<TaskEntity>> snapshot,
+      ) =>
+          snapshot.hasData
+              ? _buildListView(snapshot.data, removeTask, completeTask)
+              : Center(child: CircularProgressIndicator()),
     );
   }
 
@@ -106,15 +128,35 @@ class _TaskListViewState extends State<TaskListView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      // Display the task which currently exist
-      body: _buildListView(
-          widget.taskList, widget.removeTask, widget.completeTask),
+    return ScopedModelDescendant<TaskModel>(
+      builder: (BuildContext context, Widget child, TaskModel model) {
+        Function getTaskList;
+        switch (widget.tabNumber) {
+          case 0:
+            getTaskList = model.getUpcomingTaskList;
+            break;
+          case 1:
+            getTaskList = model.getOverdueTaskList;
+            break;
+          case 2:
+            getTaskList = model.getCompletedTaskList;
+            break;
+        }
 
-      // Floating action button for adding new tasks and goals
-      floatingActionButton: widget.tabNumber == 0
-          ? _buildFloatingActionButton(widget.addTask, context)
-          : null,
+        return Scaffold(
+          // Display the task which currently exist
+          body: _buildFuture(
+            getTaskList,
+            model.removeTask,
+            model.completeTask,
+          ),
+
+          // Floating action button for adding new tasks and goals
+          floatingActionButton: widget.tabNumber == 0
+              ? _buildFloatingActionButton(model.addTask, context)
+              : null,
+        );
+      },
     );
   }
 }

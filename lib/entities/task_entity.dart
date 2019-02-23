@@ -22,9 +22,9 @@ class TaskEntity {
     @required String id,
     @required String name,
     @required DateTime dueDate,
-    String description = "None",
+    String description = null,
     int priority = 0,
-    String location = "Unspecified",
+    String location = null,
   }) {
     this._id = id;
     this._name = name;

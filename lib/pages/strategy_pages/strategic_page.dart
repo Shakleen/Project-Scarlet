@@ -1,19 +1,17 @@
 import 'package:flutter/material.dart';
 
-import 'package:scoped_model/scoped_model.dart';
-
-import '../../scoped_model/task_model.dart';
 import '../../widgets/ui_elements/side_drawer.dart';
 import '../../presentation/custom_icons.dart';
 import '../../widgets/strategy_widgets/task_list_view.dart';
 import '../../controller/task_database.dart';
 
-class StrategicPage extends StatefulWidget {
-  @override
-  _StrategicPage createState() {
-    return _StrategicPage();
-  }
-}
+// class StrategicPage extends StatefulWidget {
+//   @override
+//   _StrategicPage createState() {
+//     TaskDatabase.taskDatabase.createDatabase();
+//     return _StrategicPage();
+//   }
+// }
 
 /// Stateless widget class for our Strategy page.
 ///
@@ -26,7 +24,8 @@ class StrategicPage extends StatefulWidget {
 /// Each task card shows the name and date of the task.
 /// Further more there is a floating action button which enable the user
 /// to add more tasks.
-class _StrategicPage extends State<StrategicPage> {
+// class _StrategicPage extends State<StrategicPage> {
+class StrategicPage extends StatelessWidget {
   Widget _buildTabBar() {
     return TabBar(
       tabs: <Widget>[
@@ -46,48 +45,27 @@ class _StrategicPage extends State<StrategicPage> {
     );
   }
 
+  /// Method for building TabView. Creates 3 tabs. Upcoming, Overdue and Completed tabs.
   Widget _buildTabBarView() {
-    return ScopedModelDescendant<TaskModel>(
-      builder: (BuildContext context, Widget child, TaskModel model) {
-        return TabBarView(
-          children: <Widget>[
-            TaskListView(
-              0,
-              model.getUpcomingTaskList(),
-              model.removeTask,
-              model.addTask,
-              model.completeTask,
-            ),
-            TaskListView(
-              1,
-              model.getOverdueTaskList(),
-              model.removeTask,
-              model.addTask,
-              model.completeTask,
-            ),
-            TaskListView(
-              2,
-              model.getCompletedTaskList(),
-              model.removeTask,
-              model.addTask,
-              model.completeTask,
-            ),
-          ],
-        );
-      },
+    return TabBarView(
+      children: <Widget>[
+        TaskListView(0),
+        TaskListView(1),
+        TaskListView(2),
+      ],
     );
   }
 
   @override
   Widget build(BuildContext context) {
     TaskDatabase.taskDatabase.createDatabase();
-
+    
     return DefaultTabController(
       length: 3,
       child: Scaffold(
         drawer: SideDrawer(4),
         appBar: AppBar(
-          title: Text('Strategy'),
+          title: Text('Strategic'),
           bottom: _buildTabBar(),
         ),
         body: _buildTabBarView(),
