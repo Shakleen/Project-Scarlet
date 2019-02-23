@@ -41,7 +41,7 @@ class TaskDetails extends StatelessWidget {
     );
   }
 
-  Widget _buildFormView(TaskEntity inputTask) {
+  Widget _buildListView(TaskEntity inputTask) {
     final DateTime dateTime = inputTask.getDueDate();
     final String dateTimeString = dateTime.day.toString() +
         '/' +
@@ -58,50 +58,85 @@ class TaskDetails extends StatelessWidget {
     final String priority = TaskModel.priorityLevels[inputTask.getPriority()];
     final String location = inputTask.getLocation();
 
-    return Container(
-      child: ListView(
-        children: <Widget>[
-          _buildHeaderText('Name'),
-          _buildContentText(name),
-          Divider(
-            color: Colors.black,
-          ),
-          _buildHeaderText('Date/Time'),
-          _buildContentText(dateTimeString),
-          Divider(
-            color: Colors.black,
-          ),
-          _buildHeaderText('Description'),
-          _buildContentText(description == null ? 'None' : description),
-          Divider(
-            color: Colors.black,
-          ),
-          _buildHeaderText('Priority'),
-          _buildContentText(priority),
-          Divider(
-            color: Colors.black,
-          ),
-          _buildHeaderText('Location'),
-          _buildContentText(location == null ? 'Unspecified' : location),
-          Divider(
-            color: Colors.black,
-          ),
-        ],
+    return ListView(
+          children: <Widget>[
+            _buildHeaderText('Name'),
+            _buildContentText(name),
+            Divider(
+              color: Colors.black,
+            ),
+            _buildHeaderText('Date/Time'),
+            _buildContentText(dateTimeString),
+            Divider(
+              color: Colors.black,
+            ),
+            _buildHeaderText('Description'),
+            _buildContentText(description == null ? 'None' : description),
+            Divider(
+              color: Colors.black,
+            ),
+            _buildHeaderText('Priority'),
+            _buildContentText(priority),
+            Divider(
+              color: Colors.black,
+            ),
+            _buildHeaderText('Location'),
+            _buildContentText(location == null ? 'Unspecified' : location),
+            Divider(
+              color: Colors.black,
+            ),
+          ],
+        );
+  }
+
+  Widget _buildForm(BuildContext context, TaskEntity inputTask) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('View task details'),
       ),
+      // Display the task which currently exist
+      body: Container(
+        child: _buildListView(inputTask)
+      ),
+
+      // Floating action button for adding new tasks and goals
+      floatingActionButton: _buildFloatingActionButton(context, inputTask),
     );
   }
 
   /// Method for building the floating action button. It generates a new
   /// form for creating a new task. The button passes in [addTask] to the
   /// form for adding the new task to the list of tasks.
-  FloatingActionButton _buildFloatingActionButton(BuildContext context) {
+  FloatingActionButton _buildFloatingActionButton(
+      BuildContext context, TaskEntity task) {
     return FloatingActionButton(
       child: Icon(Icons.edit),
       backgroundColor: Colors.red,
       onPressed: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => TaskForm(inputTask)),
+          MaterialPageRoute(builder: (context) => TaskForm(task)),
+        );
+      },
+    );
+  }
+
+  Widget _buildFutureTask() {
+    return ScopedModelDescendant<TaskModel>(
+      builder: (BuildContext context, Widget child, TaskModel model) {
+        final Future<TaskEntity> task = model.getSelectedTask(inputTask);
+        return FutureBuilder<TaskEntity>(
+          future: task,
+          builder: (
+            BuildContext context,
+            AsyncSnapshot<TaskEntity> snapshot,
+          ) {
+            if (snapshot.connectionState == ConnectionState.done) {
+              return _buildForm(context, snapshot.data);
+            } else {
+              return Center(child: CircularProgressIndicator());
+            }
+          },
         );
       },
     );
@@ -109,15 +144,6 @@ class TaskDetails extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('View task details'),
-      ),
-      // Display the task which currently exist
-      body: _buildFormView(inputTask),
-
-      // Floating action button for adding new tasks and goals
-      floatingActionButton: _buildFloatingActionButton(context),
-    );
+    return _buildFutureTask();
   }
 }

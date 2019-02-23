@@ -14,7 +14,9 @@ import 'pages/play_game_page.dart';
 import 'controller/task_database.dart';
 
 main() {
-  TaskDatabase.taskDatabase.createDatabase();
+  TaskDatabase.taskDatabase.initializeDatabase().whenComplete(() {
+    TaskDatabase.taskDatabase.createViews();
+  });
   runApp(MyApp());
 }
 

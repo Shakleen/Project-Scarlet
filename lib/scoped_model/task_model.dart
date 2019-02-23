@@ -20,18 +20,6 @@ class TaskModel extends Model {
     'priority': 0,
     'location': null
   };
-  static final Map<int, dynamic> columnNames = const {
-    0: ["UUID", "Text"],
-    1: ["Name", "Text"],
-    2: ["DueDate", "DateTime"],
-    3: ["Description", "Text"],
-    4: ["Priority", "Number"],
-    5: ["Location", "Text"],
-    6: ["CompleteDate", "DateTime"],
-    7: ["SetDate", "DateTime"]
-  };
-  static final String tableName = "Tasks";
-  static final String databaseFileName = "TasksDatabase.db";
   static final Uuid _uuid = Uuid();
   static final Map<int, String> priorityLevels = const {
     0: 'Low',
@@ -42,18 +30,18 @@ class TaskModel extends Model {
 
   static Map<String, dynamic> toMap(TaskEntity task) {
     final Map<String, dynamic> map = {
-        columnNames[0][0]: task.getID(),
-        columnNames[1][0]: task.getName(),
-        columnNames[2][0]: task.getDueDate()?.toString(),
-        columnNames[3][0]: task.getDescription(),
-        columnNames[4][0]: task.getPriority()?.toString(),
-        columnNames[5][0]: task.getLocation(),
-        columnNames[6][0]: task.getCompleteDate()?.toString(),
-        columnNames[7][0]: task.getSetDate()?.toString(),
-      };
+      TaskDatabase.columnNames[0][0]: task.getID(),
+      TaskDatabase.columnNames[1][0]: task.getName(),
+      TaskDatabase.columnNames[2][0]: task.getDueDate()?.toString(),
+      TaskDatabase.columnNames[3][0]: task.getDescription(),
+      TaskDatabase.columnNames[4][0]: task.getPriority()?.toString(),
+      TaskDatabase.columnNames[5][0]: task.getLocation(),
+      TaskDatabase.columnNames[6][0]: task.getCompleteDate()?.toString(),
+      TaskDatabase.columnNames[7][0]: task.getSetDate()?.toString(),
+    };
 
     return map;
-  } 
+  }
 
   /// Returns the filtered list of upcoming tasks as a new varaible.
   /// So the original one can't be editted outside the class.
@@ -83,9 +71,7 @@ class TaskModel extends Model {
   /// Used to add a new task to the list. Performs proper checking
   /// before proceeding. Throws exception if checking shows error.
   void addTask(String name, DateTime dueDate,
-      [String description = null,
-      int priority = 0,
-      String location = null]) {
+      [String description = null, int priority = 0, String location = null]) {
     if (name != null && dueDate != null) {
       TaskEntity task = TaskEntity(
         id: _uuid.v1(),
@@ -106,10 +92,8 @@ class TaskModel extends Model {
 
   /// Update [task] information.
   void updateTask(TaskEntity task, String name, DateTime dueDate,
-      [String description = null,
-      int priority = 0,
-      String location = null]) {
-    TaskEntity newTask =TaskEntity(
+      [String description = null, int priority = 0, String location = null]) {
+    TaskEntity newTask = TaskEntity(
       id: task.getID(),
       name: name,
       dueDate: dueDate,
@@ -135,7 +119,6 @@ class TaskModel extends Model {
     notifyListeners();
   }
 }
-
 
 /*
 [
