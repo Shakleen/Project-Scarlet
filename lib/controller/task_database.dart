@@ -159,8 +159,8 @@ class TaskDatabase {
     final int len = columnNames.length - 1;
 
     for (int i = 0; i <= len; ++i) {
-      statement += columnNames[i][0] + ((i < len) ? ", " : ") ");
-      values += _buildValueFragment(task, i) + ((i < len) ? ", " : ") ");
+      statement += columnNames[i][0] + (i < len ? ", " : ") ");
+      values += _buildValueFragment(task, i) + (i < len ? ", " : ") ");
     }
 
     print(statement + values); // TODO REMOVE THIS

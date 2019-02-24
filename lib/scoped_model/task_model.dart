@@ -1,5 +1,7 @@
+import 'package:flutter/material.dart';
 import 'package:scoped_model/scoped_model.dart';
 
+import '../presentation/custom_icons.dart';
 import '../entities/task_entity.dart';
 import 'package:uuid/uuid.dart';
 import '../controller/task_database.dart';
@@ -21,11 +23,11 @@ class TaskModel extends Model {
     'location': null
   };
   static final Uuid _uuid = Uuid();
-  static final Map<int, String> priorityLevels = const {
-    0: 'Low',
-    1: 'Normal',
-    2: 'Important',
-    3: 'Urgent'
+  static final Map<int, List> priorityLevels = const {
+    0: ['Low', CustomIcons.low, Colors.black],
+    1: ['Normal', CustomIcons.normal, Colors.green],
+    2: ['Important', CustomIcons.important, Colors.purple],
+    3: ['Urgent', CustomIcons.urgent, Colors.red],
   };
 
   static Map<String, dynamic> toMap(TaskEntity task) {

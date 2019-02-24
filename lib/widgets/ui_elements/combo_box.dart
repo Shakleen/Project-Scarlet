@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 
+import '../../scoped_model/task_model.dart';
+
 class ComboBox extends StatefulWidget {
-  final Map<int, String> optionsMap;
   int choice;
 
-  ComboBox(this.optionsMap, [this.choice = 0]);
+  ComboBox([this.choice = 0]);
 
   @override
   State<StatefulWidget> createState() {
@@ -13,7 +14,6 @@ class ComboBox extends StatefulWidget {
 }
 
 class _ComboBoxState extends State<ComboBox> {
-  final List<String> _options = [];
   List<DropdownMenuItem<int>> _dropDownMenuItems;
   int _currentChoice;
 
@@ -27,10 +27,31 @@ class _ComboBoxState extends State<ComboBox> {
   List<DropdownMenuItem<int>> getDropDownMenuItems() {
     List<DropdownMenuItem<int>> items = List();
 
-    for (int i = 0; i < widget.optionsMap.length; ++i) {
-      String optionText = widget.optionsMap[i];
+    for (int i = 0; i < TaskModel.priorityLevels.length; ++i) {
+      final String optionText = TaskModel.priorityLevels[i][0];
+      final IconData optionIcon = TaskModel.priorityLevels[i][1];
+      final Color optionColor = TaskModel.priorityLevels[i][2];
 
-      items.add(DropdownMenuItem(value: i, child: Text(optionText)));
+      items.add(DropdownMenuItem(
+        value: i,
+        child: Container(
+          child: Row(
+            children: <Widget>[
+              Icon(
+                optionIcon,
+                color: optionColor,
+              ),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 5.0),
+              ),
+              Text(
+                optionText,
+                style: TextStyle(color: optionColor),
+              ),
+            ],
+          ),
+        ),
+      ));
     }
 
     return items;

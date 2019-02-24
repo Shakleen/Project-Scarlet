@@ -90,7 +90,7 @@ class _TaskForm extends State<TaskForm> {
   /// being updated.
   ///
   /// The condition for acceptance is that the name must be at least
-  /// 5 and less than or equal to 100 characters.
+  /// 5 and less than or equal to 50 characters.
   Widget _buildNameTextField(TaskEntity task) {
     return EnsureVisibleWhenFocused(
       focusNode: _nameFocusNode,
@@ -104,13 +104,14 @@ class _TaskForm extends State<TaskForm> {
         validator: (String value) {
           if (value.length < 5) {
             return 'Name must be at least 5 characters!';
-          } else if (value.length > 100) {
-            return 'Name can be at most 100 characters!';
+          } else if (value.length > 50) {
+            return 'Name can be at most 50 characters!';
           }
         },
         onSaved: (String value) {
           _formData['name'] = value;
         },
+        maxLength: 50,
       ),
     );
   }
@@ -212,8 +213,10 @@ class _TaskForm extends State<TaskForm> {
         onSaved: (String value) {
           if (value.length > 0) {
             _formData['description'] = value;
+            value = "";
           }
         },
+        maxLength: 200,
       ),
     );
   }
@@ -226,9 +229,9 @@ class _TaskForm extends State<TaskForm> {
   /// being updated.
   Widget _buildPriorityField(TaskEntity task) {
     if (task == null) {
-      comboBox = ComboBox(TaskModel.priorityLevels);
+      comboBox = ComboBox();
     } else {
-      comboBox = ComboBox(TaskModel.priorityLevels, task.getPriority());
+      comboBox = ComboBox(task.getPriority());
     }
 
     return Container(
@@ -274,8 +277,10 @@ class _TaskForm extends State<TaskForm> {
         onSaved: (String value) {
           if (value.length > 0) {
             _formData['location'] = value;
+            value = "";
           }
         },
+        maxLength: 200,
       ),
     );
   }
@@ -303,7 +308,10 @@ class _TaskForm extends State<TaskForm> {
       Function addTask, Function updateTask, TaskEntity inputTask) {
     if (!_formKey.currentState.validate()) {
       return;
+    } else if (dateTime.compareTo(DateTime.now()) < 0) {
+      return;
     }
+
     _formKey.currentState.save();
 
     _formData['priority'] = comboBox.choice;

@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:scoped_model/scoped_model.dart';
 
 import '../../widgets/ui_elements/side_drawer.dart';
-import '../../presentation/custom_icons.dart';
 import '../../widgets/strategy_widgets/task_list_view.dart';
 import '../../scoped_model/task_model.dart';
 
@@ -23,15 +22,15 @@ class StrategicPage extends StatelessWidget {
     return TabBar(
       tabs: <Widget>[
         Tab(
-          icon: Icon(CustomIcons.calendar_alt_regular),
+          icon: Icon(Icons.event_note),
           text: 'Upcoming',
         ),
         Tab(
-          icon: Icon(CustomIcons.calendar_times_regular),
+          icon: Icon(Icons.event_busy),
           text: 'Overdue',
         ),
         Tab(
-          icon: Icon(CustomIcons.calendar_check_regular),
+          icon: Icon(Icons.event_available),
           text: 'Completed',
         ),
       ],

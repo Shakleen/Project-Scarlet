@@ -9,8 +9,9 @@ class CustomIcons {
   static const IconData chess_knight_solid = const IconData(0xe801, fontFamily: _kFontFam);
   static const IconData shield_alt_solid = const IconData(0xe802, fontFamily: _kFontFam);
   static const IconData book_solid = const IconData(0xe803, fontFamily: _kFontFam);
-  static const IconData calendar_alt_regular = const IconData(0xe804, fontFamily: _kFontFam);
-  static const IconData calendar_times_regular = const IconData(0xe805, fontFamily: _kFontFam);
-  static const IconData calendar_check_regular = const IconData(0xe806, fontFamily: _kFontFam);
   static const IconData gamepad_solid = const IconData(0xe807, fontFamily: _kFontFam);
+  static const IconData important = const IconData(0xe808, fontFamily: _kFontFam);
+  static const IconData urgent = const IconData(0xe809, fontFamily: _kFontFam);
+  static const IconData normal = const IconData(0xe80a, fontFamily: _kFontFam);
+  static const IconData low = const IconData(0xe80b, fontFamily: _kFontFam);
 }
