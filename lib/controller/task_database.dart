@@ -155,7 +155,7 @@ class TaskDatabase {
   /// new task.
   String _insertQueryBuilder(TaskEntity task) {
     String statement = "INSERT INTO " + _tableName + " (";
-    String values = " VALUES (";
+    String values = "VALUES (";
     final int len = columnNames.length - 1;
 
     for (int i = 0; i <= len; ++i) {

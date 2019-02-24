@@ -116,8 +116,8 @@ class _TaskListViewState extends State<TaskListView> {
             ;
           },
           dismissThresholds: {
-            DismissDirection.endToStart: 0.6,
-            DismissDirection.startToEnd: 0.6,
+            DismissDirection.endToStart: 0.9,
+            DismissDirection.startToEnd: 0.9,
           },
           // Main task component
           child: TaskCard(
