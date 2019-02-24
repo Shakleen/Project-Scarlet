@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 
+import 'package:scoped_model/scoped_model.dart';
+
 import '../../widgets/ui_elements/side_drawer.dart';
 import '../../presentation/custom_icons.dart';
 import '../../widgets/strategy_widgets/task_list_view.dart';
+import '../../scoped_model/task_model.dart';
 
 /// Stateless widget class for our Strategy page.
 ///
@@ -37,12 +40,34 @@ class StrategicPage extends StatelessWidget {
 
   /// Method for building TabView. Creates 3 tabs. Upcoming, Overdue and Completed tabs.
   Widget _buildTabBarView() {
-    return TabBarView(
-      children: <Widget>[
-        TaskListView(0),
-        TaskListView(1),
-        TaskListView(2),
-      ],
+    return ScopedModelDescendant<TaskModel>(
+      builder: (BuildContext context, Widget child, TaskModel model) {
+        return TabBarView(
+          children: <Widget>[
+            TaskListView(
+              0,
+              model.getUpcomingTaskList,
+              model.addTask,
+              model.removeTask,
+              model.completeTask,
+            ),
+            TaskListView(
+              1,
+              model.getOverdueTaskList,
+              model.addTask,
+              model.removeTask,
+              model.completeTask,
+            ),
+            TaskListView(
+              2,
+              model.getCompletedTaskList,
+              model.addTask,
+              model.removeTask,
+              model.completeTask,
+            ),
+          ],
+        );
+      },
     );
   }
 

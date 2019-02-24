@@ -36,6 +36,24 @@ class _TaskForm extends State<TaskForm> {
     dateTime = null;
   }
 
+  /// Method for building the entire widget.
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        FocusScope.of(context).requestFocus(FocusNode());
+      },
+      child: Material(
+        child: Scaffold(
+          appBar: AppBar(
+            title: Text('Edit task details'),
+          ),
+          body: _buildForm(context),
+        ),
+      ),
+    );
+  }
+
   void _selectDateTime(
       BuildContext context, DateTime initDate, TimeOfDay initTime) async {
     final DateTime pickedDate = await showDatePicker(
@@ -358,20 +376,5 @@ class _TaskForm extends State<TaskForm> {
     });
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        FocusScope.of(context).requestFocus(FocusNode());
-      },
-      child: Material(
-        child: Scaffold(
-          appBar: AppBar(
-            title: Text('Edit task details'),
-          ),
-          body: _buildForm(context),
-        ),
-      ),
-    );
-  }
+  
 }

@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../ui_elements/default_title.dart';
-import '../ui_elements/default_date.dart';
-
 import '../../pages/strategy_pages/task_details_page.dart';
 import '../../entities/task_entity.dart';
 
@@ -12,15 +9,13 @@ class TaskCard extends StatelessWidget {
 
   TaskCard(this.task, this.tabNumber);
 
-  BoxDecoration _buildDecorations() {
-    return BoxDecoration(
-      border: Border(
-        bottom: BorderSide(
-          color: Colors.black,
-          style: BorderStyle.solid,
-        ),
-      ),
-      color: Colors.white,
+  /// Method for building the entire widget.
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: _buildDecorations(),
+      child: _buildTaskCard(context, task),
+      padding: EdgeInsets.symmetric(vertical: 5.0),
     );
   }
 
@@ -29,12 +24,10 @@ class TaskCard extends StatelessWidget {
       children: <Widget>[
         // Contains a task
         ListTile(
-          // leading: task.getCompleteDate() == null ? _buildIconButton() : null,
-          title: DefaultTitle(task.getName()),
-          trailing: DefaultDate(task.getDueDate(), tabNumber),
+          title: _buildTitle(task.getName()),
+          subtitle: _buildTrailer(),
           enabled: true,
           onLongPress: () {
-            // TaskDatabase.taskDatabase.getTasks(task.getID());
             Navigator.push(
               context,
               MaterialPageRoute(
@@ -47,12 +40,63 @@ class TaskCard extends StatelessWidget {
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildInformationText(IconData icon, String text) {
     return Container(
-      decoration: _buildDecorations(),
-      child: _buildTaskCard(context, task),
-      padding: EdgeInsets.symmetric(vertical: 5.0),
+      child: Row(
+        children: <Widget>[
+          Icon(
+            icon,
+            size: 20.0,
+          ),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 2.0),
+          ),
+          Text(text),
+        ],
+      ),
+      margin: EdgeInsets.symmetric(vertical: 5.0),
+    );
+  }
+
+  Widget _buildTrailer() {
+    return Column(
+      children: <Widget>[
+        _buildInformationText(Icons.access_time, task.getDueDate().toString()),
+        _buildInformationText(Icons.description, task.getDescription()),
+        _buildInformationText(Icons.location_on, task.getLocation()),
+      ],
+    );
+  }
+
+  Widget _buildTitle(String title) {
+    return Container(
+      padding: EdgeInsets.all(5.0),
+      child: Text(
+        title,
+        style: TextStyle(
+          fontSize: 26,
+          fontFamily: 'Roboto',
+          shadows: [
+            Shadow(
+              color: Colors.grey[300],
+              offset: Offset(1.0, 1.0),
+              blurRadius: 1.5,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  BoxDecoration _buildDecorations() {
+    return BoxDecoration(
+      border: Border(
+        bottom: BorderSide(
+          color: Colors.black,
+          style: BorderStyle.solid,
+        ),
+      ),
+      color: Colors.white,
     );
   }
 }

@@ -105,9 +105,9 @@ class TaskDatabase {
     final int len = columnNames.length - 1;
 
     for (int i = 0; i <= len; ++i) {
-      statement += columnNames[i][0] + " " + columnNames[i][1] + (i < len)
+      statement += columnNames[i][0] + " " + columnNames[i][1] + (i < len
           ? ", "
-          : ", CONSTRAINT PK_UUID PRIMARY KEY(" + columnNames[0][0] + "))";
+          : ", CONSTRAINT PK_UUID PRIMARY KEY(" + columnNames[0][0] + "))");
     }
 
     print(statement); // TODO REMOVE THIS
@@ -125,8 +125,8 @@ class TaskDatabase {
         " WHERE " +
         columnNames[6][0] +
         " is" +
-        ((view == 1) ? " not Null" : " Null");
-    final len = 2;
+        (view == 1 ? " not Null" : " Null");
+    final len = 5;
 
     for (int i = 0; i <= len; ++i) {
       statement += columnNames[i][0] + (i < len ? ", " : ending);
@@ -296,24 +296,24 @@ class TaskDatabase {
     final String id = input[columnNames[0][0]];
     final String name = input[columnNames[1][0]];
     final String dueDate = input[columnNames[2][0]];
+      final String description = input[columnNames[3][0]];
+    final String priority = input[columnNames[4][0]]?.toString();
+    final String location = input[columnNames[5][0]];
 
     final TaskEntity taskEntity = TaskEntity(
         id: id,
         name: name,
-        dueDate: DateTime.parse(dueDate)
+        dueDate: DateTime.parse(dueDate),
+        description: description,
+        priority: int.parse(priority),
+        location: location
     );
-
+    
     // True means everything should be parsed.
     if (mode) {
-      final String description = input[columnNames[3][0]];
-      final String priority = input[columnNames[4][0]]?.toString();
-      final String location = input[columnNames[5][0]];
       final String completeDate = input[columnNames[6][0]];
       final String setDate = input[columnNames[7][0]];
 
-      taskEntity.setDescription(description);
-      taskEntity.setPriority(int.parse(priority));
-      taskEntity.setLocation(location);
       taskEntity.setSetDate(DateTime.parse(setDate));
       taskEntity.setCompleteDate(
         completeDate == null ? null : DateTime.parse(completeDate),
