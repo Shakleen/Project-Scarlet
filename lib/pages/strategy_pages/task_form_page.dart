@@ -93,7 +93,7 @@ class _TaskForm extends State<TaskForm> {
   /// 5 and less than or equal to 50 characters.
   Widget _buildNameTextField(TaskEntity task) {
     return EnsureVisibleWhenFocused(
-      focusNode: _nameFocusNode,
+      focusNode: _nameFocusNode, 
       child: TextFormField(
         focusNode: _nameFocusNode,
         decoration: InputDecoration(
@@ -112,6 +112,8 @@ class _TaskForm extends State<TaskForm> {
           _formData['name'] = value;
         },
         maxLength: 50,
+        maxLengthEnforced: true,
+        autocorrect: true,
       ),
     );
   }
@@ -217,6 +219,8 @@ class _TaskForm extends State<TaskForm> {
           }
         },
         maxLength: 200,
+        maxLengthEnforced: true,
+        autocorrect: true,
       ),
     );
   }
@@ -281,6 +285,8 @@ class _TaskForm extends State<TaskForm> {
           }
         },
         maxLength: 200,
+        maxLengthEnforced: true,
+        autocorrect: true,
       ),
     );
   }

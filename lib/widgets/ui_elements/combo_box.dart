@@ -48,6 +48,9 @@ class _ComboBoxState extends State<ComboBox> {
                 optionText,
                 style: TextStyle(color: optionColor),
               ),
+              Divider(
+                color: Colors.grey,
+              ),
             ],
           ),
         ),
