@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 import '../../pages/strategy_pages/task_form_page.dart';
 import '../../entities/task_entity.dart';
@@ -13,6 +12,7 @@ class TaskCard extends StatefulWidget {
 
   @override
   _TaskCard createState() {
+    // print('Task card - ' + task.name + ' ' + task.priority.toString());
     // TODO: implement createState
     return _TaskCard();
   }
@@ -38,7 +38,7 @@ class _TaskCard extends State<TaskCard> {
       moreInfo = !moreInfo;
       infoIcon = moreInfo ? Icons.expand_less : Icons.expand_more;
       infoIconColor = moreInfo ? Colors.blue : Colors.black;
-      backgroundColor =moreInfo ? Colors.lightBlue[50] : Colors.white;
+      backgroundColor = moreInfo ? Colors.lightBlue[50] : Colors.white;
     });
   }
 
@@ -55,9 +55,9 @@ class _TaskCard extends State<TaskCard> {
   Column _buildTaskCard(BuildContext context) {
     final double deviceWidth = MediaQuery.of(context).size.width * 0.6;
     final IconData priorityIcon =
-        TaskModel.priorityLevels[widget.task.getPriority()][1];
+        TaskEntity.priorityLevels[widget.task.priority][1];
     final Color priorityColor =
-        TaskModel.priorityLevels[widget.task.getPriority()][2];
+        TaskEntity.priorityLevels[widget.task.priority][2];
 
     return Column(
       children: <Widget>[
@@ -65,7 +65,7 @@ class _TaskCard extends State<TaskCard> {
         ListTile(
           title: _buildInformationText(
             priorityIcon,
-            widget.task.getName(),
+            widget.task.name,
             deviceWidth,
             26.0,
             25.0,
@@ -74,7 +74,10 @@ class _TaskCard extends State<TaskCard> {
           ),
           subtitle: _buildTrailer(deviceWidth),
           trailing: IconButton(
-            icon: Icon(infoIcon, size: 25,),
+            icon: Icon(
+              infoIcon,
+              size: 25,
+            ),
             color: infoIconColor,
             onPressed: () {
               _setState();
@@ -97,14 +100,14 @@ class _TaskCard extends State<TaskCard> {
   }
 
   Widget _buildTrailer(double deviceWidth) {
-    final String description = widget.task.getDescription();
-    final String location = widget.task.getLocation();
+    final String description = widget.task.description;
+    final String location = widget.task.location;
     final List<Widget> childrenList = [];
 
     // Adding duedate
     childrenList.add(_buildInformationText(
       Icons.access_time,
-      _formatDateTime(widget.task.getDueDate()),
+      TaskModel.dateFormatter.format(widget.task.dueDate),
       deviceWidth,
       14.0,
       20.0,
@@ -114,28 +117,28 @@ class _TaskCard extends State<TaskCard> {
 
     if (moreInfo) {
       if (description != null && description != 'null') {
-      childrenList.add(_buildInformationText(
-        Icons.format_align_left,
-        description,
-        deviceWidth,
-        14.0,
-        20.0,
-        Colors.indigo,
-        Colors.black,
-      ));
-    }
+        childrenList.add(_buildInformationText(
+          Icons.format_align_left,
+          description,
+          deviceWidth,
+          14.0,
+          20.0,
+          Colors.indigo,
+          Colors.black,
+        ));
+      }
 
-    if (location != null && location != 'null') {
-      childrenList.add(_buildInformationText(
-        Icons.location_on,
-        location,
-        deviceWidth,
-        14.0,
-        20.0,
-        Colors.deepOrange,
-        Colors.black,
-      ));
-    }
+      if (location != null && location != 'null') {
+        childrenList.add(_buildInformationText(
+          Icons.location_on,
+          location,
+          deviceWidth,
+          14.0,
+          20.0,
+          Colors.deepOrange,
+          Colors.black,
+        ));
+      }
     }
 
     return Column(
@@ -190,11 +193,5 @@ class _TaskCard extends State<TaskCard> {
       ),
       color: backgroundColor,
     );
-  }
-
-  String _formatDateTime(DateTime dateTime) {
-    final DateFormat dateFormat = DateFormat("EEEE, dd/MM/yyyy 'at' hh:mm a");
-    final String formatted = dateFormat.format(dateTime);
-    return formatted;
   }
 }

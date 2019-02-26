@@ -19,9 +19,10 @@ class TaskForm extends StatefulWidget {
 }
 
 class _TaskForm extends State<TaskForm> {
-  final Map<String, dynamic> _formData = TaskModel.taskFormData;
+  final Map<String, dynamic> _formData = TaskEntity.taskFormData;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final _nameFocusNode = FocusNode();
+  final _dueDateFocusNode = FocusNode();
   final _descriptionFocusNode = FocusNode();
   final _locationFocusNode = FocusNode();
   final TextStyle labelStyle = TextStyle(
@@ -36,7 +37,6 @@ class _TaskForm extends State<TaskForm> {
     dateTime = null;
   }
 
-  /// Method for building the entire widget.
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -83,41 +83,6 @@ class _TaskForm extends State<TaskForm> {
     }
   }
 
-  /// Method for building a text field for name property.
-  ///
-  /// The method initializes itself as blank if it is for a new
-  /// task, otherwise it displays the name of the [task] that is
-  /// being updated.
-  ///
-  /// The condition for acceptance is that the name must be at least
-  /// 5 and less than or equal to 50 characters.
-  Widget _buildNameTextField(TaskEntity task) {
-    return EnsureVisibleWhenFocused(
-      focusNode: _nameFocusNode, 
-      child: TextFormField(
-        focusNode: _nameFocusNode,
-        decoration: InputDecoration(
-          labelText: 'Task name',
-          labelStyle: labelStyle,
-        ),
-        initialValue: task == null ? '' : task.getName(),
-        validator: (String value) {
-          if (value.length < 5) {
-            return 'Name must be at least 5 characters!';
-          } else if (value.length > 50) {
-            return 'Name can be at most 50 characters!';
-          }
-        },
-        onSaved: (String value) {
-          _formData['name'] = value;
-        },
-        maxLength: 50,
-        maxLengthEnforced: true,
-        autocorrect: true,
-      ),
-    );
-  }
-
   /// Method for building a date field for the due date property.
   ///
   /// The method initializes itself as the current date for a new
@@ -128,20 +93,9 @@ class _TaskForm extends State<TaskForm> {
   /// the past.
   Widget _buildDueDateField(TaskEntity task, BuildContext context) {
     if (dateTime == null) {
-      dateTime = widget.inputTask == null
-          ? DateTime.now()
-          : widget.inputTask.getDueDate();
+      dateTime =
+          widget.inputTask == null ? DateTime.now() : widget.inputTask.dueDate;
     }
-
-    final String dateTimeString = dateTime.day.toString() +
-        '/' +
-        dateTime.month.toString() +
-        '/' +
-        dateTime.year.toString() +
-        " at " +
-        dateTime.hour.toString() +
-        ':' +
-        dateTime.minute.toString();
 
     return Container(
       child: Column(
@@ -150,77 +104,34 @@ class _TaskForm extends State<TaskForm> {
             'Date/Time',
             style: labelStyle,
           ),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Text(
-                dateTimeString,
-                style: TextStyle(
-                  fontFamily: 'Roboto',
-                  fontSize: 20,
+          SizedBox(height: 5.0),
+          Text(
+            TaskModel.dateFormatter.format(dateTime),
+            style: TextStyle(
+              fontFamily: 'Roboto',
+              fontSize: 18,
+            ),
+          ),
+          SizedBox(height: 5.0),
+          RaisedButton(
+            onPressed: () {
+              return _selectDateTime(
+                context,
+                dateTime,
+                TimeOfDay(
+                  hour: dateTime.hour,
+                  minute: dateTime.minute,
                 ),
-              ),
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 10.0),
-              ),
-              RaisedButton(
-                onPressed: () {
-                  return _selectDateTime(
-                    context,
-                    dateTime,
-                    TimeOfDay(
-                      hour: dateTime.hour,
-                      minute: dateTime.minute,
-                    ),
-                  );
-                },
-                child: Text(
-                  'Pick Date/Time',
-                  style: TextStyle(color: Colors.white),
-                ),
-                color: Colors.blue,
-              ),
-            ],
-          )
+              );
+            },
+            child: Text(
+              'Pick Date/Time',
+              style: TextStyle(color: Colors.white),
+            ),
+            color: Colors.blue,
+          ),
         ],
         crossAxisAlignment: CrossAxisAlignment.start,
-      ),
-    );
-  }
-
-  /// Method for building a description field for the task description
-  /// property.
-  ///
-  /// The method initializes itself as blank if it is for a new
-  /// task, otherwise it displays the description of the [task] that is
-  /// being updated.
-  ///
-  /// The condition for acceptance is that the description should be at max
-  /// 200 characters.
-  Widget _buildDescriptionTextField(TaskEntity task) {
-    return EnsureVisibleWhenFocused(
-      focusNode: _descriptionFocusNode,
-      child: TextFormField(
-        focusNode: _descriptionFocusNode,
-        decoration: InputDecoration(
-          labelText: 'Task description',
-          labelStyle: labelStyle,
-        ),
-        initialValue: task == null ? '' : task.getDescription(),
-        validator: (String value) {
-          if (value.length > 200) {
-            return "Description can't be above 200 character";
-          }
-        },
-        onSaved: (String value) {
-          if (value.length > 0) {
-            _formData['description'] = value;
-            value = "";
-          }
-        },
-        maxLength: 200,
-        maxLengthEnforced: true,
-        autocorrect: true,
       ),
     );
   }
@@ -235,7 +146,7 @@ class _TaskForm extends State<TaskForm> {
     if (task == null) {
       comboBox = ComboBox();
     } else {
-      comboBox = ComboBox(task.getPriority());
+      comboBox = ComboBox(task.priority);
     }
 
     return Container(
@@ -251,43 +162,6 @@ class _TaskForm extends State<TaskForm> {
         ],
       ),
       padding: EdgeInsets.only(top: 10.0, right: 10.0),
-    );
-  }
-
-  /// Method for building a location text field for the task location
-  /// property.
-  ///
-  /// The method initializes itself as blank if it is for a new
-  /// task, otherwise it displays the location of the [task] that is
-  /// being updated.
-  ///
-  /// The condition for acceptance is that the location should be at max
-  /// 200 characters.
-  Widget _buildLocationTextField(TaskEntity task) {
-    return EnsureVisibleWhenFocused(
-      focusNode: _locationFocusNode,
-      child: TextFormField(
-        focusNode: _locationFocusNode,
-        decoration: InputDecoration(
-          labelText: 'Task location',
-          labelStyle: labelStyle,
-        ),
-        initialValue: task == null ? '' : task.getLocation(),
-        validator: (String value) {
-          if (value.length > 200) {
-            return 'Location can be at most 200 characters';
-          }
-        },
-        onSaved: (String value) {
-          if (value.length > 0) {
-            _formData['location'] = value;
-            value = "";
-          }
-        },
-        maxLength: 200,
-        maxLengthEnforced: true,
-        autocorrect: true,
-      ),
     );
   }
 
@@ -320,28 +194,18 @@ class _TaskForm extends State<TaskForm> {
 
     _formKey.currentState.save();
 
-    _formData['priority'] = comboBox.choice;
-    _formData['dueDate'] = dateTime;
+    if (widget.inputTask != null)
+      _formData[TaskEntity.columnNames[8][0]] = widget.inputTask.id;
+    _formData[TaskEntity.columnNames[3][0]] = comboBox.choice;
+    _formData[TaskEntity.columnNames[1][0]] = dateTime;
 
     // Add mode
     if (inputTask == null) {
-      addTask(
-        _formData['name'],
-        _formData['dueDate'],
-        _formData['description'],
-        _formData['priority'],
-        _formData['location'],
-      );
-    } else {
-      // Update mode
-      updateTask(
-        widget.inputTask,
-        _formData['name'],
-        _formData['dueDate'],
-        _formData['description'],
-        _formData['priority'],
-        _formData['location'],
-      );
+      addTask(TaskEntity.fromMap(_formData));
+    }
+    // Update mode
+    else {
+      updateTask(TaskEntity.fromMap(_formData));
     }
 
     Navigator.pop(context);
@@ -357,23 +221,38 @@ class _TaskForm extends State<TaskForm> {
       return Container(
         margin: EdgeInsets.all(10.0),
         child: Form(
+          autovalidate: true,
           key: _formKey,
           child: ListView(
             padding: EdgeInsets.symmetric(horizontal: targetPadding / 2.0),
             children: <Widget>[
-              _buildNameTextField(widget.inputTask),
-              SizedBox(
-                height: 10.0,
+              _buildFormField(
+                focusNode: _nameFocusNode,
+                initialValue:
+                    widget.inputTask?.name == null ? '' : widget.inputTask.name,
+                labelText: TaskEntity.columnNames[0][0],
+                textInputType: TextInputType.text,
+                maxLength: 50,
+              ),
+              _buildFormField(
+                focusNode: _descriptionFocusNode,
+                initialValue: widget.inputTask?.description == null
+                    ? ''
+                    : widget.inputTask.description,
+                labelText: TaskEntity.columnNames[2][0],
+                textInputType: TextInputType.text,
+                maxLength: 150,
+              ),
+              _buildFormField(
+                focusNode: _locationFocusNode,
+                initialValue: widget.inputTask?.location == null
+                    ? ''
+                    : widget.inputTask.location,
+                labelText: TaskEntity.columnNames[5][0],
+                textInputType: TextInputType.text,
+                maxLength: 100,
               ),
               _buildDueDateField(widget.inputTask, context),
-              SizedBox(
-                height: 10.0,
-              ),
-              _buildDescriptionTextField(widget.inputTask),
-              SizedBox(
-                height: 10.0,
-              ),
-              _buildLocationTextField(widget.inputTask),
               SizedBox(
                 height: 10.0,
               ),
@@ -390,5 +269,39 @@ class _TaskForm extends State<TaskForm> {
     });
   }
 
-  
+  Widget _buildFormField({
+    FocusNode focusNode,
+    String labelText,
+    String initialValue,
+    TextInputType textInputType,
+    int maxLength,
+  }) {
+    return Container(
+      child: EnsureVisibleWhenFocused(
+        focusNode: focusNode,
+        child: TextFormField(
+          focusNode: focusNode,
+          decoration: InputDecoration(
+            labelText: labelText,
+            labelStyle: labelStyle,
+          ),
+          initialValue: initialValue,
+          validator: (String value) {
+            if (value.contains("'")) {
+              return "Can not contain ' character";
+            }
+          },
+          onSaved: (String value) {
+            _formData[labelText] = value.length > 0 ? value : null;
+          },
+          maxLength: maxLength,
+          maxLengthEnforced: true,
+          keyboardType: textInputType,
+        ),
+      ),
+    );
+  }
+
+  /// Method for building the entire widget.
+
 }

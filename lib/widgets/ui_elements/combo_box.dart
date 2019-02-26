@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../scoped_model/task_model.dart';
+import '../../entities/task_entity.dart';
 
 class ComboBox extends StatefulWidget {
   int choice;
@@ -27,10 +27,10 @@ class _ComboBoxState extends State<ComboBox> {
   List<DropdownMenuItem<int>> getDropDownMenuItems() {
     List<DropdownMenuItem<int>> items = List();
 
-    for (int i = 0; i < TaskModel.priorityLevels.length; ++i) {
-      final String optionText = TaskModel.priorityLevels[i][0];
-      final IconData optionIcon = TaskModel.priorityLevels[i][1];
-      final Color optionColor = TaskModel.priorityLevels[i][2];
+    for (int i = 0; i < TaskEntity.priorityLevels.length; ++i) {
+      final String optionText = TaskEntity.priorityLevels[i][0];
+      final IconData optionIcon = TaskEntity.priorityLevels[i][1];
+      final Color optionColor = TaskEntity.priorityLevels[i][2];
 
       items.add(DropdownMenuItem(
         value: i,
@@ -47,9 +47,6 @@ class _ComboBoxState extends State<ComboBox> {
               Text(
                 optionText,
                 style: TextStyle(color: optionColor),
-              ),
-              Divider(
-                color: Colors.grey,
               ),
             ],
           ),

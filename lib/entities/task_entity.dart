@@ -1,156 +1,159 @@
 import 'package:flutter/material.dart';
+import '../presentation/custom_icons.dart';
+import 'package:uuid/uuid.dart';
 
-/// An entity class that represents a single task.
+/// Entity class for tasks.
 ///
-/// Each task in the strategic portion consists of the following things:
-/// [name], [dueDate], [completeDate], [description], [priority] and [location].
-/// But only the first two are required to create a task while the others are
-/// optional.
-///
-/// [priority] values are (0, low), (1, normal), (2, important), (3, urgent)
+/// Each task has a unique [setDate] which is used to differentiate it from
+/// other tasks in the database where it will be ultimately stored. Moreover,
+/// a task is composed of having a [name], [dueDate], [completeDate],
+/// [description], [priority], [location] and [difficulty]. [priority]
+/// levels and [difficulty] levels are defined in the static maps called
+/// [priorityLevels] and [difficultyLevels] respectively. The [columnNames]
+/// define the different column names and types each of the attributes will
+/// have in the database. [databaseConstraints] carries the database constraints
+/// for the task database. The data is stored in a table named [tableName]. The
+/// table has two views whose names are kept in [tableViewNames] list. Finally,
+/// the file that keeps the data is called [databaseFileName].
 class TaskEntity {
-  String _id;
-  String _name;
-  DateTime _dueDate;
-  DateTime _completeDate;
-  String _description;
-  int _priority;
-  String _location;
-  DateTime _setDate;
+  static final Map<int, List> priorityLevels = const {
+    0: ['Low', CustomIcons.low, Colors.black],
+    1: ['Normal', CustomIcons.normal, Colors.green],
+    2: ['Important', CustomIcons.important, Colors.purple],
+    3: ['Urgent', CustomIcons.urgent, Colors.red],
+  };
+  static final Map<int, List> difficultyLevels = const {
+    0: ['Easy', CustomIcons.low, Colors.black],
+    1: ['Medium', CustomIcons.normal, Colors.green],
+    2: ['Difficult', CustomIcons.important, Colors.purple],
+    3: ['Hard', CustomIcons.urgent, Colors.red],
+  };
+  static final Map<int, List<String>> columnNames = const {
+    0: ["Name", "TEXT"],
+    1: ["DueDate", "DATETIME"],
+    2: ["Description", "TEXT"],
+    3: ["Priority", "TEXT"],
+    4: ["Difficulty", "TEXT"],
+    5: ["Location", "TEXT"],
+    6: ["CompleteDate", "DATETIME"],
+    7: ["SetDate", "DATETIME"],
+    8: ["ID", "TEXT"],
+  };
+  static final Map<String, dynamic> taskFormData = {
+    TaskEntity.columnNames[0][0]: null, // Name
+    TaskEntity.columnNames[1][0]: DateTime.now(), // DueDate
+    TaskEntity.columnNames[2][0]: null, // Description
+    TaskEntity.columnNames[3][0]: 0, // Priority
+    TaskEntity.columnNames[4][0]: 0, // Difficulty
+    TaskEntity.columnNames[5][0]: null // Location
+  };
+  static final String tableName = "Tasks";
+  static final List<String> tableViewNames = const [
+    "TasksPending",
+    "TasksCompleted",
+  ];
+  static final String databaseFileName = "TasksDatabase.db";
+  static DateTime _convert(dynamic input) {
+    return input != null
+        ? input.runtimeType.toString() == 'DateTime'
+            ? input
+            : DateTime.parse(input)
+        : null;
+  }
+  static final Uuid uuid = Uuid();
 
-  TaskEntity({
-    @required String id,
-    @required String name,
-    @required DateTime dueDate,
-    String description = null,
-    int priority = 0,
-    String location = null,
-  }) {
-    this._id = id;
-    this._name = name;
-    this._dueDate = dueDate;
-    this._setDate = DateTime.now();
-    this._description = description;
-    this._priority = priority;
-    this._location = location;
-    this._completeDate = null;
+  String id;
+  String name;
+  DateTime dueDate;
+  DateTime completeDate;
+  String description;
+  int priority;
+  int difficulty;
+  String location;
+  DateTime setDate;
+
+  /// Constructor for class.
+  ///
+  /// The constructor takes 2 required parameters. They are [name] and [dueDate].
+  /// All the parameters are named parameters.
+  TaskEntity(
+      {@required String name,
+      @required DateTime dueDate,
+      DateTime setDate,
+      DateTime completeDate,
+      String description,
+      int priority = 0,
+      int difficulty = 0,
+      String location,
+      String id}) {
+    this.name = name;
+    this.dueDate = dueDate;
+    this.setDate = (setDate == null ? DateTime.now() : setDate);
+    this.description = description;
+    this.priority = priority;
+    this.difficulty = difficulty;
+    this.location = location;
+    this.completeDate = completeDate;
+    this.id = (id == null ? uuid.v1() : id);
   }
 
-  dynamic getInfo(int i) {
+  Map<String, dynamic> toMap(bool mode) {
+    final Map<String, dynamic> map = {};
+
+    for (int keys in columnNames.keys)
+      map[columnNames[keys][0]] = this.getTaskInfo(keys)?.toString();
+
+    if (mode) 
+      map.remove(columnNames[8][0]);
+
+    return map;
+  }
+
+  static TaskEntity fromMap(Map<String, dynamic> map) {
+    final dynamic dueDate = map[columnNames[1][0]];
+    final dynamic priority = map[columnNames[3][0]];
+    final dynamic difficulty = map[columnNames[4][0]];
+    final dynamic completeDate = map[columnNames[6][0]];
+    final dynamic setDate = map[columnNames[7][0]];
+
+    return TaskEntity(
+      name: map[columnNames[0][0]],
+      dueDate: _convert(dueDate),
+      description: map[columnNames[2][0]],
+      priority: priority.runtimeType == int ? priority : int.parse(priority),
+      difficulty:
+          difficulty.runtimeType == int ? difficulty : int.parse(difficulty),
+      location: map[columnNames[5][0]],
+      completeDate: _convert(completeDate),
+      setDate: _convert(setDate),
+      id: map[columnNames[8][0]],
+    );
+  }
+
+  /// Method for getting any information about a task by passing in an index
+  /// that represents the task.
+  dynamic getTaskInfo(int i) {
     switch (i) {
       case 0:
-        return this.getID();
+        return this.name;
       case 1:
-        return this.getName();
+        return this.dueDate;
       case 2:
-        return this.getDueDate();
+        return this.description;
       case 3:
-        return this.getDescription();
+        return this.priority;
       case 4:
-        return this.getPriority();
+        return this.difficulty;
       case 5:
-        return this.getLocation();
+        return this.location;
       case 6:
-        return this.getCompleteDate();
+        return this.completeDate;
       case 7:
-        return this.getSetDate();
+        return this.setDate;
+      case 8:
+        return this.id;
+      default:
+      return null;
     }
-    return null;
-  }
-
-  String getID() {
-    return this._id;
-  }
-
-  String getName() {
-    return this._name;
-  }
-
-  bool setName(String name) {
-    if (name != null) {
-      if (name.length > 0) {
-        this._name = name;
-        return true;
-      }
-    }
-    return false;
-  }
-
-  DateTime getDueDate() {
-    return this._dueDate;
-  }
-
-  bool setDueDate(DateTime dueDate) {
-    if (dueDate != null) {
-      if (dueDate.compareTo(DateTime.now()) >= 0) {
-        this._dueDate = dueDate;
-        return true;
-      }
-    }
-    return false;
-  }
-
-  DateTime getCompleteDate() {
-    return this._completeDate;
-  }
-
-  bool setCompleteDate(DateTime completeDate) {
-    if (completeDate != null) {
-      this._completeDate = completeDate;
-      return true;
-    }
-    return false;
-  }
-
-  DateTime getSetDate() {
-    return this._setDate;
-  }
-
-  bool setSetDate(DateTime setDate) {
-    if (setDate != null) {
-      this._setDate = setDate;
-      return true;
-    }
-    return false;
-  }
-
-  String getDescription() {
-    return this._description;
-  }
-
-  bool setDescription(String description) {
-    if (description != null) {
-      if (description.length > 0) {
-        this._description = description;
-        return true;
-      }
-    }
-    return false;
-  }
-
-  int getPriority() {
-    return this._priority;
-  }
-
-  bool setPriority(int priority) {
-    if (priority >= 0 && priority <= 3) {
-      this._priority = priority;
-      return true;
-    }
-    return false;
-  }
-
-  String getLocation() {
-    return this._location;
-  }
-
-  bool setLocation(String location) {
-    if (location != null) {
-      if (location.length > 0) {
-        this._location = location;
-        return true;
-      }
-    }
-    return false;
   }
 }
