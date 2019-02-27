@@ -1,75 +1,56 @@
 import 'package:flutter/material.dart';
 
-import 'package:scoped_model/scoped_model.dart';
-
 import '../../widgets/ui_elements/side_drawer.dart';
 import '../../widgets/strategy_widgets/task_list_view.dart';
-import '../../scoped_model/task_model.dart';
 
-/// Stateless widget class for our Strategy page.
+/// [StrategicPage] class is the main strategic page which consists of 3 tab bars.
 ///
-/// The class implments a task management system. Each task is shown
-/// as a card. The cards are tiled columnwise. The user may interact
-/// with each Task Card in 3 ways.
-/// 'Long Press' - Edit task.
-/// 'Swipe left' - remove task.
-/// 'Press tick button' - Complete task.
-/// Each task card shows the name and date of the task.
-/// Further more there is a floating action button which enable the user
-/// to add more tasks.
+/// The three tabs are upcoming, overdue and completed showing 3 different types of tasks.
+/// The class provides all the widget under the same widget tree with functions necessary to interact
+/// with the Task Database. The functions are kept as [_addTask], [_removeTask], [_completeTask],
+/// [_updateTask], [_getUpcomingTaskList], [_getOverdueTaskList], [_getCompletedTaskList] variables.
 class StrategicPage extends StatelessWidget {
-  Widget _buildTabBar() {
-    return TabBar(
-      tabs: <Widget>[
-        Tab(
-          icon: Icon(Icons.event_note),
-          text: 'Upcoming',
-        ),
-        Tab(
-          icon: Icon(Icons.event_busy),
-          text: 'Overdue',
-        ),
-        Tab(
-          icon: Icon(Icons.event_available),
-          text: 'Completed',
-        ),
-      ],
-    );
-  }
+  final Function _addTask,
+      _removeTask,
+      _completeTask,
+      _updateTask,
+      _getUpcomingTaskList,
+      _getOverdueTaskList,
+      _getCompletedTaskList;
 
-  /// Method for building TabView. Creates 3 tabs. Upcoming, Overdue and Completed tabs.
-  Widget _buildTabBarView() {
-    return ScopedModelDescendant<TaskModel>(
-      builder: (BuildContext context, Widget child, TaskModel model) {
-        return TabBarView(
-          children: <Widget>[
-            TaskListView(
-              0,
-              model.getUpcomingTaskList,
-              model.addTask,
-              model.removeTask,
-              model.completeTask,
-              model.updateTask,
-            ),
-            TaskListView(
-              1,
-              model.getOverdueTaskList,
-              model.addTask,
-              model.removeTask,
-              model.completeTask,
-              model.updateTask,
-            ),
-            TaskListView(
-              2,
-              model.getCompletedTaskList,
-              model.addTask,
-              model.removeTask,
-              model.completeTask,
-              model.updateTask,
-            ),
-          ],
-        );
-      },
+  StrategicPage(
+    this._addTask,
+    this._removeTask,
+    this._completeTask,
+    this._updateTask,
+    this._getCompletedTaskList,
+    this._getOverdueTaskList,
+    this._getUpcomingTaskList,
+  );
+
+  Widget _buildTab(bool mode, int tabNumber) {
+    if (mode) {
+      return Tab(
+        icon: Icon(
+          tabNumber == 0
+              ? Icons.event_note
+              : tabNumber == 1 ? Icons.event_busy : Icons.event_available,
+        ),
+        text: tabNumber == 0
+            ? 'Upcoming'
+            : tabNumber == 1 ? 'Overdue' : 'Completed',
+      );
+    }
+
+    return TaskListView(
+      tabNumber,
+      tabNumber == 0
+          ? _getUpcomingTaskList
+          : tabNumber == 1 ? _getOverdueTaskList : _getCompletedTaskList,
+      _addTask,
+      _removeTask,
+      _completeTask,
+      _updateTask,
     );
   }
 
@@ -81,9 +62,21 @@ class StrategicPage extends StatelessWidget {
         drawer: SideDrawer(4),
         appBar: AppBar(
           title: Text('Strategic'),
-          bottom: _buildTabBar(),
+          bottom: TabBar(
+            tabs: <Widget>[
+              _buildTab(true, 0),
+              _buildTab(true, 1),
+              _buildTab(true, 2),
+            ],
+          ),
         ),
-        body: _buildTabBarView(),
+        body: TabBarView(
+          children: <Widget>[
+            _buildTab(false, 0),
+            _buildTab(false, 1),
+            _buildTab(false, 2),
+          ],
+        ),
       ),
     );
   }

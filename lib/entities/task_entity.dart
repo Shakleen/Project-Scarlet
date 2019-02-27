@@ -36,7 +36,6 @@ class TaskEntity {
     5: ["Location", "TEXT"],
     6: ["CompleteDate", "DATETIME"],
     7: ["SetDate", "DATETIME"],
-    // 8: ["ID", "TEXT"],
   };
   static final Map<String, dynamic> taskFormData = {
     TaskEntity.columnNames[0][0]: null, // Name

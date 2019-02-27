@@ -4,27 +4,19 @@ import '../../entities/task_entity.dart';
 import './task_card.dart';
 import '../../pages/strategy_pages/task_form_page.dart';
 
-/// A StatefulWidget class which is resposible for displaying
-/// the list of tasks in a specific category.
+/// [TaskListView] class is resposible for displaying the list of tasks 
+/// in a specific tab which is a stateful class.
 ///
-/// The categories of tasks are upcoming, overdue and completed.
-/// The class expects to receive 5 arguments when a object is created.
-/// These are [tabNumber] representing the different categories,
-/// [getTaskList] which is a function for getting task data from the
-/// data base, [removeTask] which is a function for removing a task
-/// from the database, [addTask] which is a function for adding a new
-/// task to the database and [completeTask] which is a function for
-/// marking a task as complete.
+/// The types of tab are upcoming, overdue and completed. The type of
+/// tab is represented by [tabType]. All the function variables
+/// [getTaskList], [removeTask], [completeTask], [addTask], [updateTask]
+/// are for interacting with Task database.
 class TaskListView extends StatefulWidget {
-  final int tabNumber;
-  final Function getTaskList;
-  final Function removeTask;
-  final Function completeTask;
-  final Function addTask;
-  final Function updateTask;
+  final int tabType;
+  final Function getTaskList, removeTask, completeTask, addTask, updateTask;
 
   TaskListView(
-    this.tabNumber,
+    this.tabType,
     this.getTaskList,
     this.addTask,
     this.removeTask,
@@ -38,29 +30,116 @@ class TaskListView extends StatefulWidget {
   }
 }
 
-/// A stateless widget class for our stateful widget class.
-///
-/// The stateless widget will change its state in two cases. These are
-/// when a TaskCard widget has been dismissed for removal or for completion.
+/// [_TaskListViewState] stateless class is redrawn based on the change of its contents
+/// which is the [_taskList].
+/// 
+/// It displays the tasks in [_taskList] and also displays snack bars [_deleteSnackBar] 
+/// upon the delete and [_completeSnackBar] on completion of a task to revert changes. 
+/// These snack bars are built by the function [_buildSnackBar].
 class _TaskListViewState extends State<TaskListView> {
   List<TaskEntity> _taskList = [];
-  SnackBar deleteSnackBar, completeSnackBar;
-  TaskEntity swipedTask;
+  SnackBar _deleteSnackBar, _completeSnackBar;
+  TaskEntity _swipedTask;
 
+  @override
+  void initState() {
+    _deleteSnackBar = _buildSnackBar(true);
+    _completeSnackBar = _buildSnackBar(false);
+    _swipedTask = null;
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      // Display the task which currently exist
+      body: FutureBuilder<List<TaskEntity>>(
+      future: widget.getTaskList(),
+      builder:
+          (BuildContext context, AsyncSnapshot<List<TaskEntity>> snapshot) {
+        if (snapshot.connectionState == ConnectionState.done) {
+          _taskList = snapshot.hasData ? snapshot.data : [];
+
+          if (snapshot.hasError) {
+            // TODO: Handle Error code
+          }
+
+          return _buildListView();
+        }
+        else if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        }
+      },
+    ),
+
+      // Floating action button for adding new tasks and goals
+      floatingActionButton:
+          widget.tabType == 0 ? _buildFloatingActionButton(context) : null,
+    );
+  }
+
+  /// Method that builds the list of [TaskCard] type objects to display on the screen.
+  /// 
+  /// Dissmissible is used for dissmissing tasks. Swiping from end to start removes and
+  /// from start to end completes a task. Dissmiss action is handled by [_handleOnDismiss]
+  /// function.
+  Widget _buildListView() {
+    return ListView.builder(
+      itemCount: _taskList.length,
+      itemBuilder: (BuildContext context, int index) {
+        return Dismissible(
+          child: TaskCard(
+            _taskList[index],
+            widget.tabType,
+          ),
+          background: _buildContainer(true),  // For completion.
+          secondaryBackground: _buildContainer(false), // For remove.
+          key: Key(_taskList[index].setDate.toString()),
+          direction: widget.tabType == 2 // Tab type = 2 means Completed tab
+              ? DismissDirection.endToStart // Swipe to only delete
+              : DismissDirection.horizontal, // Swipe to both complete and delete
+          onDismissed: (DismissDirection direction) =>
+              _handleOnDismiss(direction, index),
+          dismissThresholds: {
+            DismissDirection.endToStart: 0.9,
+            DismissDirection.startToEnd: 0.9,
+          },
+        );
+      },
+    );
+  }
+
+  /// Method to handle swipe to dismiss based on direction.
+  void _handleOnDismiss(DismissDirection direction, int index) {
+    _swipedTask = _taskList[index];
+    _taskList.removeAt(index);
+
+    setState(() {
+      if (direction == DismissDirection.endToStart) {
+        widget.removeTask(_swipedTask);
+        Scaffold.of(context).showSnackBar(_deleteSnackBar);
+      } else if (direction == DismissDirection.startToEnd) {
+        widget.completeTask(_swipedTask);
+        Scaffold.of(context).showSnackBar(_completeSnackBar);
+      }
+    });
+  }
+
+  /// Method for building the snack bars [_deleteSnackBar] and [_completeSnackBar].
   SnackBar _buildSnackBar(bool mode) {
     return SnackBar(
-      content: Text(mode ? 'Task deleted' : 'Task completed'),
+      content: Text('Task ' + (mode ? 'deleted' : 'completed')),
       duration: Duration(seconds: 4),
       action: SnackBarAction(
-        label: 'Undo' + (mode ? ' delete' : ' complete'),
+        label: 'Undo ' + (mode ? 'delete' : 'complete'),
         textColor: mode ? Colors.red : Colors.green,
         onPressed: () {
           setState(() {
             if (mode) {
-              widget.addTask(swipedTask);
+              widget.addTask(_swipedTask);
             } else {
-              swipedTask.completeDate = null;
-              widget.updateTask(swipedTask);
+              _swipedTask.completeDate = null;
+              widget.updateTask(_swipedTask);
             }
           });
         },
@@ -68,126 +147,9 @@ class _TaskListViewState extends State<TaskListView> {
     );
   }
 
-  @override
-  void initState() {
-    deleteSnackBar = _buildSnackBar(true);
-    completeSnackBar = _buildSnackBar(false);
-    super.initState();
-  }
-
-  /// Method for building the widget.
-  ///
-  /// It makes a call to [_buildFuture]
-  /// method for building the body and [_buildFloatingActionButton] to
-  /// make a Floating action button.
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      // Display the task which currently exist
-      body: _buildFuture(),
-
-      // Floating action button for adding new tasks and goals
-      floatingActionButton:
-          widget.tabNumber == 0 ? _buildFloatingActionButton(context) : null,
-    );
-  }
-
-  /// Method that implements future builder class to create a widget.
-  ///
-  /// This method uses [FutureBuilder] class to create a widget that
-  /// depends on data from the SQLite database. The type of future is
-  /// List<TaskEntity>.
-  ///
-  /// The method calls [_buildListView] method to build the list view
-  /// with whatever data it gets from the database. The method creates
-  /// a [CircularProgressIndicator] when it is waiting for data from
-  /// the database.
-  Widget _buildFuture() {
-    return FutureBuilder<List<TaskEntity>>(
-      future: widget.getTaskList(),
-      builder:
-          (BuildContext context, AsyncSnapshot<List<TaskEntity>> snapshot) {
-        // The future is done processing and returned something.
-        if (snapshot.connectionState == ConnectionState.done) {
-          // If the future retuned some data then set it to _taskList otherwise
-          // set it as empty list.
-          _taskList = snapshot.hasData ? snapshot.data : [];
-
-          // In case the future ran into some error it will be processed here.
-          if (snapshot.hasError) {
-            // TODO: Handle Error code
-          }
-
-          return _buildListView();
-        }
-        // In case the future isn't done processing, a progress indicator will be
-        // shown
-        else if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
-        }
-      },
-    );
-  }
-
-  /// Method that builds the list of [TaskCard] type objects to display
-  /// on the screen.
-  Widget _buildListView() {
-    return ListView.builder(
-      itemCount: _taskList.length,
-      itemBuilder: (BuildContext context, int index) {
-        // Dissmissible is needed for swapping to delete from right to left.
-        return Dismissible(
-          // Background for swapping to delete task
-          background: _buildContainer(true),
-          // Background for swapping to finish task
-          secondaryBackground: _buildContainer(false),
-          key: Key(_taskList[index].setDate.toString()),
-
-          // Directions allowed for swapping. For completed tasks only delete.
-          // For the rest swipe left to delete and right to complete.
-          direction: widget.tabNumber == 2
-              ? DismissDirection.endToStart
-              : DismissDirection.horizontal,
-
-          // What to do on dismiss based on direction
-          onDismissed: (DismissDirection direction) =>
-              _handleOnDismiss(direction, index),
-
-          // How far to swipe to activate onDismiss
-          dismissThresholds: {
-            DismissDirection.endToStart: 0.9,
-            DismissDirection.startToEnd: 0.9,
-          },
-
-          // Main task component
-          child: TaskCard(
-            _taskList[index],
-            widget.tabNumber,
-          ),
-        );
-      },
-    );
-  }
-
-  /// Method to handle swipe to dismiss based on direction
-  void _handleOnDismiss(DismissDirection direction, int index) {
-    swipedTask = _taskList[index];
-    _taskList.removeAt(index);
-
-    setState(() {
-      if (direction == DismissDirection.endToStart) {
-        widget.removeTask(swipedTask);
-        Scaffold.of(context).showSnackBar(deleteSnackBar);
-      } else if (direction == DismissDirection.startToEnd) {
-        widget.completeTask(swipedTask);
-        Scaffold.of(context).showSnackBar(completeSnackBar);
-      }
-    });
-  }
-
   /// Method for building the container of the dissmissable widget.
   ///
-  /// [mode] true means check off and false means remove.
+  /// [mode] true means complete and false means remove.
   Widget _buildContainer(bool mode) {
     return Container(
       color: mode ? Colors.green : Colors.red,

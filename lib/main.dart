@@ -32,26 +32,38 @@ class _MyApp extends State<MyApp> {
   Widget build(BuildContext context) {
     return ScopedModel<TaskModel>(
       model: TaskModel(),
-      child: MaterialApp(
-        // This sets the theme of the application
-        theme: ThemeData(
-          primaryColor: Colors.blue,
-          accentColor: Colors.blueAccent,
-          brightness: Brightness.light,
-        ),
+      child: ScopedModelDescendant<TaskModel>(
+        builder: (BuildContext context, Widget child, TaskModel model) {
+          return MaterialApp(
+            // This sets the theme of the application
+            theme: ThemeData(
+              primaryColor: Colors.blue,
+              accentColor: Colors.blueAccent,
+              brightness: Brightness.light,
+            ),
 
-        // The application home page. The app will land here everytime it starts.
-        home: HomePage(),
+            // The application home page. The app will land here everytime it starts.
+            home: HomePage(),
 
-        // Creating a page registry
-        routes: {
-          '/strength': (BuildContext context) => StrengthPage(),
-          '/wisdom': (BuildContext context) => WisdomPage(),
-          '/resistance': (BuildContext context) => ResistancePage(),
-          '/strategic': (BuildContext context) => StrategicPage(),
-          '/playgame': (BuildContext context) => PlayGamePage(),
-          '/settings': (BuildContext context) => SettingsPage(),
-          '/about': (BuildContext context) => AboutPage(),
+            // Creating a page registry
+            routes: {
+              '/strength': (BuildContext context) => StrengthPage(),
+              '/wisdom': (BuildContext context) => WisdomPage(),
+              '/resistance': (BuildContext context) => ResistancePage(),
+              '/strategic': (BuildContext context) => StrategicPage(
+                    model.addTask,
+                    model.removeTask,
+                    model.completeTask,
+                    model.updateTask,
+                    model.getCompletedTaskList,
+                    model.getOverdueTaskList,
+                    model.getUpcomingTaskList,
+                  ),
+              '/playgame': (BuildContext context) => PlayGamePage(),
+              '/settings': (BuildContext context) => SettingsPage(),
+              '/about': (BuildContext context) => AboutPage(),
+            },
+          );
         },
       ),
     );
