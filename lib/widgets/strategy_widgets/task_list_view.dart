@@ -21,6 +21,7 @@ class TaskListView extends StatefulWidget {
   final Function removeTask;
   final Function completeTask;
   final Function addTask;
+  final Function updateTask;
 
   TaskListView(
     this.tabNumber,
@@ -28,6 +29,7 @@ class TaskListView extends StatefulWidget {
     this.addTask,
     this.removeTask,
     this.completeTask,
+    this.updateTask,
   );
 
   @override
@@ -45,37 +47,31 @@ class _TaskListViewState extends State<TaskListView> {
   SnackBar deleteSnackBar, completeSnackBar;
   TaskEntity swipedTask;
 
-  @override
-  void initState() {
-    deleteSnackBar = SnackBar(
-      content: Text('Task deleted'),
-      duration: Duration(seconds: 2),
+  SnackBar _buildSnackBar(bool mode) {
+    return SnackBar(
+      content: Text(mode ? 'Task deleted' : 'Task completed'),
+      duration: Duration(seconds: 4),
       action: SnackBarAction(
-        label: 'Undo delete',
-        textColor: Colors.red,
+        label: 'Undo' + (mode ? ' delete' : ' complete'),
+        textColor: mode ? Colors.red : Colors.green,
         onPressed: () {
           setState(() {
-            widget.addTask(swipedTask);
+            if (mode) {
+              widget.addTask(swipedTask);
+            } else {
+              swipedTask.completeDate = null;
+              widget.updateTask(swipedTask);
+            }
           });
         },
       ),
     );
+  }
 
-    // completeSnackBar = SnackBar(
-    //   content: Text('Task completed'),
-    //   duration: Duration(seconds: 2),
-    //   action: SnackBarAction(
-    //     label: 'Undo completion',
-    //     textColor: Colors.green,
-    //     onPressed: () {
-    //       setState(() {
-    //         widget.removeTask(swipedTask).whenComplete(() {
-    //           widget.addTask(swipedTask);
-    //         });
-    //       });
-    //     },
-    //   ),
-    // );
+  @override
+  void initState() {
+    deleteSnackBar = _buildSnackBar(true);
+    completeSnackBar = _buildSnackBar(false);
     super.initState();
   }
 
@@ -184,10 +180,9 @@ class _TaskListViewState extends State<TaskListView> {
         Scaffold.of(context).showSnackBar(deleteSnackBar);
       } else if (direction == DismissDirection.startToEnd) {
         widget.completeTask(swipedTask);
-        // Scaffold.of(context).showSnackBar(completeSnackBar);
+        Scaffold.of(context).showSnackBar(completeSnackBar);
       }
     });
-
   }
 
   /// Method for building the container of the dissmissable widget.

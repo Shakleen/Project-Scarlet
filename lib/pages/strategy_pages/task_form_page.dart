@@ -22,18 +22,18 @@ class _TaskForm extends State<TaskForm> {
   final Map<String, dynamic> _formData = TaskEntity.taskFormData;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final _nameFocusNode = FocusNode();
-  final _dueDateFocusNode = FocusNode();
   final _descriptionFocusNode = FocusNode();
   final _locationFocusNode = FocusNode();
   final TextStyle labelStyle = TextStyle(
     color: Colors.blueAccent,
     fontFamily: 'Roboto',
   );
-  ComboBox comboBox;
+  ComboBox comboBoxPriority, comboBoxDifficulty;
   DateTime dateTime;
 
   _TaskForm() {
-    comboBox = null;
+    comboBoxPriority = null;
+    comboBoxDifficulty = null;
     dateTime = null;
   }
 
@@ -142,12 +142,15 @@ class _TaskForm extends State<TaskForm> {
   /// The method initializes itself as low if it is for a new
   /// task, otherwise it displays the priority of the [task] that is
   /// being updated.
-  Widget _buildPriorityField(TaskEntity task) {
-    if (task == null) {
-      comboBox = ComboBox();
+  Widget _buildPriorityField(TaskEntity task, int form) {
+    if (form == 1) {
+      comboBoxPriority =
+          task == null ? ComboBox(form) : ComboBox(form, task.priority);
     } else {
-      comboBox = ComboBox(task.priority);
+      comboBoxDifficulty =
+          task == null ? ComboBox(form) : ComboBox(form, task.difficulty);
     }
+    final String labelText = form == 1 ? "Priority" : "Difficulty";
 
     return Container(
       child: Column(
@@ -155,10 +158,10 @@ class _TaskForm extends State<TaskForm> {
         mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
           Text(
-            "Priority",
+            labelText,
             style: labelStyle,
           ),
-          comboBox,
+          form == 1 ? comboBoxPriority : comboBoxDifficulty,
         ],
       ),
       padding: EdgeInsets.only(top: 10.0, right: 10.0),
@@ -186,27 +189,22 @@ class _TaskForm extends State<TaskForm> {
   /// passed into it.
   void _submitForm(
       Function addTask, Function updateTask, TaskEntity inputTask) {
-    if (!_formKey.currentState.validate()) {
+    if (!_formKey.currentState.validate() || dateTime.compareTo(DateTime.now()) < 0) {
       return;
-    } else if (dateTime.compareTo(DateTime.now()) < 0) {
-      return;
-    }
+    } 
 
     _formKey.currentState.save();
 
     if (widget.inputTask != null)
-      _formData[TaskEntity.columnNames[8][0]] = widget.inputTask.id;
-    _formData[TaskEntity.columnNames[3][0]] = comboBox.choice;
-    _formData[TaskEntity.columnNames[1][0]] = dateTime;
+      _formData[TaskEntity.columnNames[7][0]] = widget.inputTask.setDate;
 
-    // Add mode
-    if (inputTask == null) {
-      addTask(TaskEntity.fromMap(_formData));
-    }
-    // Update mode
-    else {
-      updateTask(TaskEntity.fromMap(_formData));
-    }
+    _formData[TaskEntity.columnNames[1][0]] = dateTime;
+    _formData[TaskEntity.columnNames[3][0]] = comboBoxPriority.choice;
+    _formData[TaskEntity.columnNames[4][0]] = comboBoxDifficulty.choice;
+
+    inputTask == null
+        ? addTask(TaskEntity.fromMap(_formData))
+        : updateTask(TaskEntity.fromMap(_formData));
 
     Navigator.pop(context);
   }
@@ -256,7 +254,13 @@ class _TaskForm extends State<TaskForm> {
               SizedBox(
                 height: 10.0,
               ),
-              _buildPriorityField(widget.inputTask),
+              Row(
+                children: <Widget>[
+                  _buildPriorityField(widget.inputTask, 1),
+                  _buildPriorityField(widget.inputTask, 2),
+                ],
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              ),
               SizedBox(
                 height: 10.0,
               ),

@@ -4,8 +4,9 @@ import '../../entities/task_entity.dart';
 
 class ComboBox extends StatefulWidget {
   int choice;
+  final int info;
 
-  ComboBox([this.choice = 0]);
+  ComboBox(this.info, [this.choice = 0]);
 
   @override
   State<StatefulWidget> createState() {
@@ -28,9 +29,15 @@ class _ComboBoxState extends State<ComboBox> {
     List<DropdownMenuItem<int>> items = List();
 
     for (int i = 0; i < TaskEntity.priorityLevels.length; ++i) {
-      final String optionText = TaskEntity.priorityLevels[i][0];
-      final IconData optionIcon = TaskEntity.priorityLevels[i][1];
-      final Color optionColor = TaskEntity.priorityLevels[i][2];
+      final String optionText = widget.info == 1
+          ? TaskEntity.priorityLevels[i][0]
+          : TaskEntity.difficultyLevels[i][0];
+      final IconData optionIcon = widget.info == 1
+          ? TaskEntity.priorityLevels[i][1]
+          : TaskEntity.difficultyLevels[i][1];
+      final Color optionColor = widget.info == 1
+          ? TaskEntity.priorityLevels[i][2]
+          : TaskEntity.difficultyLevels[i][2];
 
       items.add(DropdownMenuItem(
         value: i,

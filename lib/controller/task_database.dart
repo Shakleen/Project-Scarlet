@@ -61,7 +61,7 @@ class TaskDatabase {
     try {
       final int result = await _database.insert(
         TaskEntity.tableName,
-        task.toMap(false),
+        TaskEntity.toMap(task, false),
       );
 
       if (result == 1) {
@@ -82,8 +82,8 @@ class TaskDatabase {
     try {
       final int result = await _database.delete(
         TaskEntity.tableName,
-        where: (TaskEntity.columnNames[8][0] + " = ?"),
-        whereArgs: [task.id],
+        where: (TaskEntity.columnNames[7][0] + " = ?"),
+        whereArgs: [task.setDate.toString()],
       );
       if (result == 1) {
         print('removal successful!'); // TODO REMOVE THIS
@@ -103,13 +103,13 @@ class TaskDatabase {
     print('TaskDatabase - updateTaske - '); // TODO REMOVE THIS
 
     try {
-      Map<String, dynamic> myMap = task.toMap(true);
+      Map<String, dynamic> myMap = TaskEntity.toMap(task, true);
       print(myMap);
       final int result = await _database.update(
         TaskEntity.tableName,
         myMap,
-        where: TaskEntity.columnNames[8][0] + " = ?",
-        whereArgs: [task.id],
+        where: TaskEntity.columnNames[7][0] + " = ?",
+        whereArgs: [task.setDate.toString()],
       );
 
       print('Result of update: ' + result?.toString());
@@ -211,7 +211,7 @@ class TaskDatabase {
     // Creating the column name and column type portion
     for (int i = 0; i <= numberOfColumns; ++i)
       statement += TaskEntity.columnNames[i][0] + " " + TaskEntity.columnNames[i][1] + 
-      (i < numberOfColumns ? ", " : ", CONSTRAINT TASKS_PRIMARY_KEY PRIMARY KEY(ID))");
+      (i < numberOfColumns ? ", " : ", CONSTRAINT TASKS_PRIMARY_KEY PRIMARY KEY(SetDate))");
 
     print('TaskDatabase - _buildTableCreateStatement - ' + statement); // TODO REMOVE THIS
 

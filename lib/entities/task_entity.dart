@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../presentation/custom_icons.dart';
-import 'package:uuid/uuid.dart';
 
 /// Entity class for tasks.
 ///
@@ -37,7 +36,7 @@ class TaskEntity {
     5: ["Location", "TEXT"],
     6: ["CompleteDate", "DATETIME"],
     7: ["SetDate", "DATETIME"],
-    8: ["ID", "TEXT"],
+    // 8: ["ID", "TEXT"],
   };
   static final Map<String, dynamic> taskFormData = {
     TaskEntity.columnNames[0][0]: null, // Name
@@ -45,7 +44,8 @@ class TaskEntity {
     TaskEntity.columnNames[2][0]: null, // Description
     TaskEntity.columnNames[3][0]: 0, // Priority
     TaskEntity.columnNames[4][0]: 0, // Difficulty
-    TaskEntity.columnNames[5][0]: null // Location
+    TaskEntity.columnNames[5][0]: null, // Location
+    TaskEntity.columnNames[7][0]: DateTime.now(),
   };
   static final String tableName = "Tasks";
   static final List<String> tableViewNames = const [
@@ -60,51 +60,14 @@ class TaskEntity {
             : DateTime.parse(input)
         : null;
   }
-  static final Uuid uuid = Uuid();
 
-  String id;
-  String name;
-  DateTime dueDate;
-  DateTime completeDate;
-  String description;
-  int priority;
-  int difficulty;
-  String location;
-  DateTime setDate;
-
-  /// Constructor for class.
-  ///
-  /// The constructor takes 2 required parameters. They are [name] and [dueDate].
-  /// All the parameters are named parameters.
-  TaskEntity(
-      {@required String name,
-      @required DateTime dueDate,
-      DateTime setDate,
-      DateTime completeDate,
-      String description,
-      int priority = 0,
-      int difficulty = 0,
-      String location,
-      String id}) {
-    this.name = name;
-    this.dueDate = dueDate;
-    this.setDate = (setDate == null ? DateTime.now() : setDate);
-    this.description = description;
-    this.priority = priority;
-    this.difficulty = difficulty;
-    this.location = location;
-    this.completeDate = completeDate;
-    this.id = (id == null ? uuid.v1() : id);
-  }
-
-  Map<String, dynamic> toMap(bool mode) {
+  static Map<String, dynamic> toMap(TaskEntity task, bool mode) {
     final Map<String, dynamic> map = {};
 
     for (int keys in columnNames.keys)
-      map[columnNames[keys][0]] = this.getTaskInfo(keys)?.toString();
+      map[columnNames[keys][0]] = task.getTaskInfo(keys)?.toString();
 
-    if (mode) 
-      map.remove(columnNames[8][0]);
+    if (mode) map.remove(columnNames[7][0]);
 
     return map;
   }
@@ -126,8 +89,40 @@ class TaskEntity {
       location: map[columnNames[5][0]],
       completeDate: _convert(completeDate),
       setDate: _convert(setDate),
-      id: map[columnNames[8][0]],
     );
+  }
+
+  String name;
+  DateTime dueDate;
+  DateTime completeDate;
+  String description;
+  int priority;
+  int difficulty;
+  String location;
+  DateTime setDate;
+
+  /// Constructor for class.
+  ///
+  /// The constructor takes 2 required parameters. They are [name] and [dueDate].
+  /// All the parameters are named parameters.
+  TaskEntity({
+    @required String name,
+    @required DateTime dueDate,
+    DateTime setDate,
+    DateTime completeDate,
+    String description,
+    int priority = 0,
+    int difficulty = 0,
+    String location,
+  }) {
+    this.name = name;
+    this.dueDate = dueDate;
+    this.setDate = (setDate == null ? DateTime.now() : setDate);
+    this.description = description;
+    this.priority = priority;
+    this.difficulty = difficulty;
+    this.location = location;
+    this.completeDate = completeDate;
   }
 
   /// Method for getting any information about a task by passing in an index
@@ -150,10 +145,8 @@ class TaskEntity {
         return this.completeDate;
       case 7:
         return this.setDate;
-      case 8:
-        return this.id;
       default:
-      return null;
+        return null;
     }
   }
 }

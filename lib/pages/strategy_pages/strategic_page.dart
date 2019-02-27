@@ -49,6 +49,7 @@ class StrategicPage extends StatelessWidget {
               model.addTask,
               model.removeTask,
               model.completeTask,
+              model.updateTask,
             ),
             TaskListView(
               1,
@@ -56,6 +57,7 @@ class StrategicPage extends StatelessWidget {
               model.addTask,
               model.removeTask,
               model.completeTask,
+              model.updateTask,
             ),
             TaskListView(
               2,
@@ -63,6 +65,7 @@ class StrategicPage extends StatelessWidget {
               model.addTask,
               model.removeTask,
               model.completeTask,
+              model.updateTask,
             ),
           ],
         );
