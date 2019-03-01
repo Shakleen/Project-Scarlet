@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 
 import '../../pages/strategy_pages/task_form_page.dart';
 import '../../entities/task_entity.dart';
-import '../../scoped_model/task_model.dart';
+import '../../scoped_model/main_model.dart';
 
 class TaskCard extends StatefulWidget {
   final TaskEntity task;
   final int tabNumber;
+  final Function addTask, updateTask;
 
-  TaskCard(this.task, this.tabNumber);
+  TaskCard(this.task, this.tabNumber, this.addTask, this.updateTask);
 
   @override
   _TaskCard createState() {
@@ -49,7 +50,9 @@ class _TaskCard extends State<TaskCard> {
       onLongPress: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => TaskForm(widget.task)),
+          MaterialPageRoute(
+              builder: (context) =>
+                  TaskForm(widget.task, widget.addTask, widget.updateTask)),
         );
       },
     );
@@ -67,7 +70,7 @@ class _TaskCard extends State<TaskCard> {
       ),
       _buildInformationText(
         Icons.schedule,
-        TaskModel.dateFormatter.format(widget.task.dueDate),
+        MainModel.dateFormatter.format(widget.task.dueDate),
         contentFontSize,
         contentIconSize,
         Colors.black,
@@ -78,7 +81,7 @@ class _TaskCard extends State<TaskCard> {
     if (widget.task.completeDate != null) {
       childrenList.add(_buildInformationText(
         Icons.check_circle,
-        TaskModel.dateFormatter.format(widget.task.completeDate),
+        MainModel.dateFormatter.format(widget.task.completeDate),
         contentFontSize,
         contentIconSize,
         Colors.green,
@@ -119,8 +122,8 @@ class _TaskCard extends State<TaskCard> {
     }
 
     childrenList.add(_buildInformationText(
-      Icons.av_timer,
-      TaskModel.dateFormatter.format(widget.task.setDate),
+      Icons.save,
+      MainModel.dateFormatter.format(widget.task.setDate),
       contentFontSize,
       contentIconSize,
       Colors.indigo,

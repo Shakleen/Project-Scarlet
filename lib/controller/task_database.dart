@@ -56,7 +56,7 @@ class TaskDatabase {
   }
 
   /// Public method for inserting a new task into the database.
-  Future<bool> insertTask(TaskEntity task) async {
+  Future<int> insertTask(TaskEntity task) async {
     print('TaskDatabase - insertTask - ');
     try {
       final int result = await _database.insert(
@@ -66,17 +66,17 @@ class TaskDatabase {
 
       if (result == 1) {
         print('Successful insertion!'); // TODO REMOVE THIS
-        return true;
+        return getTaskCount();
       }
     } catch (e) {
       // TODO IMPLEMENT EXCEPTION HANDLING
       print('failed insertion!' + e.toString()); // TODO REMOVE THIS
     }
-    return false;
+    return getTaskCount();
   }
 
   /// Public method for removing an existing task from the database.
-  Future<bool> removeTask(TaskEntity task) async {
+  Future<int> removeTask(TaskEntity task) async {
     print('TaskDatabase - removeTask - '); // TODO REMOVE THIS
 
     try {
@@ -87,7 +87,7 @@ class TaskDatabase {
       );
       if (result == 1) {
         print('removal successful!'); // TODO REMOVE THIS
-        return true;
+        return getTaskCount();
       }
     } catch (e) {
       // TODO IMPLEMENT EXCEPTION HANDLING
@@ -95,11 +95,11 @@ class TaskDatabase {
     }
 
     print('removal failed!'); // TODO REMOVE THIS
-    return false;
+    return getTaskCount();
   }
 
   /// Public method for updating existing task information.
-  Future<bool> updateTask(TaskEntity task) async {
+  Future<int> updateTask(TaskEntity task) async {
     print('TaskDatabase - updateTaske - '); // TODO REMOVE THIS
 
     try {
@@ -116,7 +116,7 @@ class TaskDatabase {
 
       if (result == 1) {
         print('Update successful!'); // TODO REMOVE THIS
-        return true;
+        return getTaskCount();
       }
     } catch (e) {
       // TODO IMPLEMENT EXCEPTION HANDLING
@@ -126,7 +126,14 @@ class TaskDatabase {
 
     print('Update failed!'); // TODO REMOVE THIS
 
-    return false;
+    return getTaskCount();
+  }
+
+  Future<int> getTaskCount() async {
+    final List<dynamic> result = await _database
+        .rawQuery("SELECT COUNT(SETDATE) FROM " + TaskEntity.tableName);
+    print(result[0]['COUNT(SETDATE)']);
+    return result[0]['COUNT(SETDATE)'];
   }
 
   /// Public method for retrieving tasks of three types. Type is
@@ -172,7 +179,8 @@ class TaskDatabase {
         for (Map<String, dynamic> entry in result)
           resultList.add(TaskEntity.fromMap(entry));
 
-        print("Length of the list is " + resultList.length.toString()); // TODO REMOVE THIS
+        print("Length of the list is " +
+            resultList.length.toString()); // TODO REMOVE THIS
       }
     } catch (e) {
       // TODO IMPLEMENT EXCEPTION HANDLING
@@ -210,10 +218,15 @@ class TaskDatabase {
 
     // Creating the column name and column type portion
     for (int i = 0; i <= numberOfColumns; ++i)
-      statement += TaskEntity.columnNames[i][0] + " " + TaskEntity.columnNames[i][1] + 
-      (i < numberOfColumns ? ", " : ", CONSTRAINT TASKS_PRIMARY_KEY PRIMARY KEY(SetDate))");
+      statement += TaskEntity.columnNames[i][0] +
+          " " +
+          TaskEntity.columnNames[i][1] +
+          (i < numberOfColumns
+              ? ", "
+              : ", CONSTRAINT TASKS_PRIMARY_KEY PRIMARY KEY(SetDate))");
 
-    print('TaskDatabase - _buildTableCreateStatement - ' + statement); // TODO REMOVE THIS
+    print('TaskDatabase - _buildTableCreateStatement - ' +
+        statement); // TODO REMOVE THIS
 
     return statement;
   }

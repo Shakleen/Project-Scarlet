@@ -12,10 +12,7 @@ import '../controller/task_database.dart';
 /// It implements [addTask], [updateTask] and [removeTask] as a way
 /// of modifying this list. Further more, [getTaskList] and [getSelectedTask]
 /// can be used to get the whole list or just one task respectively.
-class TaskModel extends Model {
-  static final DateFormat dateFormatter =
-      DateFormat("EEEE, dd/MM/yyyy 'at' hh:mm a");
-
+mixin TaskModel on Model {
   /// Returns the filtered list of upcoming tasks as a new varaible.
   /// So the original one can't be editted outside the class.
   Future<List<TaskEntity>> getUpcomingTaskList() {
@@ -36,22 +33,23 @@ class TaskModel extends Model {
 
   /// Used to add a new task to the list. Performs proper checking
   /// before proceeding. Throws exception if checking shows error.
-  Future<bool> addTask(TaskEntity task) {
+  Future<int> addTask(TaskEntity task) {
+//    scheduleNotification(task);
     return TaskDatabase.taskDatabase.insertTask(task);
   }
 
   /// Update [task] information.
-  Future<bool> updateTask(TaskEntity task) {
+  Future<int> updateTask(TaskEntity task) {
     return TaskDatabase.taskDatabase.updateTask(task);
   }
 
   /// Removes the [task].
-  Future<bool> removeTask(TaskEntity task) {
+  Future<int> removeTask(TaskEntity task) {
     return TaskDatabase.taskDatabase.removeTask(task);
   }
 
   /// Completes the [task].
-  Future<bool> completeTask(TaskEntity task) {
+  Future<int> completeTask(TaskEntity task) {
     task.completeDate = DateTime.now();
     return TaskDatabase.taskDatabase.updateTask(task);
   }

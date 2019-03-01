@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 
+import 'package:scoped_model/scoped_model.dart';
+
 import '../../widgets/ui_elements/side_drawer.dart';
-import '../../widgets/strategy_widgets/task_list_view.dart';
+import '../../widgets/strategy_widgets/task_list.dart';
+import '../../scoped_model/main_model.dart';
 
 /// [StrategicPage] class is the main strategic page which consists of 3 tab bars.
 ///
@@ -10,7 +13,7 @@ import '../../widgets/strategy_widgets/task_list_view.dart';
 /// with the Task Database. The functions are kept as [_addTask], [_removeTask], [_completeTask],
 /// [_updateTask], [_getUpcomingTaskList], [_getOverdueTaskList], [_getCompletedTaskList] variables.
 class StrategicPage extends StatelessWidget {
-  final Function _addTask,
+  Function _addTask,
       _removeTask,
       _completeTask,
       _updateTask,
@@ -18,15 +21,7 @@ class StrategicPage extends StatelessWidget {
       _getOverdueTaskList,
       _getCompletedTaskList;
 
-  StrategicPage(
-    this._addTask,
-    this._removeTask,
-    this._completeTask,
-    this._updateTask,
-    this._getCompletedTaskList,
-    this._getOverdueTaskList,
-    this._getUpcomingTaskList,
-  );
+  StrategicPage();
 
   Widget _buildTab(bool mode, int tabNumber) {
     if (mode) {
@@ -42,7 +37,7 @@ class StrategicPage extends StatelessWidget {
       );
     }
 
-    return TaskListView(
+    return TaskList(
       tabNumber,
       tabNumber == 0
           ? _getUpcomingTaskList
@@ -56,28 +51,40 @@ class StrategicPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 3,
-      child: Scaffold(
-        drawer: SideDrawer(4),
-        appBar: AppBar(
-          title: Text('Strategic'),
-          bottom: TabBar(
-            tabs: <Widget>[
-              _buildTab(true, 0),
-              _buildTab(true, 1),
-              _buildTab(true, 2),
-            ],
+    return ScopedModelDescendant<MainModel>(
+      builder: (BuildContext context, Widget child, MainModel model) {
+        _addTask = model.addTask;
+        _removeTask = model.removeTask;
+        _completeTask = model.completeTask;
+        _updateTask = model.updateTask;
+        _getUpcomingTaskList = model.getUpcomingTaskList;
+        _getOverdueTaskList = model.getOverdueTaskList;
+        _getCompletedTaskList = model.getCompletedTaskList;
+
+        return DefaultTabController(
+          length: 3,
+          child: Scaffold(
+            drawer: SideDrawer(4),
+            appBar: AppBar(
+              title: Text('Strategic'),
+              bottom: TabBar(
+                tabs: <Widget>[
+                  _buildTab(true, 0),
+                  _buildTab(true, 1),
+                  _buildTab(true, 2),
+                ],
+              ),
+            ),
+            body: TabBarView(
+              children: <Widget>[
+                _buildTab(false, 0),
+                _buildTab(false, 1),
+                _buildTab(false, 2),
+              ],
+            ),
           ),
-        ),
-        body: TabBarView(
-          children: <Widget>[
-            _buildTab(false, 0),
-            _buildTab(false, 1),
-            _buildTab(false, 2),
-          ],
-        ),
-      ),
+        );
+      },
     );
   }
 }

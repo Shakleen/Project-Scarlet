@@ -4,18 +4,18 @@ import '../../entities/task_entity.dart';
 import './task_card.dart';
 import '../../pages/strategy_pages/task_form_page.dart';
 
-/// [TaskListView] class is resposible for displaying the list of tasks 
+/// [TaskList] class is resposible for displaying the list of tasks
 /// in a specific tab which is a stateful class.
 ///
 /// The types of tab are upcoming, overdue and completed. The type of
 /// tab is represented by [tabType]. All the function variables
 /// [getTaskList], [removeTask], [completeTask], [addTask], [updateTask]
 /// are for interacting with Task database.
-class TaskListView extends StatefulWidget {
+class TaskList extends StatefulWidget {
   final int tabType;
   final Function getTaskList, removeTask, completeTask, addTask, updateTask;
 
-  TaskListView(
+  TaskList(
     this.tabType,
     this.getTaskList,
     this.addTask,
@@ -25,18 +25,18 @@ class TaskListView extends StatefulWidget {
   );
 
   @override
-  _TaskListViewState createState() {
-    return _TaskListViewState();
+  _TaskListState createState() {
+    return _TaskListState();
   }
 }
 
-/// [_TaskListViewState] stateless class is redrawn based on the change of its contents
+/// [_TaskListState] stateless class is redrawn based on the change of its contents
 /// which is the [_taskList].
 /// 
 /// It displays the tasks in [_taskList] and also displays snack bars [_deleteSnackBar] 
 /// upon the delete and [_completeSnackBar] on completion of a task to revert changes. 
 /// These snack bars are built by the function [_buildSnackBar].
-class _TaskListViewState extends State<TaskListView> {
+class _TaskListState extends State<TaskList> {
   List<TaskEntity> _taskList = [];
   SnackBar _deleteSnackBar, _completeSnackBar;
   TaskEntity _swipedTask;
@@ -91,6 +91,8 @@ class _TaskListViewState extends State<TaskListView> {
           child: TaskCard(
             _taskList[index],
             widget.tabType,
+            widget.addTask,
+            widget.updateTask
           ),
           background: _buildContainer(true),  // For completion.
           secondaryBackground: _buildContainer(false), // For remove.
@@ -178,7 +180,7 @@ class _TaskListViewState extends State<TaskListView> {
       onPressed: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => TaskForm(null)),
+          MaterialPageRoute(builder: (context) => TaskForm(null, widget.addTask, widget.updateTask)),
         );
       },
     );

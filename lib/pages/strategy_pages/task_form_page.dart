@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
+import 'dart:math';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 import '../../widgets/helper/ensure-visible.dart';
-import 'package:scoped_model/scoped_model.dart';
 import '../../widgets/ui_elements/combo_box.dart';
 
 import '../../entities/task_entity.dart';
-import '../../scoped_model/task_model.dart';
+import '../../scoped_model/main_model.dart';
+import '../../pages/strategy_pages/strategic_page.dart';
 
 class TaskForm extends StatefulWidget {
   final TaskEntity inputTask;
+  final Function addTask, updateTask;
 
-  TaskForm(this.inputTask);
+  TaskForm(this.inputTask, this.addTask, this.updateTask);
 
   @override
   _TaskForm createState() {
@@ -24,17 +27,59 @@ class _TaskForm extends State<TaskForm> {
   final _nameFocusNode = FocusNode();
   final _descriptionFocusNode = FocusNode();
   final _locationFocusNode = FocusNode();
-  final TextStyle labelStyle = TextStyle(
-    color: Colors.blueAccent,
-    fontFamily: 'Roboto',
-  );
+  final TextStyle labelStyle =
+      TextStyle(color: Colors.blueAccent, fontFamily: 'Roboto', fontSize: 16);
   ComboBox comboBoxPriority, comboBoxDifficulty;
   DateTime dateTime;
+  FlutterLocalNotificationsPlugin notificationsPlugin;
 
   _TaskForm() {
     comboBoxPriority = null;
     comboBoxDifficulty = null;
     dateTime = null;
+  }
+
+  @override
+  void initState() {
+    notificationsPlugin = FlutterLocalNotificationsPlugin();
+    AndroidInitializationSettings android =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
+    IOSInitializationSettings iOS = IOSInitializationSettings();
+    InitializationSettings initializationSettings =
+        InitializationSettings(android, iOS);
+    notificationsPlugin.initialize(initializationSettings,
+        onSelectNotification: (String payload) async {
+      await Navigator.push(
+        context,
+        new MaterialPageRoute(builder: (context) => StrategicPage()),
+      );
+    });
+    super.initState();
+  }
+
+  scheduleNotification(TaskEntity task) async {
+    DateTime scheduledNotificationDateTime =
+        task.dueDate.subtract(Duration(minutes: 5));
+    NotificationDetails platformChannelSpecifics = NotificationDetails(
+      MainModel.notificationDetails[0][0],
+      MainModel.notificationDetails[0][1],
+    );
+
+    final int seed = (task.dueDate.microsecond +
+            task.setDate.microsecond * task.dueDate.millisecond +
+            task.setDate.millisecond * task.dueDate.second) +
+        (task.setDate.second * task.dueDate.minute + task.setDate.minute) *
+            task.dueDate.month +
+        (task.setDate.month * task.dueDate.year + task.setDate.year);
+    final int id = Random(Random(seed).nextInt(4294967295)).nextInt(4294967295);
+
+    await notificationsPlugin.schedule(
+      id,
+      'Project Scarlet',
+      task.name + ' at ' + MainModel.dateFormatter.format(task.dueDate),
+      scheduledNotificationDateTime,
+      platformChannelSpecifics,
+    );
   }
 
   @override
@@ -97,7 +142,7 @@ class _TaskForm extends State<TaskForm> {
           widget.inputTask == null ? DateTime.now() : widget.inputTask.dueDate;
     }
 
-    return Container(
+    return Padding(
       child: Column(
         children: <Widget>[
           Text(
@@ -105,15 +150,11 @@ class _TaskForm extends State<TaskForm> {
             style: labelStyle,
           ),
           SizedBox(height: 5.0),
-          Text(
-            TaskModel.dateFormatter.format(dateTime),
-            style: TextStyle(
-              fontFamily: 'Roboto',
-              fontSize: 18,
-            ),
-          ),
-          SizedBox(height: 5.0),
           RaisedButton(
+            child: Text(
+              MainModel.dateFormatter.format(dateTime),
+              style: TextStyle(color: Colors.white),
+            ),
             onPressed: () {
               return _selectDateTime(
                 context,
@@ -124,15 +165,12 @@ class _TaskForm extends State<TaskForm> {
                 ),
               );
             },
-            child: Text(
-              'Pick Date/Time',
-              style: TextStyle(color: Colors.white),
-            ),
             color: Colors.blue,
           ),
         ],
         crossAxisAlignment: CrossAxisAlignment.start,
       ),
+      padding: EdgeInsets.symmetric(vertical: 10),
     );
   }
 
@@ -142,7 +180,7 @@ class _TaskForm extends State<TaskForm> {
   /// The method initializes itself as low if it is for a new
   /// task, otherwise it displays the priority of the [task] that is
   /// being updated.
-  Widget _buildPriorityField(TaskEntity task, int form) {
+  Widget _buildOptions(TaskEntity task, int form) {
     if (form == 1) {
       comboBoxPriority =
           task == null ? ComboBox(form) : ComboBox(form, task.priority);
@@ -189,22 +227,23 @@ class _TaskForm extends State<TaskForm> {
   /// passed into it.
   void _submitForm(
       Function addTask, Function updateTask, TaskEntity inputTask) {
-    if (!_formKey.currentState.validate() || dateTime.compareTo(DateTime.now()) < 0) {
+    if (!_formKey.currentState.validate() ||
+        dateTime.compareTo(DateTime.now()) < 0) {
       return;
-    } 
+    }
 
     _formKey.currentState.save();
 
-    if (widget.inputTask != null)
-      _formData[TaskEntity.columnNames[7][0]] = widget.inputTask.setDate;
-
+    _formData[TaskEntity.columnNames[7][0]] =
+        (widget.inputTask != null) ? widget.inputTask.setDate : DateTime.now();
     _formData[TaskEntity.columnNames[1][0]] = dateTime;
     _formData[TaskEntity.columnNames[3][0]] = comboBoxPriority.choice;
     _formData[TaskEntity.columnNames[4][0]] = comboBoxDifficulty.choice;
 
-    inputTask == null
-        ? addTask(TaskEntity.fromMap(_formData))
-        : updateTask(TaskEntity.fromMap(_formData));
+    final TaskEntity task = TaskEntity.fromMap(_formData);
+    inputTask == null ? addTask(task) : updateTask(task);
+
+    scheduleNotification(task);
 
     Navigator.pop(context);
   }
@@ -214,25 +253,26 @@ class _TaskForm extends State<TaskForm> {
     final double targetWidth = deviceWidth > 550.0 ? 500.0 : deviceWidth * 0.95;
     final double targetPadding = deviceWidth - targetWidth;
 
-    return ScopedModelDescendant<TaskModel>(
-        builder: (BuildContext context, Widget child, TaskModel model) {
-      return Container(
-        margin: EdgeInsets.all(10.0),
-        child: Form(
-          autovalidate: true,
-          key: _formKey,
-          child: ListView(
-            padding: EdgeInsets.symmetric(horizontal: targetPadding / 2.0),
-            children: <Widget>[
-              _buildFormField(
+    return Container(
+      margin: EdgeInsets.all(10.0),
+      child: Form(
+        autovalidate: true,
+        key: _formKey,
+        child: ListView(
+          padding: EdgeInsets.symmetric(horizontal: targetPadding / 2.0),
+          children: <Widget>[
+            _buildFormField(
                 focusNode: _nameFocusNode,
                 initialValue:
                     widget.inputTask?.name == null ? '' : widget.inputTask.name,
                 labelText: TaskEntity.columnNames[0][0],
                 textInputType: TextInputType.text,
                 maxLength: 50,
-              ),
-              _buildFormField(
+                autoFocus: true,
+                nextFocusNode: _descriptionFocusNode,
+                prefixIcon: Icons.title,
+                fieldHint: 'Task name e.g. Swimming'),
+            _buildFormField(
                 focusNode: _descriptionFocusNode,
                 initialValue: widget.inputTask?.description == null
                     ? ''
@@ -240,8 +280,11 @@ class _TaskForm extends State<TaskForm> {
                 labelText: TaskEntity.columnNames[2][0],
                 textInputType: TextInputType.text,
                 maxLength: 150,
-              ),
-              _buildFormField(
+                autoFocus: false,
+                nextFocusNode: _locationFocusNode,
+                prefixIcon: Icons.format_align_left,
+                fieldHint: 'Task details e.g. Swimming for 1 hour.'),
+            _buildFormField(
                 focusNode: _locationFocusNode,
                 initialValue: widget.inputTask?.location == null
                     ? ''
@@ -249,45 +292,54 @@ class _TaskForm extends State<TaskForm> {
                 labelText: TaskEntity.columnNames[5][0],
                 textInputType: TextInputType.text,
                 maxLength: 100,
-              ),
-              _buildDueDateField(widget.inputTask, context),
-              SizedBox(
-                height: 10.0,
-              ),
-              Row(
-                children: <Widget>[
-                  _buildPriorityField(widget.inputTask, 1),
-                  _buildPriorityField(widget.inputTask, 2),
-                ],
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              ),
-              SizedBox(
-                height: 10.0,
-              ),
-              _buildSubmitButton(
-                  widget.inputTask, model.addTask, model.updateTask),
-            ],
-          ),
+                autoFocus: false,
+                nextFocusNode: null,
+                prefixIcon: Icons.location_on,
+                fieldHint: 'Task location e.g. University swimming pool.'),
+            _buildDueDateField(widget.inputTask, context),
+            SizedBox(
+              height: 10.0,
+            ),
+            Row(
+              children: <Widget>[
+                _buildOptions(widget.inputTask, 1),
+                _buildOptions(widget.inputTask, 2),
+              ],
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            ),
+            SizedBox(
+              height: 10.0,
+            ),
+            _buildSubmitButton(
+                widget.inputTask, widget.addTask, widget.updateTask),
+          ],
         ),
-      );
-    });
+      ),
+    );
   }
 
-  Widget _buildFormField({
-    FocusNode focusNode,
-    String labelText,
-    String initialValue,
-    TextInputType textInputType,
-    int maxLength,
-  }) {
+  Widget _buildFormField(
+      {FocusNode focusNode,
+      String labelText,
+      String initialValue,
+      TextInputType textInputType,
+      int maxLength,
+      FocusNode nextFocusNode,
+      bool autoFocus,
+      IconData prefixIcon,
+      String fieldHint}) {
     return Container(
       child: EnsureVisibleWhenFocused(
         focusNode: focusNode,
         child: TextFormField(
           focusNode: focusNode,
+          autofocus: autoFocus,
           decoration: InputDecoration(
             labelText: labelText,
             labelStyle: labelStyle,
+            suffixIcon: Icon(prefixIcon),
+            helperText: fieldHint,
+            alignLabelWithHint: true,
           ),
           initialValue: initialValue,
           validator: (String value) {
@@ -301,11 +353,17 @@ class _TaskForm extends State<TaskForm> {
           maxLength: maxLength,
           maxLengthEnforced: true,
           keyboardType: textInputType,
+          textCapitalization: TextCapitalization.sentences,
+          autocorrect: true,
+          textInputAction: nextFocusNode == null
+              ? TextInputAction.done
+              : TextInputAction.next,
+          maxLines: null,
+          onFieldSubmitted: (String value) {
+            FocusScope.of(context).autofocus(nextFocusNode);
+          },
         ),
       ),
     );
   }
-
-  /// Method for building the entire widget.
-
 }
