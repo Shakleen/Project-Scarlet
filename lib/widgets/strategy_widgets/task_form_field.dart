@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../widgets/helper/ensure-visible.dart';
 
 import '../../entities/task_entity.dart';
+import '../../scoped_model/main_model.dart';
 
 class TaskFormField extends StatelessWidget {
   final FocusNode focusNode;
@@ -59,12 +60,9 @@ class TaskFormField extends StatelessWidget {
   }
 
   InputDecoration _buildInputDecorations() {
-    final TextStyle labelStyle =
-        TextStyle(color: Colors.blueAccent, fontFamily: 'Roboto', fontSize: 16);
-
     return InputDecoration(
       labelText: TaskEntity.columnNames[labelText][0],
-      labelStyle: labelStyle,
+      labelStyle: MainModel.labelStyle,
       helperText: fieldHint,
       alignLabelWithHint: true,
     );

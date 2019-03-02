@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 
 import '../../entities/task_entity.dart';
+import '../../scoped_model/main_model.dart';
 
 class ComboBox extends StatefulWidget {
   int choice;
-  final int info;
+  final Map<int, List<dynamic>> levels;
+  final Map<String, dynamic> formData;
+  final String formKey;
 
-  ComboBox(this.info, [this.choice = 0]);
+  ComboBox(this.levels, this.formData, this.formKey, [this.choice = 0]);
 
   @override
   State<StatefulWidget> createState() {
@@ -22,6 +25,7 @@ class _ComboBoxState extends State<ComboBox> {
   void initState() {
     _dropDownMenuItems = getDropDownMenuItems();
     _currentChoice = widget.choice;
+
     super.initState();
   }
 
@@ -29,15 +33,9 @@ class _ComboBoxState extends State<ComboBox> {
     List<DropdownMenuItem<int>> items = List();
 
     for (int i = 0; i < TaskEntity.priorityLevels.length; ++i) {
-      final String optionText = widget.info == 1
-          ? TaskEntity.priorityLevels[i][0]
-          : TaskEntity.difficultyLevels[i][0];
-      final IconData optionIcon = widget.info == 1
-          ? TaskEntity.priorityLevels[i][1]
-          : TaskEntity.difficultyLevels[i][1];
-      final Color optionColor = widget.info == 1
-          ? TaskEntity.priorityLevels[i][2]
-          : TaskEntity.difficultyLevels[i][2];
+      final String optionText = widget.levels[i][0];
+      final IconData optionIcon = widget.levels[i][1];
+      final Color optionColor = widget.levels[i][2];
 
       items.add(DropdownMenuItem(
         value: i,
@@ -64,19 +62,32 @@ class _ComboBoxState extends State<ComboBox> {
     return items;
   }
 
-  void changedDropDownItem(int selectedCity) {
+  void changedDropDownItem(int selection) {
     setState(() {
-      _currentChoice = selectedCity;
-      widget.choice = _currentChoice;
+      widget.formData[widget.formKey] =
+          widget.choice = _currentChoice = selection;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return DropdownButton(
-      value: _currentChoice,
-      items: _dropDownMenuItems,
-      onChanged: changedDropDownItem,
+    return Container(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: <Widget>[
+          Text(
+            widget.formKey,
+            style: MainModel.labelStyle,
+          ),
+          DropdownButton(
+            value: _currentChoice,
+            items: _dropDownMenuItems,
+            onChanged: changedDropDownItem,
+          ),
+        ],
+      ),
+      padding: EdgeInsets.only(top: 10.0, right: 10.0),
     );
   }
 }

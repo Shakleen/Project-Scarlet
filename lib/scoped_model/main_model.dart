@@ -8,6 +8,8 @@ import 'package:scoped_model/scoped_model.dart';
 class MainModel extends Model with TaskModel {
   static final DateFormat dateFormatter =
       DateFormat("EEEE, dd/MM/yyyy 'at' hh:mm a");
+  static final TextStyle labelStyle =
+      TextStyle(color: Colors.blueAccent, fontFamily: 'Roboto', fontSize: 16);
   static final Map<int, List<dynamic>> notificationDetails = {
     0: [
       AndroidNotificationDetails(

@@ -29,14 +29,12 @@ class _TaskDatePicker extends State<TaskDatePicker> {
 
   @override
   Widget build(BuildContext context) {
-    final TextStyle labelStyle =
-        TextStyle(color: Colors.blueAccent, fontFamily: 'Roboto', fontSize: 16);
     return Padding(
       child: Column(
         children: <Widget>[
           Text(
             'Date/Time',
-            style: labelStyle,
+            style: MainModel.labelStyle,
           ),
           SizedBox(height: 5.0),
           RaisedButton(

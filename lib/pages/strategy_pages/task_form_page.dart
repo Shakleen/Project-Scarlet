@@ -28,15 +28,7 @@ class _TaskForm extends State<TaskForm> {
   final _nameFocusNode = FocusNode();
   final _descriptionFocusNode = FocusNode();
   final _locationFocusNode = FocusNode();
-  final TextStyle labelStyle =
-      TextStyle(color: Colors.blueAccent, fontFamily: 'Roboto', fontSize: 16);
-  ComboBox comboBoxPriority, comboBoxDifficulty;
   FlutterLocalNotificationsPlugin notificationsPlugin;
-
-  _TaskForm() {
-    comboBoxPriority = null;
-    comboBoxDifficulty = null;
-  }
 
   @override
   void initState() {
@@ -96,38 +88,6 @@ class _TaskForm extends State<TaskForm> {
     );
   }
 
-  /// Method for building a priority field for the task priority
-  /// property.
-  ///
-  /// The method initializes itself as low if it is for a new
-  /// task, otherwise it displays the priority of the [task] that is
-  /// being updated.
-  Widget _buildOptions(TaskEntity task, int form) {
-    if (form == 1) {
-      comboBoxPriority =
-          task == null ? ComboBox(form) : ComboBox(form, task.priority);
-    } else {
-      comboBoxDifficulty =
-          task == null ? ComboBox(form) : ComboBox(form, task.difficulty);
-    }
-    final String labelText = form == 1 ? "Priority" : "Difficulty";
-
-    return Container(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: <Widget>[
-          Text(
-            labelText,
-            style: labelStyle,
-          ),
-          form == 1 ? comboBoxPriority : comboBoxDifficulty,
-        ],
-      ),
-      padding: EdgeInsets.only(top: 10.0, right: 10.0),
-    );
-  }
-
   /// This method creates and saves the task by using the [addTask] function
   /// passed into it.
   void _submitForm() {
@@ -136,8 +96,6 @@ class _TaskForm extends State<TaskForm> {
     _formKey.currentState.save();
     _formData[TaskEntity.columnNames[7][0]] =
         (widget.inputTask != null) ? widget.inputTask.setDate : DateTime.now();
-    _formData[TaskEntity.columnNames[3][0]] = comboBoxPriority.choice;
-    _formData[TaskEntity.columnNames[4][0]] = comboBoxDifficulty.choice;
 
     final TaskEntity task = TaskEntity.fromMap(_formData);
     widget.inputTask == null ? widget.addTask(task) : widget.updateTask(task);
@@ -195,8 +153,18 @@ class _TaskForm extends State<TaskForm> {
     children.add(SizedBox(height: 10.0));
     children.add(Row(
       children: <Widget>[
-        _buildOptions(widget.inputTask, 1),
-        _buildOptions(widget.inputTask, 2)
+        ComboBox(
+          TaskEntity.priorityLevels,
+          _formData,
+          TaskEntity.columnNames[3][0],
+          widget.inputTask == null ? 0 : widget.inputTask.priority,
+        ),
+        ComboBox(
+          TaskEntity.difficultyLevels,
+          _formData,
+          TaskEntity.columnNames[4][0],
+          widget.inputTask == null ? 0 : widget.inputTask.difficulty,
+        )
       ],
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
     ));
