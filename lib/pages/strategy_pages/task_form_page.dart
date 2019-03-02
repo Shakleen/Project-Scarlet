@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'dart:math';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
-import '../../widgets/helper/ensure-visible.dart';
 import '../../widgets/ui_elements/combo_box.dart';
 
 import '../../entities/task_entity.dart';
 import '../../scoped_model/main_model.dart';
 import '../../pages/strategy_pages/strategic_page.dart';
+import '../../widgets/strategy_widgets/task_form_field.dart';
+import '../../widgets/strategy_widgets/task_date_picker.dart';
 
 class TaskForm extends StatefulWidget {
   final TaskEntity inputTask;
@@ -30,13 +31,11 @@ class _TaskForm extends State<TaskForm> {
   final TextStyle labelStyle =
       TextStyle(color: Colors.blueAccent, fontFamily: 'Roboto', fontSize: 16);
   ComboBox comboBoxPriority, comboBoxDifficulty;
-  DateTime dateTime;
   FlutterLocalNotificationsPlugin notificationsPlugin;
 
   _TaskForm() {
     comboBoxPriority = null;
     comboBoxDifficulty = null;
-    dateTime = null;
   }
 
   @override
@@ -75,8 +74,8 @@ class _TaskForm extends State<TaskForm> {
 
     await notificationsPlugin.schedule(
       id,
-      'Project Scarlet',
-      task.name + ' at ' + MainModel.dateFormatter.format(task.dueDate),
+      task.name,
+      'Scheduled at ' + MainModel.dateFormatter.format(task.dueDate),
       scheduledNotificationDateTime,
       platformChannelSpecifics,
     );
@@ -90,87 +89,10 @@ class _TaskForm extends State<TaskForm> {
       },
       child: Material(
         child: Scaffold(
-          appBar: AppBar(
-            title: Text('Edit task details'),
-          ),
+          appBar: AppBar(title: Text('Edit task details')),
           body: _buildForm(context),
         ),
       ),
-    );
-  }
-
-  void _selectDateTime(
-      BuildContext context, DateTime initDate, TimeOfDay initTime) async {
-    final DateTime pickedDate = await showDatePicker(
-      context: context,
-      initialDate: initDate,
-      firstDate: DateTime(2015, 8),
-      lastDate: DateTime(2101),
-    );
-
-    if (pickedDate != null) {
-      final TimeOfDay pickedTime = await showTimePicker(
-        context: context,
-        initialTime: initTime,
-      );
-
-      if (pickedTime != null) {
-        setState(() {
-          dateTime = DateTime(
-            pickedDate.year,
-            pickedDate.month,
-            pickedDate.day,
-            pickedTime.hour,
-            pickedTime.minute,
-          );
-        });
-      }
-    }
-  }
-
-  /// Method for building a date field for the due date property.
-  ///
-  /// The method initializes itself as the current date for a new
-  /// task, otherwise it displays the due date of the [task] that is
-  /// being updated.
-  ///
-  /// The condition for acceptance is that the due date can't be in
-  /// the past.
-  Widget _buildDueDateField(TaskEntity task, BuildContext context) {
-    if (dateTime == null) {
-      dateTime =
-          widget.inputTask == null ? DateTime.now() : widget.inputTask.dueDate;
-    }
-
-    return Padding(
-      child: Column(
-        children: <Widget>[
-          Text(
-            'Date/Time',
-            style: labelStyle,
-          ),
-          SizedBox(height: 5.0),
-          RaisedButton(
-            child: Text(
-              MainModel.dateFormatter.format(dateTime),
-              style: TextStyle(color: Colors.white),
-            ),
-            onPressed: () {
-              return _selectDateTime(
-                context,
-                dateTime,
-                TimeOfDay(
-                  hour: dateTime.hour,
-                  minute: dateTime.minute,
-                ),
-              );
-            },
-            color: Colors.blue,
-          ),
-        ],
-        crossAxisAlignment: CrossAxisAlignment.start,
-      ),
-      padding: EdgeInsets.symmetric(vertical: 10),
     );
   }
 
@@ -206,42 +128,19 @@ class _TaskForm extends State<TaskForm> {
     );
   }
 
-  /// Method for building a button for submitting the form of task creation.
-  ///
-  /// The button calls the _submitForm when clicked!
-  Widget _buildSubmitButton(
-      TaskEntity inputTask, Function addTask, Function updateTask) {
-    String buttonText = inputTask == null ? 'Add new task' : 'Update task';
-
-    return RaisedButton(
-      child: Text(buttonText),
-      color: Colors.blueAccent,
-      textColor: Colors.white,
-      onPressed: () {
-        _submitForm(addTask, updateTask, inputTask);
-      },
-    );
-  }
-
   /// This method creates and saves the task by using the [addTask] function
   /// passed into it.
-  void _submitForm(
-      Function addTask, Function updateTask, TaskEntity inputTask) {
-    if (!_formKey.currentState.validate() ||
-        dateTime.compareTo(DateTime.now()) < 0) {
-      return;
-    }
+  void _submitForm() {
+    if (!_formKey.currentState.validate()) return;
 
     _formKey.currentState.save();
-
     _formData[TaskEntity.columnNames[7][0]] =
         (widget.inputTask != null) ? widget.inputTask.setDate : DateTime.now();
-    _formData[TaskEntity.columnNames[1][0]] = dateTime;
     _formData[TaskEntity.columnNames[3][0]] = comboBoxPriority.choice;
     _formData[TaskEntity.columnNames[4][0]] = comboBoxDifficulty.choice;
 
     final TaskEntity task = TaskEntity.fromMap(_formData);
-    inputTask == null ? addTask(task) : updateTask(task);
+    widget.inputTask == null ? widget.addTask(task) : widget.updateTask(task);
 
     scheduleNotification(task);
 
@@ -260,110 +159,55 @@ class _TaskForm extends State<TaskForm> {
         key: _formKey,
         child: ListView(
           padding: EdgeInsets.symmetric(horizontal: targetPadding / 2.0),
-          children: <Widget>[
-            _buildFormField(
-                focusNode: _nameFocusNode,
-                initialValue:
-                    widget.inputTask?.name == null ? '' : widget.inputTask.name,
-                labelText: TaskEntity.columnNames[0][0],
-                textInputType: TextInputType.text,
-                maxLength: 50,
-                autoFocus: true,
-                nextFocusNode: _descriptionFocusNode,
-                prefixIcon: Icons.title,
-                fieldHint: 'Task name e.g. Swimming'),
-            _buildFormField(
-                focusNode: _descriptionFocusNode,
-                initialValue: widget.inputTask?.description == null
-                    ? ''
-                    : widget.inputTask.description,
-                labelText: TaskEntity.columnNames[2][0],
-                textInputType: TextInputType.text,
-                maxLength: 150,
-                autoFocus: false,
-                nextFocusNode: _locationFocusNode,
-                prefixIcon: Icons.format_align_left,
-                fieldHint: 'Task details e.g. Swimming for 1 hour.'),
-            _buildFormField(
-                focusNode: _locationFocusNode,
-                initialValue: widget.inputTask?.location == null
-                    ? ''
-                    : widget.inputTask.location,
-                labelText: TaskEntity.columnNames[5][0],
-                textInputType: TextInputType.text,
-                maxLength: 100,
-                autoFocus: false,
-                nextFocusNode: null,
-                prefixIcon: Icons.location_on,
-                fieldHint: 'Task location e.g. University swimming pool.'),
-            _buildDueDateField(widget.inputTask, context),
-            SizedBox(
-              height: 10.0,
-            ),
-            Row(
-              children: <Widget>[
-                _buildOptions(widget.inputTask, 1),
-                _buildOptions(widget.inputTask, 2),
-              ],
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            ),
-            SizedBox(
-              height: 10.0,
-            ),
-            _buildSubmitButton(
-                widget.inputTask, widget.addTask, widget.updateTask),
-          ],
+          children: _buildChildren(),
         ),
       ),
     );
   }
 
-  Widget _buildFormField(
-      {FocusNode focusNode,
-      String labelText,
-      String initialValue,
-      TextInputType textInputType,
-      int maxLength,
-      FocusNode nextFocusNode,
-      bool autoFocus,
-      IconData prefixIcon,
-      String fieldHint}) {
-    return Container(
-      child: EnsureVisibleWhenFocused(
-        focusNode: focusNode,
-        child: TextFormField(
-          focusNode: focusNode,
-          autofocus: autoFocus,
-          decoration: InputDecoration(
-            labelText: labelText,
-            labelStyle: labelStyle,
-            suffixIcon: Icon(prefixIcon),
-            helperText: fieldHint,
-            alignLabelWithHint: true,
-          ),
-          initialValue: initialValue,
-          validator: (String value) {
-            if (value.contains("'")) {
-              return "Can not contain ' character";
-            }
-          },
-          onSaved: (String value) {
-            _formData[labelText] = value.length > 0 ? value : null;
-          },
-          maxLength: maxLength,
-          maxLengthEnforced: true,
-          keyboardType: textInputType,
-          textCapitalization: TextCapitalization.sentences,
-          autocorrect: true,
-          textInputAction: nextFocusNode == null
-              ? TextInputAction.done
-              : TextInputAction.next,
-          maxLines: null,
-          onFieldSubmitted: (String value) {
-            FocusScope.of(context).autofocus(nextFocusNode);
-          },
-        ),
-      ),
-    );
+  List<Widget> _buildChildren() {
+    final String name =
+        widget.inputTask?.name == null ? '' : widget.inputTask.name;
+    final String description = widget.inputTask?.description == null
+        ? ''
+        : widget.inputTask.description;
+    final String location =
+        widget.inputTask?.location == null ? '' : widget.inputTask.location;
+    final Map<String, List<dynamic>> textFieldParams = {
+      'focusNode': [_nameFocusNode, _descriptionFocusNode, _locationFocusNode],
+      'nextFocusNode': [_descriptionFocusNode, _locationFocusNode, null],
+      'initialValue': [name, description, location],
+      'label': [0, 2, 5],
+      'fieldHint': ['E.g. Swimming', 'E.g. For 1 hour.', 'E.g. Swimming pool.'],
+    };
+    final List<Widget> children = [];
+    for (int i = 0; i < 3; ++i)
+      children.add(TaskFormField(
+        formData: _formData,
+        fieldHint: textFieldParams['fieldHint'][i],
+        focusNode: textFieldParams['focusNode'][i],
+        initialValue: textFieldParams['initialValue'][i],
+        labelText: textFieldParams['label'][i],
+        nextFocusNode: textFieldParams['nextFocusNode'][i],
+      ));
+    children.add(SizedBox(height: 10.0));
+    children.add(TaskDatePicker(_formData, TaskEntity.columnNames[1][0]));
+    children.add(SizedBox(height: 10.0));
+    children.add(Row(
+      children: <Widget>[
+        _buildOptions(widget.inputTask, 1),
+        _buildOptions(widget.inputTask, 2)
+      ],
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    ));
+    children.add(SizedBox(height: 10.0));
+    children.add(RaisedButton(
+      child: Text(widget.inputTask == null ? 'Add new task' : 'Update task'),
+      color: Colors.blueAccent,
+      textColor: Colors.white,
+      onPressed: _submitForm,
+    ));
+
+    return children;
   }
 }
