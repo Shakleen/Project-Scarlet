@@ -8,16 +8,15 @@ import 'package:flutter/material.dart';
 /// [navigatorRoute] - route to navigate to once pressed.
 /// [active] - true if page is currently in view, false otherwise.
 class SideDrawerListTile extends StatelessWidget {
-  final String titleText;
+  final String titleText, route;
   final IconData leadingIcon;
-  final String navigatorRoute;
   final bool active;
   final Color itemColor;
 
   SideDrawerListTile(
     this.titleText,
+    this.route,
     this.leadingIcon,
-    this.navigatorRoute,
     this.active,
     this.itemColor,
   );
@@ -40,7 +39,7 @@ class SideDrawerListTile extends StatelessWidget {
       onTap: () {
         // Change only if inactive.
         if (active == false) {
-          Navigator.pushReplacementNamed(context, navigatorRoute);
+          Navigator.pushReplacementNamed(context, route);
         }
       },
     );

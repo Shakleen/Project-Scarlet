@@ -1,14 +1,9 @@
 import 'package:flutter/material.dart';
-import 'dart:math';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-
 import '../../widgets/ui_elements/combo_box.dart';
-
 import '../../entities/task_entity.dart';
-import '../../scoped_model/main_model.dart';
-import '../../pages/strategy_pages/strategic_page.dart';
 import '../../widgets/strategy_widgets/task_form_field.dart';
 import '../../widgets/strategy_widgets/task_date_picker.dart';
+import '../../controller/task_notification.dart';
 
 class TaskForm extends StatefulWidget {
   final TaskEntity inputTask;
@@ -17,61 +12,12 @@ class TaskForm extends StatefulWidget {
   TaskForm(this.inputTask, this.addTask, this.updateTask);
 
   @override
-  _TaskForm createState() {
-    return _TaskForm();
-  }
+  _TaskForm createState() => _TaskForm();
 }
 
 class _TaskForm extends State<TaskForm> {
   final Map<String, dynamic> _formData = TaskEntity.taskFormData;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final _nameFocusNode = FocusNode();
-  final _descriptionFocusNode = FocusNode();
-  final _locationFocusNode = FocusNode();
-  FlutterLocalNotificationsPlugin notificationsPlugin;
-
-  @override
-  void initState() {
-    notificationsPlugin = FlutterLocalNotificationsPlugin();
-    AndroidInitializationSettings android =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
-    IOSInitializationSettings iOS = IOSInitializationSettings();
-    InitializationSettings initializationSettings =
-        InitializationSettings(android, iOS);
-    notificationsPlugin.initialize(initializationSettings,
-        onSelectNotification: (String payload) async {
-      await Navigator.push(
-        context,
-        new MaterialPageRoute(builder: (context) => StrategicPage()),
-      );
-    });
-    super.initState();
-  }
-
-  scheduleNotification(TaskEntity task) async {
-    DateTime scheduledNotificationDateTime =
-        task.dueDate.subtract(Duration(minutes: 5));
-    NotificationDetails platformChannelSpecifics = NotificationDetails(
-      MainModel.notificationDetails[0][0],
-      MainModel.notificationDetails[0][1],
-    );
-
-    final int seed = (task.dueDate.microsecond +
-            task.setDate.microsecond * task.dueDate.millisecond +
-            task.setDate.millisecond * task.dueDate.second) +
-        (task.setDate.second * task.dueDate.minute + task.setDate.minute) *
-            task.dueDate.month +
-        (task.setDate.month * task.dueDate.year + task.setDate.year);
-    final int id = Random(Random(seed).nextInt(4294967295)).nextInt(4294967295);
-
-    await notificationsPlugin.schedule(
-      id,
-      task.name,
-      'Scheduled at ' + MainModel.dateFormatter.format(task.dueDate),
-      scheduledNotificationDateTime,
-      platformChannelSpecifics,
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -79,11 +25,9 @@ class _TaskForm extends State<TaskForm> {
       onTap: () {
         FocusScope.of(context).requestFocus(FocusNode());
       },
-      child: Material(
-        child: Scaffold(
-          appBar: AppBar(title: Text('Edit task details')),
-          body: _buildForm(context),
-        ),
+      child: Scaffold(
+        appBar: AppBar(title: Text('Edit task details')),
+        body: _buildForm(context),
       ),
     );
   }
@@ -100,7 +44,7 @@ class _TaskForm extends State<TaskForm> {
     final TaskEntity task = TaskEntity.fromMap(_formData);
     widget.inputTask == null ? widget.addTask(task) : widget.updateTask(task);
 
-    scheduleNotification(task);
+    TaskNotification().scheduleNotification(task);
 
     Navigator.pop(context);
   }
@@ -124,6 +68,9 @@ class _TaskForm extends State<TaskForm> {
   }
 
   List<Widget> _buildChildren() {
+    final FocusNode _nameFocusNode = FocusNode();
+    final FocusNode _descriptionFocusNode = FocusNode();
+    final FocusNode _locationFocusNode = FocusNode();
     final String name =
         widget.inputTask?.name == null ? '' : widget.inputTask.name;
     final String description = widget.inputTask?.description == null

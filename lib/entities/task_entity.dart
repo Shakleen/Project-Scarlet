@@ -2,32 +2,20 @@ import 'package:flutter/material.dart';
 import '../presentation/custom_icons.dart';
 
 /// Entity class for tasks.
-///
-/// Each task has a unique [setDate] which is used to differentiate it from
-/// other tasks in the database where it will be ultimately stored. Moreover,
-/// a task is composed of having a [name], [dueDate], [completeDate],
-/// [description], [priority], [location] and [difficulty]. [priority]
-/// levels and [difficulty] levels are defined in the static maps called
-/// [priorityLevels] and [difficultyLevels] respectively. The [columnNames]
-/// define the different column names and types each of the attributes will
-/// have in the database. [databaseConstraints] carries the database constraints
-/// for the task database. The data is stored in a table named [tableName]. The
-/// table has two views whose names are kept in [tableViewNames] list. Finally,
-/// the file that keeps the data is called [databaseFileName].
 class TaskEntity {
-  static final Map<int, List> priorityLevels = const {
+  static final Map<int, List<dynamic>> priorityLevels = const {
     0: ['Low', CustomIcons.low, Colors.black],
     1: ['Normal', CustomIcons.normal, Colors.green],
     2: ['Important', CustomIcons.important, Colors.purple],
     3: ['Urgent', CustomIcons.urgent, Colors.red],
-  };
-  static final Map<int, List> difficultyLevels = const {
+  },
+      difficultyLevels = const {
     0: ['Easy', CustomIcons.low, Colors.black],
     1: ['Medium', CustomIcons.normal, Colors.green],
     2: ['Difficult', CustomIcons.important, Colors.purple],
     3: ['Hard', CustomIcons.urgent, Colors.red],
-  };
-  static final Map<int, List<String>> columnNames = const {
+  },
+      columnNames = const {
     0: ["Name", "TEXT"],
     1: ["DueDate", "DATETIME"],
     2: ["Description", "TEXT"],
@@ -39,26 +27,29 @@ class TaskEntity {
   };
   static final Map<String, dynamic> taskFormData = {
     TaskEntity.columnNames[0][0]: null, // Name
-    TaskEntity.columnNames[1][0]: DateTime.now(), // DueDate
+    TaskEntity.columnNames[1][0]: DateTime.now(), // Due Date
     TaskEntity.columnNames[2][0]: null, // Description
     TaskEntity.columnNames[3][0]: 0, // Priority
     TaskEntity.columnNames[4][0]: 0, // Difficulty
     TaskEntity.columnNames[5][0]: null, // Location
-    TaskEntity.columnNames[7][0]: DateTime.now(),
+    TaskEntity.columnNames[7][0]: DateTime.now(), // Set date
   };
-  static final String tableName = "Tasks";
+  static final String primaryKey = columnNames[7][0],
+      tableName = "Tasks",
+      databaseFileName = "TasksDatabase.db";
   static final List<String> tableViewNames = const [
     "TasksPending",
     "TasksCompleted",
   ];
-  static final String databaseFileName = "TasksDatabase.db";
-  static DateTime _convert(dynamic input) {
-    return input != null
-        ? input.runtimeType.toString() == 'DateTime'
-            ? input
-            : DateTime.parse(input)
-        : null;
-  }
+
+  static DateTime _convertDate(dynamic input) => input != null
+      ? input.runtimeType.toString() == 'DateTime'
+          ? input
+          : DateTime.parse(input)
+      : null;
+
+  static int _convertInt(dynamic input) =>
+      input.runtimeType == int ? input : int.parse(input);
 
   static Map<String, dynamic> toMap(TaskEntity task, bool mode) {
     final Map<String, dynamic> map = {};
@@ -71,25 +62,16 @@ class TaskEntity {
     return map;
   }
 
-  static TaskEntity fromMap(Map<String, dynamic> map) {
-    final dynamic dueDate = map[columnNames[1][0]];
-    final dynamic priority = map[columnNames[3][0]];
-    final dynamic difficulty = map[columnNames[4][0]];
-    final dynamic completeDate = map[columnNames[6][0]];
-    final dynamic setDate = map[columnNames[7][0]];
-
-    return TaskEntity(
-      name: map[columnNames[0][0]],
-      dueDate: _convert(dueDate),
-      description: map[columnNames[2][0]],
-      priority: priority.runtimeType == int ? priority : int.parse(priority),
-      difficulty:
-          difficulty.runtimeType == int ? difficulty : int.parse(difficulty),
-      location: map[columnNames[5][0]],
-      completeDate: _convert(completeDate),
-      setDate: _convert(setDate),
-    );
-  }
+  static TaskEntity fromMap(Map<String, dynamic> map) => TaskEntity(
+        name: map[columnNames[0][0]],
+        dueDate: _convertDate(map[columnNames[1][0]]),
+        description: map[columnNames[2][0]],
+        priority: _convertInt(map[columnNames[3][0]]),
+        difficulty: _convertInt(map[columnNames[4][0]]),
+        location: map[columnNames[5][0]],
+        completeDate: _convertDate(map[columnNames[6][0]]),
+        setDate: _convertDate(map[columnNames[7][0]]),
+      );
 
   String name;
   DateTime dueDate;
@@ -101,9 +83,6 @@ class TaskEntity {
   DateTime setDate;
 
   /// Constructor for class.
-  ///
-  /// The constructor takes 2 required parameters. They are [name] and [dueDate].
-  /// All the parameters are named parameters.
   TaskEntity({
     @required String name,
     @required DateTime dueDate,
@@ -124,8 +103,7 @@ class TaskEntity {
     this.completeDate = completeDate;
   }
 
-  /// Method for getting any information about a task by passing in an index
-  /// that represents the task.
+  /// Method for getting any information about a task by passing in an index that represents the task.
   dynamic getTaskInfo(int i) {
     switch (i) {
       case 0:

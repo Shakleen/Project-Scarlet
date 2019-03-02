@@ -32,9 +32,9 @@ class TaskList extends StatefulWidget {
 
 /// [_TaskListState] stateless class is redrawn based on the change of its contents
 /// which is the [_taskList].
-/// 
-/// It displays the tasks in [_taskList] and also displays snack bars [_deleteSnackBar] 
-/// upon the delete and [_completeSnackBar] on completion of a task to revert changes. 
+///
+/// It displays the tasks in [_taskList] and also displays snack bars [_deleteSnackBar]
+/// upon the delete and [_completeSnackBar] on completion of a task to revert changes.
 /// These snack bars are built by the function [_buildSnackBar].
 class _TaskListState extends State<TaskList> {
   List<TaskEntity> _taskList = [];
@@ -54,23 +54,22 @@ class _TaskListState extends State<TaskList> {
     return Scaffold(
       // Display the task which currently exist
       body: FutureBuilder<List<TaskEntity>>(
-      future: widget.getTaskList(),
-      builder:
-          (BuildContext context, AsyncSnapshot<List<TaskEntity>> snapshot) {
-        if (snapshot.connectionState == ConnectionState.done) {
-          _taskList = snapshot.hasData ? snapshot.data : [];
+        future: widget.getTaskList(),
+        builder:
+            (BuildContext context, AsyncSnapshot<List<TaskEntity>> snapshot) {
+          if (snapshot.connectionState == ConnectionState.done) {
+            _taskList = snapshot.hasData ? snapshot.data : [];
 
-          if (snapshot.hasError) {
-            // TODO: Handle Error code
+            if (snapshot.hasError) {
+              // TODO: Handle Error code
+            }
+
+            return _buildListView();
+          } else if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
           }
-
-          return _buildListView();
-        }
-        else if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
-        }
-      },
-    ),
+        },
+      ),
 
       // Floating action button for adding new tasks and goals
       floatingActionButton:
@@ -79,7 +78,7 @@ class _TaskListState extends State<TaskList> {
   }
 
   /// Method that builds the list of [TaskCard] type objects to display on the screen.
-  /// 
+  ///
   /// Dissmissible is used for dissmissing tasks. Swiping from end to start removes and
   /// from start to end completes a task. Dissmiss action is handled by [_handleOnDismiss]
   /// function.
@@ -88,18 +87,15 @@ class _TaskListState extends State<TaskList> {
       itemCount: _taskList.length,
       itemBuilder: (BuildContext context, int index) {
         return Dismissible(
-          child: TaskCard(
-            _taskList[index],
-            widget.tabType,
-            widget.addTask,
-            widget.updateTask
-          ),
-          background: _buildContainer(true),  // For completion.
+          child: TaskCard(_taskList[index], widget.tabType, widget.addTask,
+              widget.updateTask),
+          background: _buildContainer(true), // For completion.
           secondaryBackground: _buildContainer(false), // For remove.
           key: Key(_taskList[index].setDate.toString()),
           direction: widget.tabType == 2 // Tab type = 2 means Completed tab
               ? DismissDirection.endToStart // Swipe to only delete
-              : DismissDirection.horizontal, // Swipe to both complete and delete
+              : DismissDirection
+                  .horizontal, // Swipe to both complete and delete
           onDismissed: (DismissDirection direction) =>
               _handleOnDismiss(direction, index),
           dismissThresholds: {
@@ -173,14 +169,16 @@ class _TaskListState extends State<TaskList> {
   /// Method for building the floating action button. It generates a new
   /// form for creating a new task. The button passes in [addTask] to the
   /// form for adding the new task to the list of tasks.
-  FloatingActionButton _buildFloatingActionButton(BuildContext context) {
+  Widget _buildFloatingActionButton(BuildContext context) {
     return FloatingActionButton(
       child: Icon(Icons.add),
       backgroundColor: Colors.red,
       onPressed: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => TaskForm(null, widget.addTask, widget.updateTask)),
+          MaterialPageRoute(
+              builder: (context) =>
+                  TaskForm(null, widget.addTask, widget.updateTask)),
         );
       },
     );

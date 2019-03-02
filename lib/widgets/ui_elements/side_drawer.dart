@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../presentation/custom_icons.dart';
 import './side_drawer_list_tile.dart';
+import '../../scoped_model/main_model.dart';
 
 /// Class for generating a side drawer that has the same overall structure for seven different pages.
 ///
@@ -13,81 +13,34 @@ class SideDrawer extends StatelessWidget {
   SideDrawer(this._activeNumber);
 
   List<Widget> _buildListViewChildren() {
-    final List<bool> _activeElement = [
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false,
-      false
-    ];
+    List<Widget> children = [AppBar(
+      automaticallyImplyLeading: false,
+      title: Text('Navigation'),
+    )];
 
-    _activeElement[_activeNumber] = true;
+    for (int i = 0; i < MainModel.navigationRoutes.keys.length; ++i) {
+      String key = _getKey(i);
+      children.add(SideDrawerListTile(
+        key,
+        MainModel.navigationRoutes[key.toLowerCase()][0],
+        MainModel.navigationRoutes[key.toLowerCase()][1],
+        i == _activeNumber ? true : false,
+        MainModel.navigationRoutes[key.toLowerCase()][2],
+      ));
+    }
 
-    return <Widget>[
-      AppBar(
-        automaticallyImplyLeading: false,
-        title: Text('Navigation'),
-      ),
-      SideDrawerListTile(
-        'Home',
-        Icons.home,
-        '/',
-        _activeElement[0],
-        Colors.blue,
-      ),
-      SideDrawerListTile(
-        'Strength',
-        CustomIcons.fist_raised_solid,
-        '/strength',
-        _activeElement[1],
-        Colors.red,
-      ),
-      SideDrawerListTile(
-        'Wisdom',
-        CustomIcons.book_solid,
-        '/wisdom',
-        _activeElement[2],
-        Colors.green,
-      ),
-      SideDrawerListTile(
-        'Resistance',
-        CustomIcons.shield_alt_solid,
-        '/resistance',
-        _activeElement[3],
-        Colors.purple,
-      ),
-      SideDrawerListTile(
-        'Strategic',
-        CustomIcons.chess_knight_solid,
-        '/strategic',
-        _activeElement[4],
-        Colors.deepOrangeAccent,
-      ),
-      SideDrawerListTile(
-        'Play Game',
-        CustomIcons.gamepad_solid,
-        '/playgame',
-        _activeElement[5],
-        Colors.indigoAccent,
-      ),
-      SideDrawerListTile(
-        'Settings',
-        Icons.settings,
-        '/settings',
-        _activeElement[6],
-        Colors.black,
-      ),
-      SideDrawerListTile(
-        'About',
-        Icons.info,
-        '/about',
-        _activeElement[7],
-        Colors.blueAccent,
-      ),
-    ];
+    return children;
+  }
+
+  String _getKey(int i) {
+    if (i == 0) return 'Home';
+    else if (i == 1) return 'Strength';
+    else if (i == 2) return 'Wisdom';
+    else if (i == 3) return 'Resistance';
+    else if (i == 4) return 'Strategic';
+    else if (i == 5) return 'Play Game';
+    else if (i == 6) return 'Settings';
+    else if (i == 7) return 'About';
   }
 
   @override

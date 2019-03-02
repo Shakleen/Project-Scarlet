@@ -7,9 +7,9 @@ class ComboBox extends StatefulWidget {
   int choice;
   final Map<int, List<dynamic>> levels;
   final Map<String, dynamic> formData;
-  final String formKey;
+  final String labelName;
 
-  ComboBox(this.levels, this.formData, this.formKey, [this.choice = 0]);
+  ComboBox(this.levels, this.formData, this.labelName, [this.choice = 0]);
 
   @override
   State<StatefulWidget> createState() {
@@ -64,7 +64,7 @@ class _ComboBoxState extends State<ComboBox> {
 
   void changedDropDownItem(int selection) {
     setState(() {
-      widget.formData[widget.formKey] =
+      widget.formData[widget.labelName] =
           widget.choice = _currentChoice = selection;
     });
   }
@@ -77,7 +77,7 @@ class _ComboBoxState extends State<ComboBox> {
         mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
           Text(
-            widget.formKey,
+            widget.labelName,
             style: MainModel.labelStyle,
           ),
           DropdownButton(

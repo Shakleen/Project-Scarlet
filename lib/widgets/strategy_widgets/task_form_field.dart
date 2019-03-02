@@ -27,7 +27,7 @@ class TaskFormField extends StatelessWidget {
         focusNode: focusNode,
         child: TextFormField(
           focusNode: focusNode,
-          autofocus: labelText == 0 ? true : false,
+          autofocus: false,
           decoration: _buildInputDecorations(),
           initialValue: initialValue,
           validator: _validate,

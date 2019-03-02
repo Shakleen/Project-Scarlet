@@ -17,6 +17,16 @@ class TaskDatabase {
     " >= ?",
     " < ?",
   ];
+  static final List<String> columns = [
+    TaskEntity.columnNames[0][0],
+    TaskEntity.columnNames[1][0],
+    TaskEntity.columnNames[2][0],
+    TaskEntity.columnNames[3][0],
+    TaskEntity.columnNames[4][0],
+    TaskEntity.columnNames[5][0],
+    TaskEntity.columnNames[6][0],
+    TaskEntity.columnNames[7][0],
+  ];
 
   /// Private constructor of TaskDatabase class.
   TaskDatabase._();
@@ -131,9 +141,9 @@ class TaskDatabase {
 
   Future<int> getTaskCount() async {
     final List<dynamic> result = await _database
-        .rawQuery("SELECT COUNT(SETDATE) FROM " + TaskEntity.tableName);
-    print(result[0]['COUNT(SETDATE)']);
-    return result[0]['COUNT(SETDATE)'];
+        .rawQuery("SELECT MAX(OID) FROM " + TaskEntity.tableName);
+    print(result[0]['MAX(OID)']);
+    return result[0]['MAX(OID)'];
   }
 
   /// Public method for retrieving tasks of three types. Type is
@@ -157,18 +167,21 @@ class TaskDatabase {
             where: TaskEntity.columnNames[1][0] + whereClauses[type - 1],
             whereArgs: [DateTime.now().toString()],
             orderBy: TaskEntity.columnNames[1][0],
+            columns: columns,
           );
           break;
         case 3: // Completed
           result = await _database.query(
             TaskEntity.tableViewNames[1],
             orderBy: TaskEntity.columnNames[1][0],
+            columns: columns,
           );
           break;
         default: // All
           result = await _database.query(
             TaskEntity.tableName,
             orderBy: TaskEntity.columnNames[1][0],
+            columns: columns,
           );
           break;
       }
@@ -223,7 +236,9 @@ class TaskDatabase {
           TaskEntity.columnNames[i][1] +
           (i < numberOfColumns
               ? ", "
-              : ", CONSTRAINT TASKS_PRIMARY_KEY PRIMARY KEY(SetDate))");
+              : ", CONSTRAINT TASKS_PRIMARY_KEY PRIMARY KEY(" +
+                  TaskEntity.primaryKey +
+                  "))");
 
     print('TaskDatabase - _buildTableCreateStatement - ' +
         statement); // TODO REMOVE THIS

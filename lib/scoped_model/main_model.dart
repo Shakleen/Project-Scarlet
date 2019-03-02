@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 import './task_model.dart';
+import '../presentation/custom_icons.dart';
 import 'package:scoped_model/scoped_model.dart';
 
 class MainModel extends Model with TaskModel {
@@ -32,5 +33,15 @@ class MainModel extends Model with TaskModel {
         presentSound: true,
       ),
     ],
+  };
+  static final Map<String, List<dynamic>> navigationRoutes = const {
+    'home': ['/', Icons.home, Colors.blue],
+    'strength' : ['/strength', CustomIcons.fist_raised_solid, Colors.red],
+    'wisdom' : ['/wisdom', CustomIcons.book_solid, Colors.green],
+    'resistance': ['/resistance', CustomIcons.shield_alt_solid, Colors.purple],
+    'strategic' : ['/strategic', CustomIcons.chess_knight_solid, Colors.deepOrangeAccent],
+    'play game' : ['/playgame', CustomIcons.gamepad_solid, Colors.indigoAccent],
+    'settings': ['/settings', Icons.settings, Colors.black],
+    'about' : ['/about', Icons.info, Colors.blueAccent],
   };
 }

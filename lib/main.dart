@@ -22,9 +22,7 @@ main() {
 
 class MyApp extends StatefulWidget {
   @override
-  State<StatefulWidget> createState() {
-    return _MyApp();
-  }
+  State<StatefulWidget> createState() => _MyApp();
 }
 
 class _MyApp extends State<MyApp> {
@@ -37,7 +35,8 @@ class _MyApp extends State<MyApp> {
         theme: ThemeData(
           primaryColor: Colors.blue,
           accentColor: Colors.blueAccent,
-//          brightness: Brightness.light,
+          fontFamily: 'Roboto',
+          brightness: Brightness.light,
         ),
 
         // The application home page. The app will land here everytime it starts.
@@ -45,13 +44,13 @@ class _MyApp extends State<MyApp> {
 
         // Creating a page registry
         routes: {
-          '/strength': (BuildContext context) => StrengthPage(),
-          '/wisdom': (BuildContext context) => WisdomPage(),
-          '/resistance': (BuildContext context) => ResistancePage(),
-          '/strategic': (BuildContext context) => StrategicPage(),
-          '/playgame': (BuildContext context) => PlayGamePage(),
-          '/settings': (BuildContext context) => SettingsPage(),
-          '/about': (BuildContext context) => AboutPage(),
+          MainModel.navigationRoutes['strength'][0]: (BuildContext context) => StrengthPage(),
+          MainModel.navigationRoutes['wisdom'][0]: (BuildContext context) => WisdomPage(),
+          MainModel.navigationRoutes['resistance'][0]: (BuildContext context) => ResistancePage(),
+          MainModel.navigationRoutes['strategic'][0]: (BuildContext context) => StrategicPage(),
+          MainModel.navigationRoutes['play game'][0]: (BuildContext context) => PlayGamePage(),
+          MainModel.navigationRoutes['settings'][0]: (BuildContext context) => SettingsPage(),
+          MainModel.navigationRoutes['about'][0]: (BuildContext context) => AboutPage(),
         },
       ),
     );

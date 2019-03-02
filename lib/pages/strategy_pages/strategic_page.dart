@@ -24,7 +24,7 @@ class StrategicPage extends StatelessWidget {
   StrategicPage();
 
   Widget _buildTab(bool mode, int tabNumber) {
-    if (mode) {
+    if (mode)
       return Tab(
         icon: Icon(
           tabNumber == 0
@@ -35,7 +35,6 @@ class StrategicPage extends StatelessWidget {
             ? 'Upcoming'
             : tabNumber == 1 ? 'Overdue' : 'Completed',
       );
-    }
 
     return TaskList(
       tabNumber,
