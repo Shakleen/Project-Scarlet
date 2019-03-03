@@ -25,7 +25,6 @@ class SideDrawer extends StatelessWidget {
         MainModel.navigationRoutes[key.toLowerCase()][0],
         MainModel.navigationRoutes[key.toLowerCase()][1],
         i == _activeNumber ? true : false,
-        MainModel.navigationRoutes[key.toLowerCase()][2],
       ));
     }
 

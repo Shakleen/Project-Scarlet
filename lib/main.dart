@@ -32,7 +32,7 @@ class _MyApp extends State<MyApp> {
       model: MainModel(),
       child: MaterialApp(
         // This sets the theme of the application
-        theme: _speciifyTheme(),
+        theme: MainModel.defaultTheme,
 
         // The application home page. The app will land here everytime it starts.
         home: HomePage(),
@@ -55,22 +55,6 @@ class _MyApp extends State<MyApp> {
               AboutPage(),
         },
       ),
-    );
-  }
-
-  ThemeData _speciifyTheme() {
-    return ThemeData(
-      primaryColor: Colors.blue,
-      accentColor: Colors.blueAccent,
-      backgroundColor: Colors.white,
-      fontFamily: 'Roboto',
-      brightness: Brightness.light,
-      accentColorBrightness: Brightness.light,
-      textTheme: TextTheme(
-        title: TextStyle(color: Colors.white, fontFamily: 'Roboto'),
-        subtitle: TextStyle(color: Colors.white, fontFamily: 'Roboto'),
-      ),
-      iconTheme: IconThemeData(color: Colors.white70, size: 26),
     );
   }
 }

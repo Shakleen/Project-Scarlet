@@ -12,9 +12,7 @@ class TaskDatePicker extends StatefulWidget {
   }
 
   @override
-  State<StatefulWidget> createState() {
-    return _TaskDatePicker();
-  }
+  State<StatefulWidget> createState() => _TaskDatePicker();
 }
 
 class _TaskDatePicker extends State<TaskDatePicker> {
@@ -25,34 +23,31 @@ class _TaskDatePicker extends State<TaskDatePicker> {
     buttonColor = Colors.blue;
     super.initState();
   }
-  
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       child: Column(
         children: <Widget>[
-          Text(
-            'Date/Time',
-            style: MainModel.labelStyle,
-          ),
+          Text('Date/Time', style: Theme.of(context).textTheme.subhead),
           SizedBox(height: 5.0),
           RaisedButton(
             color: buttonColor,
             child: Text(
               MainModel.dateFormatter.format(widget.dateTime),
-              style: TextStyle(color: Colors.white),
+              style: Theme.of(context)
+                  .textTheme
+                  .body1
+                  .copyWith(color: Theme.of(context).backgroundColor),
             ),
-            onPressed: () {
-              return _selectDateTime(
-                context,
-                widget.dateTime,
-                TimeOfDay(
-                  hour: widget.dateTime.hour,
-                  minute: widget.dateTime.minute,
+            onPressed: () => _selectDateTime(
+                  context,
+                  widget.dateTime,
+                  TimeOfDay(
+                    hour: widget.dateTime.hour,
+                    minute: widget.dateTime.minute,
+                  ),
                 ),
-              );
-            },
           ),
         ],
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -88,10 +83,9 @@ class _TaskDatePicker extends State<TaskDatePicker> {
         setState(() {
           if (widget.dateTime.compareTo(DateTime.now()) > 0) {
             widget.formData[widget.formDataKey] = widget.dateTime;
-            buttonColor = Colors.blue;
-          } else {
+            buttonColor = Theme.of(context).buttonColor;
+          } else
             buttonColor = Colors.redAccent;
-          }
         });
       }
     }

@@ -9,8 +9,6 @@ import 'package:scoped_model/scoped_model.dart';
 class MainModel extends Model with TaskModel {
   static final DateFormat dateFormatter =
       DateFormat("EEEE, dd/MM/yyyy 'at' hh:mm a");
-  static final TextStyle labelStyle =
-      TextStyle(color: Colors.blueAccent, fontFamily: 'Roboto', fontSize: 16);
   static final Map<int, List<dynamic>> notificationDetails = {
     0: [
       AndroidNotificationDetails(
@@ -35,13 +33,30 @@ class MainModel extends Model with TaskModel {
     ],
   };
   static final Map<String, List<dynamic>> navigationRoutes = const {
-    'home': ['/', Icons.home, Colors.blue],
-    'strength' : ['/strength', CustomIcons.fist_raised_solid, Colors.red],
-    'wisdom' : ['/wisdom', CustomIcons.book_solid, Colors.green],
-    'resistance': ['/resistance', CustomIcons.shield_alt_solid, Colors.purple],
-    'strategic' : ['/strategic', CustomIcons.chess_knight_solid, Colors.deepOrangeAccent],
-    'play game' : ['/playgame', CustomIcons.gamepad_solid, Colors.indigoAccent],
-    'settings': ['/settings', Icons.settings, Colors.black],
-    'about' : ['/about', Icons.info, Colors.blueAccent],
+    'home': ['/', Icons.home],
+    'strength': ['/strength', CustomIcons.fist_raised_solid],
+    'wisdom': ['/wisdom', CustomIcons.book_solid],
+    'resistance': ['/resistance', CustomIcons.shield_alt_solid],
+    'strategic': ['/strategic', CustomIcons.chess_knight_solid],
+    'play game': ['/playgame', CustomIcons.gamepad_solid],
+    'settings': ['/settings', Icons.settings],
+    'about': ['/about', Icons.info],
   };
+  static ThemeData defaultTheme = ThemeData(
+      primaryColor: Colors.blue,
+      accentColor: Colors.blueAccent,
+      backgroundColor: Colors.white,
+      fontFamily: 'Roboto',
+      brightness: Brightness.light,
+      accentColorBrightness: Brightness.light,
+      textTheme: TextTheme(
+        title: TextStyle(color: Colors.white),
+        subtitle: TextStyle(color: Colors.black),
+        subhead: TextStyle(color: Colors.blueAccent),
+        body1: TextStyle(color: Colors.black),
+      ),
+      iconTheme: IconThemeData(color: Colors.white70, size: 26),
+      secondaryHeaderColor: Colors.black,
+      buttonColor: Colors.blue,
+    );
 }

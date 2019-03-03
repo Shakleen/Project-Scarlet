@@ -42,6 +42,10 @@ class TaskFormField extends StatelessWidget {
           onFieldSubmitted: (String value) {
             FocusScope.of(context).requestFocus(nextFocusNode);
           },
+          style: Theme.of(context)
+              .textTheme
+              .subhead
+              .copyWith(color: Theme.of(context).secondaryHeaderColor),
         ),
       ),
     );
@@ -58,10 +62,7 @@ class TaskFormField extends StatelessWidget {
   InputDecoration _buildInputDecorations(BuildContext context) {
     return InputDecoration(
       labelText: formKey,
-      labelStyle: Theme.of(context)
-          .textTheme
-          .subhead
-          .copyWith(color: Theme.of(context).accentColor),
+      labelStyle: Theme.of(context).textTheme.subhead,
       helperText: fieldHint,
       alignLabelWithHint: true,
     );
