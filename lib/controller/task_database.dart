@@ -26,6 +26,8 @@ class TaskDatabase {
     TaskEntity.columnNames[5][0],
     TaskEntity.columnNames[6][0],
     TaskEntity.columnNames[7][0],
+    TaskEntity.columnNames[8][0],
+    TaskEntity.columnNames[9][0],
   ];
 
   /// Private constructor of TaskDatabase class.
@@ -66,67 +68,67 @@ class TaskDatabase {
   }
 
   /// Public method for inserting a new task into the database.
-  Future<int> insertTask(TaskEntity task) async {
-    print('TaskDatabase - insertTask - ');
+  Future<bool> insertTask(TaskEntity task) async {
+    print('TaskDatabase - insertTask - '); // TODO REMOVE THIS
     try {
       final int result = await _database.insert(
         TaskEntity.tableName,
-        TaskEntity.toMap(task, false),
+        TaskEntity.toMap(task, true),
       );
 
-      if (result == 1) {
+      if (result != 0) {
         print('Successful insertion!'); // TODO REMOVE THIS
-        return getTaskCount();
+        return true;
       }
     } catch (e) {
       // TODO IMPLEMENT EXCEPTION HANDLING
-      print('failed insertion!' + e.toString()); // TODO REMOVE THIS
+      print('failed insertion! ' + e.toString()); // TODO REMOVE THIS
     }
-    return getTaskCount();
+    return false;
   }
 
   /// Public method for removing an existing task from the database.
-  Future<int> removeTask(TaskEntity task) async {
+  Future<bool> removeTask(TaskEntity task) async {
     print('TaskDatabase - removeTask - '); // TODO REMOVE THIS
 
     try {
       final int result = await _database.delete(
         TaskEntity.tableName,
-        where: (TaskEntity.columnNames[7][0] + " = ?"),
-        whereArgs: [task.setDate.toString()],
+        where: (TaskEntity.primaryKey + " = ?"),
+        whereArgs: [task.id],
       );
-      if (result == 1) {
+      if (result != 0) {
         print('removal successful!'); // TODO REMOVE THIS
-        return getTaskCount();
+        return true;
       }
     } catch (e) {
       // TODO IMPLEMENT EXCEPTION HANDLING
-      print('exception occured!'); // TODO REMOVE THIS
+      print('exception occured! ' + e.toString()); // TODO REMOVE THIS
     }
 
     print('removal failed!'); // TODO REMOVE THIS
-    return getTaskCount();
+    return false;
   }
 
   /// Public method for updating existing task information.
-  Future<int> updateTask(TaskEntity task) async {
+  Future<bool> updateTask(TaskEntity task) async {
     print('TaskDatabase - updateTaske - '); // TODO REMOVE THIS
 
     try {
       Map<String, dynamic> myMap = TaskEntity.toMap(task, true);
-      print(myMap);
+      print(myMap); // TODO REMOVE THIS
       final int result = await _database.update(
         TaskEntity.tableName,
         myMap,
-        where: TaskEntity.columnNames[7][0] + " = ?",
-        whereArgs: [task.setDate.toString()],
+        where: TaskEntity.primaryKey + " = ?",
+        whereArgs: [task.id],
       );
 
       print('Result of update: ' + result?.toString());
 
-      if (result == 1) {
+      if (result != 0) {
         print('Update successful!'); // TODO REMOVE THIS
-        return getTaskCount();
+        return true;
       }
     } catch (e) {
       // TODO IMPLEMENT EXCEPTION HANDLING
@@ -136,14 +138,17 @@ class TaskDatabase {
 
     print('Update failed!'); // TODO REMOVE THIS
 
-    return getTaskCount();
+    return false;
   }
 
-  Future<int> getTaskCount() async {
-    final List<dynamic> result = await _database
-        .rawQuery("SELECT MAX(OID) FROM " + TaskEntity.tableName);
-    print(result[0]['MAX(OID)']);
-    return result[0]['MAX(OID)'];
+  // Returns information of a single task
+  Future<TaskEntity> getTaskDetails(TaskEntity task) async {
+    final List<dynamic> result = await _database.query(
+      TaskEntity.tableName,
+      where: columns[7] + ' = ?',
+      whereArgs: [task.setDate.toString()],
+    );
+    return TaskEntity.fromMap(result[0]);
   }
 
   /// Public method for retrieving tasks of three types. Type is
@@ -186,13 +191,16 @@ class TaskDatabase {
           break;
       }
 
-      print("Length = " + result?.length.toString()); // TODO REMOVE THIS
+      print("Length of list from DBMS = " +
+          result?.length.toString()); // TODO REMOVE THIS
 
       if (result != null) {
-        for (Map<String, dynamic> entry in result)
-          resultList.add(TaskEntity.fromMap(entry));
+        for (Map<String, dynamic> entry in result) {
+          final TaskEntity task = TaskEntity.fromMap(entry);
+          resultList.add(task);
+        }
 
-        print("Length of the list is " +
+        print("Length of the created list is " +
             resultList.length.toString()); // TODO REMOVE THIS
       }
     } catch (e) {
@@ -227,18 +235,19 @@ class TaskDatabase {
   /// information.
   String _buildTableCreateStatement() {
     final int numberOfColumns = TaskEntity.columnNames.length - 1;
+    final String ending = ", CONSTRAINT TASKS_PRIMARY_KEY PRIMARY KEY(" +
+        TaskEntity.primaryKey +
+        "))";
     String statement = "CREATE TABLE " + TaskEntity.tableName + " (";
 
     // Creating the column name and column type portion
     for (int i = 0; i <= numberOfColumns; ++i)
-      statement += TaskEntity.columnNames[i][0] +
+      statement += columns[i] +
           " " +
           TaskEntity.columnNames[i][1] +
-          (i < numberOfColumns
-              ? ", "
-              : ", CONSTRAINT TASKS_PRIMARY_KEY PRIMARY KEY(" +
-                  TaskEntity.primaryKey +
-                  "))");
+          " " +
+          TaskEntity.columnNames[i][2] +
+          (i < numberOfColumns ? ", " : ")");
 
     print('TaskDatabase - _buildTableCreateStatement - ' +
         statement); // TODO REMOVE THIS
@@ -253,9 +262,9 @@ class TaskDatabase {
     final String ending = " FROM " +
         TaskEntity.tableName +
         " WHERE " +
-        TaskEntity.columnNames[6][0] +
-        " is" +
-        (view == 1 ? " NOT NULL" : " NULL");
+        columns[6] +
+        " is " +
+        (view == 1 ? "NOT NULL" : "NULL");
     final len = TaskEntity.columnNames.length - 1;
 
     for (int i = 0; i <= len; ++i)

@@ -1,16 +1,10 @@
 import 'package:flutter/material.dart';
-
 import '../../entities/task_entity.dart';
 import './task_card.dart';
 import '../../pages/strategy_pages/task_form_page.dart';
 
 /// [TaskList] class is resposible for displaying the list of tasks
 /// in a specific tab which is a stateful class.
-///
-/// The types of tab are upcoming, overdue and completed. The type of
-/// tab is represented by [tabType]. All the function variables
-/// [getTaskList], [removeTask], [completeTask], [addTask], [updateTask]
-/// are for interacting with Task database.
 class TaskList extends StatefulWidget {
   final int tabType;
   final Function getTaskList, removeTask, completeTask, addTask, updateTask;
@@ -25,9 +19,7 @@ class TaskList extends StatefulWidget {
   );
 
   @override
-  _TaskListState createState() {
-    return _TaskListState();
-  }
+  _TaskListState createState() => _TaskListState();
 }
 
 /// [_TaskListState] stateless class is redrawn based on the change of its contents
@@ -39,13 +31,13 @@ class TaskList extends StatefulWidget {
 class _TaskListState extends State<TaskList> {
   List<TaskEntity> _taskList = [];
   SnackBar _deleteSnackBar, _completeSnackBar;
-  TaskEntity _swipedTask;
+  static SnackBar _snackBar;
+  static TaskEntity _swipedTask;
 
   @override
   void initState() {
     _deleteSnackBar = _buildSnackBar(true);
     _completeSnackBar = _buildSnackBar(false);
-    _swipedTask = null;
     super.initState();
   }
 
@@ -115,21 +107,25 @@ class _TaskListState extends State<TaskList> {
     setState(() {
       if (direction == DismissDirection.endToStart) {
         widget.removeTask(_swipedTask);
-        Scaffold.of(context).showSnackBar(_deleteSnackBar);
+        _snackBar = _deleteSnackBar;
       } else if (direction == DismissDirection.startToEnd) {
         widget.completeTask(_swipedTask);
-        Scaffold.of(context).showSnackBar(_completeSnackBar);
+        _snackBar = _completeSnackBar;
       }
+
+      Scaffold.of(context).hideCurrentSnackBar();
+      Scaffold.of(context).showSnackBar(_snackBar);
     });
   }
 
   /// Method for building the snack bars [_deleteSnackBar] and [_completeSnackBar].
   SnackBar _buildSnackBar(bool mode) {
+    final String modeString = mode ? 'deleted' : 'completed';
     return SnackBar(
-      content: Text('Task ' + (mode ? 'deleted' : 'completed')),
+      content: Text('Task ' + modeString),
       duration: Duration(seconds: 4),
       action: SnackBarAction(
-        label: 'Undo ' + (mode ? 'delete' : 'complete'),
+        label: 'Undo ' + modeString,
         textColor: mode ? Colors.red : Colors.green,
         onPressed: () {
           setState(() {

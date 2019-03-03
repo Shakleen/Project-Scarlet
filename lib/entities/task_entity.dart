@@ -16,14 +16,16 @@ class TaskEntity {
     3: ['Hard', CustomIcons.urgent, Colors.red],
   },
       columnNames = const {
-    0: ["Name", "TEXT"],
-    1: ["DueDate", "DATETIME"],
-    2: ["Description", "TEXT"],
-    3: ["Priority", "TEXT"],
-    4: ["Difficulty", "TEXT"],
-    5: ["Location", "TEXT"],
-    6: ["CompleteDate", "DATETIME"],
-    7: ["SetDate", "DATETIME"],
+    0: ["Name", "TEXT", "NOT NULL"],
+    1: ["DueDate", "DATETIME", "NOT NULL"],
+    2: ["Description", "TEXT", "DEFAULT NULL"],
+    3: ["Priority", "INTEGER", "DEFAULT 0"],
+    4: ["Difficulty", "INTEGER", "DEFAULT 0"],
+    5: ["Location", "TEXT", "DEFAULT NULL"],
+    6: ["CompleteDate", "DATETIME", "DEFAULT NULL"],
+    7: ["SetDate", "DATETIME", "NOT NULL"],
+    8: ["ID", "INTEGER", "PRIMARY KEY AUTOINCREMENT"],
+    9: ["YEARLY", "BOOLEAN", "DEFAULT FALSE"],
   };
   static final Map<String, dynamic> taskFormData = {
     TaskEntity.columnNames[0][0]: null, // Name
@@ -33,8 +35,10 @@ class TaskEntity {
     TaskEntity.columnNames[4][0]: 0, // Difficulty
     TaskEntity.columnNames[5][0]: null, // Location
     TaskEntity.columnNames[7][0]: DateTime.now(), // Set date
+    TaskEntity.columnNames[8][0]: 0, // ID
+    TaskEntity.columnNames[9][0]: false, // Yearly
   };
-  static final String primaryKey = columnNames[7][0],
+  static final String primaryKey = columnNames[8][0],
       tableName = "Tasks",
       databaseFileName = "TasksDatabase.db";
   static final List<String> tableViewNames = const [
@@ -42,45 +46,10 @@ class TaskEntity {
     "TasksCompleted",
   ];
 
-  static DateTime _convertDate(dynamic input) => input != null
-      ? input.runtimeType.toString() == 'DateTime'
-          ? input
-          : DateTime.parse(input)
-      : null;
-
-  static int _convertInt(dynamic input) =>
-      input.runtimeType == int ? input : int.parse(input);
-
-  static Map<String, dynamic> toMap(TaskEntity task, bool mode) {
-    final Map<String, dynamic> map = {};
-
-    for (int keys in columnNames.keys)
-      map[columnNames[keys][0]] = task.getTaskInfo(keys)?.toString();
-
-    if (mode) map.remove(columnNames[7][0]);
-
-    return map;
-  }
-
-  static TaskEntity fromMap(Map<String, dynamic> map) => TaskEntity(
-        name: map[columnNames[0][0]],
-        dueDate: _convertDate(map[columnNames[1][0]]),
-        description: map[columnNames[2][0]],
-        priority: _convertInt(map[columnNames[3][0]]),
-        difficulty: _convertInt(map[columnNames[4][0]]),
-        location: map[columnNames[5][0]],
-        completeDate: _convertDate(map[columnNames[6][0]]),
-        setDate: _convertDate(map[columnNames[7][0]]),
-      );
-
-  String name;
-  DateTime dueDate;
-  DateTime completeDate;
-  String description;
-  int priority;
-  int difficulty;
-  String location;
-  DateTime setDate;
+  String name, description, location;
+  int id, priority, difficulty;
+  DateTime dueDate, completeDate, setDate;
+  bool yearly;
 
   /// Constructor for class.
   TaskEntity({
@@ -89,18 +58,23 @@ class TaskEntity {
     DateTime setDate,
     DateTime completeDate,
     String description,
+    String location,
     int priority = 0,
     int difficulty = 0,
-    String location,
+    int id = 0,
+    bool yearly = false,
   }) {
-    this.name = name;
-    this.dueDate = dueDate;
-    this.setDate = (setDate == null ? DateTime.now() : setDate);
-    this.description = description;
-    this.priority = priority;
-    this.difficulty = difficulty;
-    this.location = location;
-    this.completeDate = completeDate;
+    this
+      ..name = name
+      ..dueDate = dueDate
+      ..setDate = setDate == null ? DateTime.now() : setDate
+      ..description = description
+      ..priority = priority
+      ..difficulty = difficulty
+      ..location = location
+      ..completeDate = completeDate
+      ..id = id
+      ..yearly = yearly;
   }
 
   /// Method for getting any information about a task by passing in an index that represents the task.
@@ -122,8 +96,49 @@ class TaskEntity {
         return this.completeDate;
       case 7:
         return this.setDate;
+      case 8:
+        return this.id;
+      case 9:
+        return this.yearly;
       default:
         return null;
     }
   }
+
+  static DateTime _convertDate(dynamic input) => input != null
+      ? input.runtimeType.toString() == 'DateTime'
+          ? input
+          : DateTime.parse(input)
+      : null;
+
+  static int _convertInt(dynamic input) =>
+      input.runtimeType == int ? input : int.parse(input);
+
+  static bool _convertBool(dynamic input) => input.runtimeType == bool
+      ? input
+      : input.toString().toLowerCase() == 'false' ? false : true;
+
+  static Map<String, dynamic> toMap(TaskEntity task, bool mode) {
+    final Map<String, dynamic> map = {};
+
+    for (int keys in columnNames.keys) 
+      map[columnNames[keys][0]] = task.getTaskInfo(keys)?.toString();
+
+    if (mode) map.remove(primaryKey);
+
+    return map;
+  }
+
+  static TaskEntity fromMap(Map<String, dynamic> map) => TaskEntity(
+        name: map[columnNames[0][0]],
+        dueDate: _convertDate(map[columnNames[1][0]]),
+        description: map[columnNames[2][0]],
+        priority: _convertInt(map[columnNames[3][0]]),
+        difficulty: _convertInt(map[columnNames[4][0]]),
+        location: map[columnNames[5][0]],
+        completeDate: _convertDate(map[columnNames[6][0]]),
+        setDate: _convertDate(map[columnNames[7][0]]),
+        id: _convertInt(map[columnNames[8][0]]),
+        yearly: _convertBool(map[columnNames[9][0]]),
+      );
 }

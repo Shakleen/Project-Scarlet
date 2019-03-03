@@ -3,7 +3,6 @@ import '../../widgets/ui_elements/combo_box.dart';
 import '../../entities/task_entity.dart';
 import '../../widgets/strategy_widgets/task_form_field.dart';
 import '../../widgets/strategy_widgets/task_date_picker.dart';
-import '../../controller/task_notification.dart';
 
 class TaskForm extends StatefulWidget {
   final TaskEntity inputTask;
@@ -18,6 +17,9 @@ class TaskForm extends StatefulWidget {
 class _TaskForm extends State<TaskForm> {
   final Map<String, dynamic> _formData = TaskEntity.taskFormData;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final FocusNode _nameFocusNode = FocusNode(),
+      _descriptionFocusNode = FocusNode(),
+      _locationFocusNode = FocusNode();
 
   @override
   Widget build(BuildContext context) {
@@ -25,9 +27,11 @@ class _TaskForm extends State<TaskForm> {
       onTap: () {
         FocusScope.of(context).requestFocus(FocusNode());
       },
-      child: Scaffold(
-        appBar: AppBar(title: Text('Edit task details')),
-        body: _buildForm(context),
+      child: Material(
+        child: Scaffold(
+          appBar: AppBar(title: Text('Edit task details')),
+          body: _buildForm(context),
+        ),
       ),
     );
   }
@@ -43,8 +47,6 @@ class _TaskForm extends State<TaskForm> {
 
     final TaskEntity task = TaskEntity.fromMap(_formData);
     widget.inputTask == null ? widget.addTask(task) : widget.updateTask(task);
-
-    TaskNotification().scheduleNotification(task);
 
     Navigator.pop(context);
   }
@@ -68,9 +70,6 @@ class _TaskForm extends State<TaskForm> {
   }
 
   List<Widget> _buildChildren() {
-    final FocusNode _nameFocusNode = FocusNode();
-    final FocusNode _descriptionFocusNode = FocusNode();
-    final FocusNode _locationFocusNode = FocusNode();
     final String name =
         widget.inputTask?.name == null ? '' : widget.inputTask.name;
     final String description = widget.inputTask?.description == null
