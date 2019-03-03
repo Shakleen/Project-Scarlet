@@ -8,7 +8,10 @@ class AboutPage extends StatelessWidget {
     return Scaffold(
       // Title of the app bar
       appBar: AppBar(
-        title: Text('About'),
+        title: Text(
+          'About',
+          style: Theme.of(context).textTheme.title,
+        ),
       ),
 
       // Side drawer

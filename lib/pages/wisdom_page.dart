@@ -8,7 +8,10 @@ class WisdomPage extends StatelessWidget {
     return Scaffold(
       // Title of the app bar
       appBar: AppBar(
-        title: Text('Wisdom'),
+        title: Text(
+          'Wisdom',
+          style: Theme.of(context).textTheme.title,
+        ),
       ),
 
       // Side drawer

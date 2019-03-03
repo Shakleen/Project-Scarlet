@@ -9,14 +9,8 @@ class TaskList extends StatefulWidget {
   final int tabType;
   final Function getTaskList, removeTask, completeTask, addTask, updateTask;
 
-  TaskList(
-    this.tabType,
-    this.getTaskList,
-    this.addTask,
-    this.removeTask,
-    this.completeTask,
-    this.updateTask,
-  );
+  TaskList(this.tabType, this.getTaskList, this.addTask, this.removeTask,
+      this.completeTask, this.updateTask);
 
   @override
   _TaskListState createState() => _TaskListState();
@@ -44,7 +38,6 @@ class _TaskListState extends State<TaskList> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Display the task which currently exist
       body: FutureBuilder<List<TaskEntity>>(
         future: widget.getTaskList(),
         builder:
@@ -57,9 +50,8 @@ class _TaskListState extends State<TaskList> {
             }
 
             return _buildListView();
-          } else if (snapshot.connectionState == ConnectionState.waiting) {
+          } else if (snapshot.connectionState == ConnectionState.waiting)
             return Center(child: CircularProgressIndicator());
-          }
         },
       ),
 
@@ -167,8 +159,12 @@ class _TaskListState extends State<TaskList> {
   /// form for adding the new task to the list of tasks.
   Widget _buildFloatingActionButton(BuildContext context) {
     return FloatingActionButton(
-      child: Icon(Icons.add),
-      backgroundColor: Colors.red,
+      child: Icon(
+        Icons.add,
+        color: Theme.of(context).iconTheme.color,
+        size: Theme.of(context).iconTheme.size,
+      ),
+      backgroundColor: Theme.of(context).accentColor,
       onPressed: () {
         Navigator.push(
           context,

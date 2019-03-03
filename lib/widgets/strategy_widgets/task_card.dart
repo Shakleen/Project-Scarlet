@@ -12,28 +12,17 @@ class TaskCard extends StatefulWidget {
   TaskCard(this.task, this.tabNumber, this.addTask, this.updateTask);
 
   @override
-  _TaskCard createState() {
-    return _TaskCard();
-  }
+  _TaskCard createState() => _TaskCard();
 }
 
 class _TaskCard extends State<TaskCard> {
-  double deviceWidth;
-  final double titleFontSize = 24.0,
-      contentFontSize = 12.0,
-      contentIconSize = 15.0;
-
   @override
   Widget build(BuildContext context) {
-    deviceWidth = MediaQuery.of(context).size.width * 0.7;
     return GestureDetector(
       child: Container(
         decoration: BoxDecoration(
           border: Border(
-            bottom: BorderSide(
-              color: Colors.black,
-              style: BorderStyle.solid,
-            ),
+            bottom: BorderSide(color: Colors.black, style: BorderStyle.solid),
           ),
         ),
         child: ExpansionTile(
@@ -60,119 +49,81 @@ class _TaskCard extends State<TaskCard> {
 
   Widget _buildTitle() {
     final List<Widget> childrenList = [
-      _buildInformationText(
-        null,
-        widget.task.name,
-        titleFontSize,
-        0.0,
-        Colors.white,
-        Colors.black,
+      Container(
+        child: Text(
+          widget.task.name,
+          style: Theme.of(context)
+              .textTheme
+              .display1
+              .copyWith(color: Colors.black),
+          softWrap: true,
+        ),
+        alignment: Alignment.centerLeft,
       ),
       _buildInformationText(
         Icons.schedule,
         MainModel.dateFormatter.format(widget.task.dueDate),
-        contentFontSize,
-        contentIconSize,
         Colors.black,
-        Colors.black,
+        true,
       )
     ];
 
-    if (widget.task.completeDate != null) {
+    if (widget.task.completeDate != null)
       childrenList.add(_buildInformationText(
         Icons.check_circle,
         MainModel.dateFormatter.format(widget.task.completeDate),
-        contentFontSize,
-        contentIconSize,
         Colors.green,
-        Colors.black,
       ));
-    }
 
-    return Container(
-      child: Column(
-        children: childrenList,
-      ),
-    );
+    return Column(children: childrenList);
   }
 
   Widget _buildChildren() {
     final List<Widget> childrenList = [];
 
-    if (widget.task.description != null) {
+    if (widget.task.description != null)
       childrenList.add(_buildInformationText(
-        Icons.format_align_left,
-        widget.task.description,
-        contentFontSize,
-        contentIconSize,
-        Colors.indigo,
-        Colors.black,
-      ));
-    }
+          Icons.format_align_left, widget.task.description, Colors.indigo));
 
-    if (widget.task.location != null) {
+    if (widget.task.location != null)
       childrenList.add(_buildInformationText(
-        Icons.location_on,
-        widget.task.location,
-        contentFontSize,
-        contentIconSize,
-        Colors.deepOrange,
-        Colors.black,
-      ));
-    }
+          Icons.location_on, widget.task.location, Colors.deepOrange));
 
-    childrenList.add(_buildInformationText(
-      Icons.save,
-      MainModel.dateFormatter.format(widget.task.setDate),
-      contentFontSize,
-      contentIconSize,
-      Colors.indigo,
-      Colors.black,
-    ));
-    childrenList.add(_buildInformationText(
-      Icons.blur_circular,
-      TaskEntity.difficultyLevels[widget.task.difficulty][0],
-      contentFontSize,
-      contentIconSize,
-      Colors.indigo,
-      Colors.black,
-    ));
+    childrenList.add(_buildInformationText(Icons.save,
+        MainModel.dateFormatter.format(widget.task.setDate), Colors.indigo));
+    childrenList.add(_buildInformationText(Icons.blur_circular,
+        TaskEntity.difficultyLevels[widget.task.difficulty][0], Colors.indigo));
 
     return Container(
-      child: Column(
-        children: childrenList,
-      ),
+      child: Column(children: childrenList),
       margin: EdgeInsets.only(left: 15.0),
     );
   }
 
-  Widget _buildInformationText(IconData icon, String text, double fontSize,
-      double iconSize, Color iconColor, Color textColor) {
+  Widget _buildInformationText(IconData icon, String text, Color iconColor,
+      [bool half = false]) {
+    final double deviceWidth = MediaQuery.of(context).size.width;
     return Container(
       child: Row(
         children: <Widget>[
           Icon(
             icon,
-            size: iconSize,
+            size: Theme.of(context).textTheme.subtitle.fontSize,
             color: iconColor,
           ),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 2.0),
-          ),
+          Padding(padding: EdgeInsets.symmetric(horizontal: 2.0)),
           Container(
-            width: deviceWidth,
+            width: deviceWidth * (half ? 0.7 : 0.85),
             child: Text(
               text,
-              style: TextStyle(
-                color: textColor,
-                fontSize: fontSize,
-                fontFamily: 'Roboto',
-              ),
+              style: Theme.of(context)
+                  .textTheme
+                  .subtitle
+                  .copyWith(color: Colors.black),
+              textAlign: TextAlign.justify,
             ),
           ),
         ],
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
       ),
       margin: EdgeInsets.symmetric(vertical: 5.0),
     );

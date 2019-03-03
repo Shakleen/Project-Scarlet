@@ -19,23 +19,25 @@ class TaskNotification {
   }
 
   scheduleNotification(TaskEntity task) async {
-    DateTime scheduledNotificationDateTime =
-        task.dueDate.subtract(Duration(seconds: 5));
-    NotificationDetails platformChannelSpecifics = NotificationDetails(
-      MainModel.notificationDetails[0][0],
-      MainModel.notificationDetails[0][1],
-    );
+    if (task.dueDate.compareTo(DateTime.now()) > 0 &&
+        task.completeDate == null) {
+      DateTime scheduledNotificationDateTime =
+          task.dueDate.subtract(Duration(minutes: 5));
+      NotificationDetails platformChannelSpecifics = NotificationDetails(
+        MainModel.notificationDetails[0][0],
+        MainModel.notificationDetails[0][1],
+      );
 
-    await notificationsPlugin.schedule(
-      task.id,
-      task.name,
-      'Scheduled at ' + MainModel.dateFormatter.format(task.dueDate),
-      scheduledNotificationDateTime,
-      platformChannelSpecifics,
-    );
+      await notificationsPlugin.schedule(
+        task.id,
+        task.name,
+        'Scheduled at ' + MainModel.dateFormatter.format(task.dueDate),
+        scheduledNotificationDateTime,
+        platformChannelSpecifics,
+      );
+    }
   }
 
-  cancelNotification(TaskEntity task) async {
-    await notificationsPlugin.cancel(task.id);
-  }
+  cancelNotification(TaskEntity task) async =>
+      await notificationsPlugin.cancel(task.id);
 }

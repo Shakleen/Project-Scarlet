@@ -8,7 +8,10 @@ class PlayGamePage extends StatelessWidget {
     return Scaffold(
       // Title of the app bar
       appBar: AppBar(
-        title: Text('Play Game'),
+        title: Text(
+          'Play Game',
+          style: Theme.of(context).textTheme.title,
+        ),
       ),
 
       // Side drawer

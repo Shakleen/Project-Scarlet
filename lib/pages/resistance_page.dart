@@ -8,7 +8,10 @@ class ResistancePage extends StatelessWidget {
     return Scaffold(
       // Title of the app bar
       appBar: AppBar(
-        title: Text('Resistance'),
+        title: Text(
+          'Resistance',
+          style: Theme.of(context).textTheme.title,
+        ),
       ),
 
       // Side drawer

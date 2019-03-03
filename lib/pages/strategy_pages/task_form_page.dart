@@ -27,11 +27,14 @@ class _TaskForm extends State<TaskForm> {
       onTap: () {
         FocusScope.of(context).requestFocus(FocusNode());
       },
-      child: Material(
-        child: Scaffold(
-          appBar: AppBar(title: Text('Edit task details')),
-          body: _buildForm(context),
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(
+            'Edit task details',
+            style: Theme.of(context).textTheme.title,
+          ),
         ),
+        body: _buildForm(context),
       ),
     );
   }
@@ -83,6 +86,11 @@ class _TaskForm extends State<TaskForm> {
       'initialValue': [name, description, location],
       'label': [0, 2, 5],
       'fieldHint': ['E.g. Swimming', 'E.g. For 1 hour.', 'E.g. Swimming pool.'],
+      'formKey': [
+        TaskEntity.columnNames[0][0],
+        TaskEntity.columnNames[2][0],
+        TaskEntity.columnNames[5][0],
+      ],
     };
     final List<Widget> children = [];
     for (int i = 0; i < 3; ++i)
@@ -93,6 +101,7 @@ class _TaskForm extends State<TaskForm> {
         initialValue: textFieldParams['initialValue'][i],
         labelText: textFieldParams['label'][i],
         nextFocusNode: textFieldParams['nextFocusNode'][i],
+        formKey: textFieldParams['formKey'][i],
       ));
     children.add(SizedBox(height: 10.0));
     children.add(TaskDatePicker(_formData, TaskEntity.columnNames[1][0]));
@@ -117,8 +126,8 @@ class _TaskForm extends State<TaskForm> {
     children.add(SizedBox(height: 10.0));
     children.add(RaisedButton(
       child: Text(widget.inputTask == null ? 'Add new task' : 'Update task'),
-      color: Colors.blueAccent,
-      textColor: Colors.white,
+      color: Theme.of(context).primaryColor,
+      textColor: Theme.of(context).backgroundColor,
       onPressed: _submitForm,
     ));
 

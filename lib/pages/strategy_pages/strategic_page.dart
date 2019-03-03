@@ -7,11 +7,6 @@ import '../../widgets/strategy_widgets/task_list.dart';
 import '../../scoped_model/main_model.dart';
 
 /// [StrategicPage] class is the main strategic page which consists of 3 tab bars.
-///
-/// The three tabs are upcoming, overdue and completed showing 3 different types of tasks.
-/// The class provides all the widget under the same widget tree with functions necessary to interact
-/// with the Task Database. The functions are kept as [_addTask], [_removeTask], [_completeTask],
-/// [_updateTask], [_getUpcomingTaskList], [_getOverdueTaskList], [_getCompletedTaskList] variables.
 class StrategicPage extends StatelessWidget {
   Function _addTask,
       _removeTask,
@@ -23,29 +18,33 @@ class StrategicPage extends StatelessWidget {
 
   StrategicPage();
 
-  Widget _buildTab(bool mode, int tabNumber) {
+  Widget _buildTab(bool mode, int tabNumber, BuildContext context) {
+    String _text;
+    IconData _icon;
+    Function _function;
+
+    if (tabNumber == 0) {
+      _text = 'Upcoming';
+      _icon = Icons.event_note;
+      _function = _getUpcomingTaskList;
+    } else if (tabNumber == 1) {
+      _text = 'Overdue';
+      _icon = Icons.event_busy;
+      _function = _getOverdueTaskList;
+    } else if (tabNumber == 2) {
+      _text = 'Completed';
+      _icon = Icons.event_available;
+      _function = _getCompletedTaskList;
+    }
+
     if (mode)
       return Tab(
-        icon: Icon(
-          tabNumber == 0
-              ? Icons.event_note
-              : tabNumber == 1 ? Icons.event_busy : Icons.event_available,
-        ),
-        text: tabNumber == 0
-            ? 'Upcoming'
-            : tabNumber == 1 ? 'Overdue' : 'Completed',
+        icon: Icon(_icon),
+        text: _text,
       );
 
-    return TaskList(
-      tabNumber,
-      tabNumber == 0
-          ? _getUpcomingTaskList
-          : tabNumber == 1 ? _getOverdueTaskList : _getCompletedTaskList,
-      _addTask,
-      _removeTask,
-      _completeTask,
-      _updateTask,
-    );
+    return TaskList(tabNumber, _function, _addTask, _removeTask, _completeTask,
+        _updateTask);
   }
 
   @override
@@ -59,28 +58,21 @@ class StrategicPage extends StatelessWidget {
         _getUpcomingTaskList = model.getUpcomingTaskList;
         _getOverdueTaskList = model.getOverdueTaskList;
         _getCompletedTaskList = model.getCompletedTaskList;
+        final List<Widget> _tabs = [], _tabbarViews = [];
+        Text _text =
+            Text('Strategic', style: Theme.of(context).textTheme.title);
+
+        for (int i = 0; i <= 2; ++i) {
+          _tabs.add(_buildTab(true, i, context));
+          _tabbarViews.add(_buildTab(false, i, context));
+        }
 
         return DefaultTabController(
           length: 3,
           child: Scaffold(
             drawer: SideDrawer(4),
-            appBar: AppBar(
-              title: Text('Strategic'),
-              bottom: TabBar(
-                tabs: <Widget>[
-                  _buildTab(true, 0),
-                  _buildTab(true, 1),
-                  _buildTab(true, 2),
-                ],
-              ),
-            ),
-            body: TabBarView(
-              children: <Widget>[
-                _buildTab(false, 0),
-                _buildTab(false, 1),
-                _buildTab(false, 2),
-              ],
-            ),
+            appBar: AppBar(title: _text, bottom: TabBar(tabs: _tabs)),
+            body: TabBarView(children: _tabbarViews),
           ),
         );
       },

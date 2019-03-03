@@ -8,7 +8,10 @@ class HomePage extends StatelessWidget {
     return Scaffold(
       // Title of the app bar
       appBar: AppBar(
-        title: Text('Home'),
+        title: Text(
+          'Home',
+          style: Theme.of(context).textTheme.title,
+        ),
       ),
 
       // Side drawer

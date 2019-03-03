@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../widgets/helper/ensure-visible.dart';
 
-import '../../entities/task_entity.dart';
-import '../../scoped_model/main_model.dart';
-
 class TaskFormField extends StatelessWidget {
   final FocusNode focusNode;
-  final String initialValue, fieldHint;
+  final String initialValue, fieldHint, formKey;
   final int labelText;
   final FocusNode nextFocusNode;
   final Map<String, dynamic> formData;
@@ -18,6 +15,7 @@ class TaskFormField extends StatelessWidget {
     this.nextFocusNode,
     this.fieldHint,
     this.formData,
+    this.formKey,
   });
 
   @override
@@ -28,7 +26,7 @@ class TaskFormField extends StatelessWidget {
         child: TextFormField(
           focusNode: focusNode,
           autofocus: false,
-          decoration: _buildInputDecorations(),
+          decoration: _buildInputDecorations(context),
           initialValue: initialValue,
           validator: _validate,
           onSaved: _onSaved,
@@ -50,19 +48,20 @@ class TaskFormField extends StatelessWidget {
   }
 
   String _validate(String value) {
-    if (value.contains("'")) {
-      return "Can not contain ' character";
-    }
+    if (value.contains("'")) return "Can not contain ' character";
   }
 
   _onSaved(String value) {
-    formData[TaskEntity.columnNames[labelText][0]] = value.length > 0 ? value : null;
+    formData[formKey] = value.length > 0 ? value : null;
   }
 
-  InputDecoration _buildInputDecorations() {
+  InputDecoration _buildInputDecorations(BuildContext context) {
     return InputDecoration(
-      labelText: TaskEntity.columnNames[labelText][0],
-      labelStyle: MainModel.labelStyle,
+      labelText: formKey,
+      labelStyle: Theme.of(context)
+          .textTheme
+          .subhead
+          .copyWith(color: Theme.of(context).accentColor),
       helperText: fieldHint,
       alignLabelWithHint: true,
     );

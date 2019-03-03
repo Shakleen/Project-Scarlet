@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../entities/task_entity.dart';
-import '../../scoped_model/main_model.dart';
-
 class ComboBox extends StatefulWidget {
   int choice;
   final Map<int, List<dynamic>> levels;
@@ -32,7 +29,7 @@ class _ComboBoxState extends State<ComboBox> {
   List<DropdownMenuItem<int>> getDropDownMenuItems() {
     List<DropdownMenuItem<int>> items = List();
 
-    for (int i = 0; i < TaskEntity.priorityLevels.length; ++i) {
+    for (int i = 0; i < widget.levels.length; ++i) {
       final String optionText = widget.levels[i][0];
       final IconData optionIcon = widget.levels[i][1];
       final Color optionColor = widget.levels[i][2];
@@ -42,17 +39,9 @@ class _ComboBoxState extends State<ComboBox> {
         child: Container(
           child: Row(
             children: <Widget>[
-              Icon(
-                optionIcon,
-                color: optionColor,
-              ),
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 5.0),
-              ),
-              Text(
-                optionText,
-                style: TextStyle(color: optionColor),
-              ),
+              Icon(optionIcon, color: optionColor),
+              Padding(padding: EdgeInsets.symmetric(horizontal: 5.0)),
+              Text(optionText, style: TextStyle(color: optionColor)),
             ],
           ),
         ),
@@ -78,7 +67,10 @@ class _ComboBoxState extends State<ComboBox> {
         children: <Widget>[
           Text(
             widget.labelName,
-            style: MainModel.labelStyle,
+            style: Theme.of(context)
+                .textTheme
+                .subhead
+                .copyWith(color: Theme.of(context).accentColor),
           ),
           DropdownButton(
             value: _currentChoice,

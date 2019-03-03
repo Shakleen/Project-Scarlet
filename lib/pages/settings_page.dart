@@ -8,7 +8,10 @@ class SettingsPage extends StatelessWidget {
     return Scaffold(
       // Title of the app bar
       appBar: AppBar(
-        title: Text('Settings'),
+        title: Text(
+          'Settings',
+          style: Theme.of(context).textTheme.title,
+        ),
       ),
 
       // Side drawer
