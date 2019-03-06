@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../scoped_model/main_model.dart';
+import 'package:project_scarlet/presentation/standard_values.dart';
 
 class TaskDatePicker extends StatefulWidget {
   DateTime dateTime;
@@ -34,7 +34,7 @@ class _TaskDatePicker extends State<TaskDatePicker> {
           RaisedButton(
             color: buttonColor,
             child: Text(
-              MainModel.dateFormatter.format(widget.dateTime),
+              StandardValues.dateFormatter.format(widget.dateTime),
               style: Theme.of(context)
                   .textTheme
                   .body1

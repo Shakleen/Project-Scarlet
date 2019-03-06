@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:project_scarlet/presentation/custom_icons.dart';
 
-import './task_model.dart';
-import '../presentation/custom_icons.dart';
-import 'package:scoped_model/scoped_model.dart';
-
-class MainModel extends Model with TaskModel {
+class StandardValues {
   static final DateFormat dateFormatter =
       DateFormat("EEEE, dd/MM/yyyy 'at' hh:mm a");
   static final Map<int, List<dynamic>> notificationDetails = {
@@ -56,7 +53,9 @@ class MainModel extends Model with TaskModel {
         body1: TextStyle(color: Colors.black),
       ),
       iconTheme: IconThemeData(color: Colors.white70, size: 26),
-      secondaryHeaderColor: Colors.black,
+      secondaryHeaderColor: Colors.black54,
       buttonColor: Colors.blue,
+      primaryColorLight: Colors.blue[75],
+      bottomAppBarColor: Colors.blue,
     );
 }

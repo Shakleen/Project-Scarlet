@@ -1,6 +1,6 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import '../entities/task_entity.dart';
-import '../scoped_model/main_model.dart';
+import 'package:project_scarlet/presentation/standard_values.dart';
 
 class TaskNotification {
   FlutterLocalNotificationsPlugin notificationsPlugin;
@@ -24,14 +24,14 @@ class TaskNotification {
       DateTime scheduledNotificationDateTime =
           task.dueDate.subtract(Duration(minutes: 5));
       NotificationDetails platformChannelSpecifics = NotificationDetails(
-        MainModel.notificationDetails[0][0],
-        MainModel.notificationDetails[0][1],
+        StandardValues.notificationDetails[0][0],
+        StandardValues.notificationDetails[0][1],
       );
 
       await notificationsPlugin.schedule(
         task.id,
         task.name,
-        'Scheduled at ' + MainModel.dateFormatter.format(task.dueDate),
+        'Scheduled at ' + StandardValues.dateFormatter.format(task.dueDate),
         scheduledNotificationDateTime,
         platformChannelSpecifics,
       );

@@ -1,23 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:project_scarlet/bloc/strategy/bloc_provider.dart';
+import 'package:project_scarlet/bloc/strategy/task_bloc.dart';
+import 'package:project_scarlet/entities/task_entity.dart';
+import 'package:project_scarlet/pages/strategy_pages/task_form_page.dart';
+import 'package:project_scarlet/presentation/standard_values.dart';
 
-import '../../pages/strategy_pages/task_form_page.dart';
-import '../../entities/task_entity.dart';
-import '../../scoped_model/main_model.dart';
-
-class TaskCard extends StatefulWidget {
+class TaskCard extends StatelessWidget {
   final TaskEntity task;
-  final int tabNumber;
-  final Function addTask, updateTask;
+  final int tabType;
 
-  TaskCard(this.task, this.tabNumber, this.addTask, this.updateTask);
+  TaskCard({this.task, this.tabType});
 
-  @override
-  _TaskCard createState() => _TaskCard();
-}
-
-class _TaskCard extends State<TaskCard> {
   @override
   Widget build(BuildContext context) {
+    final TaskBloc taskBloc = BlocProvider.of<TaskBloc>(context);
+
     return GestureDetector(
       child: Container(
         decoration: BoxDecoration(
@@ -26,12 +23,12 @@ class _TaskCard extends State<TaskCard> {
           ),
         ),
         child: ExpansionTile(
-          title: _buildTitle(),
-          children: <Widget>[_buildChildren()],
+          title: _buildTitle(context),
+          children: <Widget>[_buildChildren(context)],
           initiallyExpanded: false,
           trailing: Icon(
-            TaskEntity.priorityLevels[widget.task.priority][1],
-            color: TaskEntity.priorityLevels[widget.task.priority][2],
+            priorityData[task.priority][1],
+            color: priorityData[task.priority][2],
           ),
         ),
         padding: EdgeInsets.symmetric(vertical: 5.0),
@@ -41,17 +38,17 @@ class _TaskCard extends State<TaskCard> {
           context,
           MaterialPageRoute(
               builder: (context) =>
-                  TaskForm(widget.task, widget.addTask, widget.updateTask)),
+                  TaskForm(task, taskBloc.addTask, taskBloc.updateTask)),
         );
       },
     );
   }
 
-  Widget _buildTitle() {
+  Widget _buildTitle(BuildContext context) {
     final List<Widget> childrenList = [
       Container(
         child: Text(
-          widget.task.name,
+          task.name,
           style: Theme.of(context)
               .textTheme
               .display1
@@ -62,37 +59,39 @@ class _TaskCard extends State<TaskCard> {
       ),
       _buildInformationText(
         Icons.schedule,
-        MainModel.dateFormatter.format(widget.task.dueDate),
+        StandardValues.dateFormatter.format(task.dueDate),
         Colors.black,
-        true,
+        context,
+        half: true,
       )
     ];
 
-    if (widget.task.completeDate != null)
+    if (task.completeDate != null)
       childrenList.add(_buildInformationText(
         Icons.check_circle,
-        MainModel.dateFormatter.format(widget.task.completeDate),
+        StandardValues.dateFormatter.format(task.completeDate),
         Colors.green,
+        context,
       ));
 
     return Column(children: childrenList);
   }
 
-  Widget _buildChildren() {
+  Widget _buildChildren(BuildContext context) {
     final List<Widget> childrenList = [];
 
-    if (widget.task.description != null)
+    if (task.description != null)
       childrenList.add(_buildInformationText(
-          Icons.format_align_left, widget.task.description, Colors.indigo));
+          Icons.format_align_left, task.description, Colors.indigo, context));
 
-    if (widget.task.location != null)
+    if (task.location != null)
       childrenList.add(_buildInformationText(
-          Icons.location_on, widget.task.location, Colors.deepOrange));
+          Icons.location_on, task.location, Colors.deepOrange, context));
 
     childrenList.add(_buildInformationText(Icons.save,
-        MainModel.dateFormatter.format(widget.task.setDate), Colors.indigo));
+        StandardValues.dateFormatter.format(task.setDate), Colors.indigo, context));
     childrenList.add(_buildInformationText(Icons.blur_circular,
-        TaskEntity.difficultyLevels[widget.task.difficulty][0], Colors.indigo));
+        difficultyData[task.difficulty][0], Colors.indigo, context));
 
     return Container(
       child: Column(children: childrenList),
@@ -100,8 +99,9 @@ class _TaskCard extends State<TaskCard> {
     );
   }
 
-  Widget _buildInformationText(IconData icon, String text, Color iconColor,
-      [bool half = false]) {
+  Widget _buildInformationText(
+      IconData icon, String text, Color iconColor, BuildContext context,
+      {bool half = false}) {
     final double deviceWidth = MediaQuery.of(context).size.width;
     return Container(
       child: Row(

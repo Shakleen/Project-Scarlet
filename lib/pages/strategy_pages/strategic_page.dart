@@ -1,81 +1,96 @@
 import 'package:flutter/material.dart';
-
-import 'package:scoped_model/scoped_model.dart';
-
-import '../../widgets/ui_elements/side_drawer.dart';
-import '../../widgets/strategy_widgets/task_list.dart';
-import '../../scoped_model/main_model.dart';
+import 'package:project_scarlet/bloc/strategy/bloc_provider.dart';
+import 'package:project_scarlet/bloc/strategy/task_bloc.dart';
+import 'package:project_scarlet/pages/strategy_pages/task_form_page.dart';
+import 'package:project_scarlet/widgets/strategy_widgets/task_list.dart';
+import 'package:project_scarlet/widgets/ui_elements/side_drawer.dart';
 
 /// [StrategicPage] class is the main strategic page which consists of 3 tab bars.
-class StrategicPage extends StatelessWidget {
-  Function _addTask,
-      _removeTask,
-      _completeTask,
-      _updateTask,
-      _getUpcomingTaskList,
-      _getOverdueTaskList,
-      _getCompletedTaskList;
+class StrategicPage extends StatefulWidget {
+  @override
+  _StrategicPageState createState() => _StrategicPageState();
+}
 
-  StrategicPage();
+class _StrategicPageState extends State<StrategicPage> {
+  final taskBloc = TaskBloc();
+  final Map<String, List> tabData = {
+    'Upcoming': [Icons.event_note, 0],
+    'Overdue': [Icons.event_busy, 1],
+    'Completed': [Icons.event_available, 2],
+  };
+  final List<Widget> tabs = [], tabBarViews = [];
 
-  Widget _buildTab(bool mode, int tabNumber, BuildContext context) {
-    String _text;
-    IconData _icon;
-    Function _function;
+  _StrategicPageState() {
+    for (String key in tabData.keys) {
+      final int tabNumber = tabData[key][1];
+      final IconData icon = tabData[key][0];
 
-    if (tabNumber == 0) {
-      _text = 'Upcoming';
-      _icon = Icons.event_note;
-      _function = _getUpcomingTaskList;
-    } else if (tabNumber == 1) {
-      _text = 'Overdue';
-      _icon = Icons.event_busy;
-      _function = _getOverdueTaskList;
-    } else if (tabNumber == 2) {
-      _text = 'Completed';
-      _icon = Icons.event_available;
-      _function = _getCompletedTaskList;
+      tabs.add(new Tab(text: key, icon: Icon(icon)));
+      tabBarViews.add(TaskList(tabNumber));
     }
+  }
 
-    if (mode)
-      return Tab(
-        icon: Icon(_icon),
-        text: _text,
-      );
-
-    return TaskList(tabNumber, _function, _addTask, _removeTask, _completeTask,
-        _updateTask);
+  @override
+  void dispose() {
+    taskBloc.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return ScopedModelDescendant<MainModel>(
-      builder: (BuildContext context, Widget child, MainModel model) {
-        _addTask = model.addTask;
-        _removeTask = model.removeTask;
-        _completeTask = model.completeTask;
-        _updateTask = model.updateTask;
-        _getUpcomingTaskList = model.getUpcomingTaskList;
-        _getOverdueTaskList = model.getOverdueTaskList;
-        _getCompletedTaskList = model.getCompletedTaskList;
-        final List<Widget> _tabs = [], _tabbarViews = [];
-        Text _text =
-            Text('Strategic', style: Theme.of(context).textTheme.title);
+    return DefaultTabController(
+      length: tabs.length,
+      child: BlocProvider(
+        bloc: taskBloc,
+        child: Scaffold(
+          drawer: SideDrawer(4),
+          appBar: _buildAppbar(tabs),
+          body: TabBarView(children: tabBarViews),
+          floatingActionButton: _buildFAB(),
+          floatingActionButtonLocation:
+              FloatingActionButtonLocation.centerDocked,
+          bottomNavigationBar: _buildBottomNavBar(),
+        ),
+      ),
+    );
+  }
 
-        for (int i = 0; i <= 2; ++i) {
-          _tabs.add(_buildTab(true, i, context));
-          _tabbarViews.add(_buildTab(false, i, context));
-        }
+  Widget _buildAppbar(List<Widget> tabs) {
+    return AppBar(
+      title: Text('Strategic', style: Theme.of(context).textTheme.title),
+      bottom: TabBar(tabs: tabs),
+    );
+  }
 
-        return DefaultTabController(
-          length: 3,
-          child: Scaffold(
-            drawer: SideDrawer(4),
-            appBar: AppBar(title: _text, bottom: TabBar(tabs: _tabs)),
-            body: TabBarView(children: _tabbarViews),
-          ),
-        );
+  /// Method for building the floating action button. It generates a new
+  /// form for creating a new task. The button passes in [addTask] to the
+  /// form for adding the new task to the list of tasks.
+  Widget _buildFAB() {
+    return FloatingActionButton(
+      child: Icon(Icons.add, color: Theme.of(context).backgroundColor),
+      backgroundColor: Colors.red,
+      onPressed: () {
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) =>
+                    TaskForm(null, taskBloc.addTask, taskBloc.updateTask)));
       },
+    );
+  }
+
+  Widget _buildBottomNavBar() {
+    return BottomAppBar(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        mainAxisSize: MainAxisSize.max,
+        children: <Widget>[
+          IconButton(icon: Icon(Icons.undo), tooltip: 'Undo', onPressed: () {}),
+          IconButton(icon: Icon(Icons.redo), tooltip: 'Redo', onPressed: () {}),
+        ],
+      ),
+      shape: CircularNotchedRectangle(),
+      color: Theme.of(context).primaryColor,
     );
   }
 }

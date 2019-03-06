@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../widgets/ui_elements/combo_box.dart';
-import '../../entities/task_entity.dart';
-import '../../widgets/strategy_widgets/task_form_field.dart';
-import '../../widgets/strategy_widgets/task_date_picker.dart';
+import 'package:project_scarlet/entities/task_entity.dart';
+import 'package:project_scarlet/widgets/strategy_widgets/task_date_picker.dart';
+import 'package:project_scarlet/widgets/strategy_widgets/task_form_field.dart';
+import 'package:project_scarlet/widgets/strategy_widgets/combo_box.dart';
 
 class TaskForm extends StatefulWidget {
   final TaskEntity inputTask;
@@ -15,7 +15,7 @@ class TaskForm extends StatefulWidget {
 }
 
 class _TaskForm extends State<TaskForm> {
-  final Map<String, dynamic> _formData = TaskEntity.taskFormData;
+  final Map<String, dynamic> _formData = taskFormData;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final FocusNode _nameFocusNode = FocusNode(),
       _descriptionFocusNode = FocusNode(),
@@ -45,19 +45,19 @@ class _TaskForm extends State<TaskForm> {
     if (!_formKey.currentState.validate()) return;
 
     _formKey.currentState.save();
-    _formData[TaskEntity.columnNames[7][0]] =
+    _formData[columnData[7][0]] =
         (widget.inputTask != null) ? widget.inputTask.setDate : DateTime.now();
 
-    final TaskEntity task = TaskEntity.fromMap(_formData);
+    final TaskEntity task = fromMap(_formData);
     widget.inputTask == null ? widget.addTask(task) : widget.updateTask(task);
 
     Navigator.pop(context);
   }
 
   Widget _buildForm(BuildContext context) {
-    final double deviceWidth = MediaQuery.of(context).size.width;
-    final double targetWidth = deviceWidth > 550.0 ? 500.0 : deviceWidth * 0.95;
-    final double targetPadding = deviceWidth - targetWidth;
+    final double deviceWidth = MediaQuery.of(context).size.width,
+        targetWidth = deviceWidth > 550.0 ? 500.0 : deviceWidth * 0.95,
+        targetPadding = deviceWidth - targetWidth;
 
     return Container(
       margin: EdgeInsets.all(10.0),
@@ -73,24 +73,30 @@ class _TaskForm extends State<TaskForm> {
   }
 
   List<Widget> _buildChildren() {
-    final String name =
-        widget.inputTask?.name == null ? '' : widget.inputTask.name;
-    final String description = widget.inputTask?.description == null
-        ? ''
-        : widget.inputTask.description;
-    final String location =
-        widget.inputTask?.location == null ? '' : widget.inputTask.location;
+    String name, description, location, buttonText = 'Add new task';
+    int priority = 0, difficulty = 0;
+    DateTime dueDate = DateTime.now();
+
+    if (widget.inputTask != null) {
+      name = widget.inputTask.name;
+      description = widget.inputTask?.description == null
+          ? ''
+          : widget.inputTask.description;
+      location =
+          widget.inputTask?.location == null ? '' : widget.inputTask.location;
+      priority = widget.inputTask.priority;
+      difficulty = widget.inputTask.difficulty;
+      dueDate = widget.inputTask.dueDate;
+      buttonText = 'Update task';
+    }
+
     final Map<String, List<dynamic>> textFieldParams = {
       'focusNode': [_nameFocusNode, _descriptionFocusNode, _locationFocusNode],
       'nextFocusNode': [_descriptionFocusNode, _locationFocusNode, null],
       'initialValue': [name, description, location],
       'label': [0, 2, 5],
       'fieldHint': ['E.g. Swimming', 'E.g. For 1 hour.', 'E.g. Swimming pool.'],
-      'formKey': [
-        TaskEntity.columnNames[0][0],
-        TaskEntity.columnNames[2][0],
-        TaskEntity.columnNames[5][0],
-      ],
+      'formKey': [columnData[0][0], columnData[2][0], columnData[5][0]],
     };
     final List<Widget> children = [];
     for (int i = 0; i < 3; ++i)
@@ -104,28 +110,18 @@ class _TaskForm extends State<TaskForm> {
         formKey: textFieldParams['formKey'][i],
       ));
     children.add(SizedBox(height: 10.0));
-    children.add(TaskDatePicker(_formData, TaskEntity.columnNames[1][0]));
+    children.add(TaskDatePicker(_formData, columnData[1][0], dueDate));
     children.add(SizedBox(height: 10.0));
     children.add(Row(
       children: <Widget>[
-        ComboBox(
-          TaskEntity.priorityLevels,
-          _formData,
-          TaskEntity.columnNames[3][0],
-          widget.inputTask == null ? 0 : widget.inputTask.priority,
-        ),
-        ComboBox(
-          TaskEntity.difficultyLevels,
-          _formData,
-          TaskEntity.columnNames[4][0],
-          widget.inputTask == null ? 0 : widget.inputTask.difficulty,
-        )
+        ComboBox(priorityData, _formData, columnData[3][0], priority),
+        ComboBox(difficultyData, _formData, columnData[4][0], difficulty)
       ],
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
     ));
     children.add(SizedBox(height: 10.0));
     children.add(RaisedButton(
-      child: Text(widget.inputTask == null ? 'Add new task' : 'Update task'),
+      child: Text(buttonText),
       color: Theme.of(context).primaryColor,
       textColor: Theme.of(context).backgroundColor,
       onPressed: _submitForm,

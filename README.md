@@ -1,9 +1,9 @@
 # Project Scarlet
-A mobile prodctivity application that aims to encourage people to be more productive by making productivity more fun and easy to measure.
+A mobile productivity application that aims to encourage people to be more productive by making productivity more fun and easy to measure.
 
 ## Project Information
-**Application Type**: Productivity application, game  
-**Target Platform**: Mobile (both Android and iOS)  
+**Application Type**: Productivity application with built-in game  
+**Target Platform**: Mobile (both Android and iOS). Planned for web and desktop.  
 
 ## Motivation
 The main target of this app is to make productivity tangible to the user. Measuring productive is hard as it consists just of completing everyday tasks. So most people find it difficult to be productive and slacks of doing things that matter. This application aims to change that mindset and make productivity fun by incorporating a game along with it.  

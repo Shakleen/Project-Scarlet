@@ -9,9 +9,7 @@ class ComboBox extends StatefulWidget {
   ComboBox(this.levels, this.formData, this.labelName, [this.choice = 0]);
 
   @override
-  State<StatefulWidget> createState() {
-    return _ComboBoxState();
-  }
+  State<StatefulWidget> createState() => _ComboBoxState();
 }
 
 class _ComboBoxState extends State<ComboBox> {
@@ -53,8 +51,9 @@ class _ComboBoxState extends State<ComboBox> {
 
   void changedDropDownItem(int selection) {
     setState(() {
-      widget.formData[widget.labelName] =
-          widget.choice = _currentChoice = selection;
+      widget.choice = _currentChoice = selection;
+      widget.formData[widget.labelName] = _currentChoice;
+      print('Combo box selection is ' + selection?.toString());
     });
   }
 

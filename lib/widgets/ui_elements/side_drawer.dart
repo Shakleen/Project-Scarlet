@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import './side_drawer_list_tile.dart';
-import '../../scoped_model/main_model.dart';
+import 'package:project_scarlet/presentation/standard_values.dart';
 
 /// Class for generating a side drawer that has the same overall structure for seven different pages.
 ///
@@ -18,12 +18,12 @@ class SideDrawer extends StatelessWidget {
       title: Text('Navigation'),
     )];
 
-    for (int i = 0; i < MainModel.navigationRoutes.keys.length; ++i) {
+    for (int i = 0; i < StandardValues.navigationRoutes.keys.length; ++i) {
       String key = _getKey(i);
       children.add(SideDrawerListTile(
         key,
-        MainModel.navigationRoutes[key.toLowerCase()][0],
-        MainModel.navigationRoutes[key.toLowerCase()][1],
+        StandardValues.navigationRoutes[key.toLowerCase()][0],
+        StandardValues.navigationRoutes[key.toLowerCase()][1],
         i == _activeNumber ? true : false,
       ));
     }

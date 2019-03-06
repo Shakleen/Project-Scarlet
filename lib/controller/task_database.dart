@@ -1,52 +1,29 @@
 import 'dart:io';
 import 'package:path/path.dart';
+import 'package:project_scarlet/entities/task_entity.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
-import '../entities/task_entity.dart';
 
 /// [TaskDatabase] class is responsible for storing and manipulating
 ///  task information in the database.
-///
-/// The methods [insertTask], [removeTask], [updateTask] are responsible
-/// for manipulating task information. The [_database] object is used
-/// to create and interact with the sqlite database.
 class TaskDatabase {
   static final TaskDatabase taskDatabase = TaskDatabase._();
-  static Database _database;
-  static final List<String> whereClauses = const [
-    " >= ?",
-    " < ?",
-  ];
-  static final List<String> columns = [
-    TaskEntity.columnNames[0][0],
-    TaskEntity.columnNames[1][0],
-    TaskEntity.columnNames[2][0],
-    TaskEntity.columnNames[3][0],
-    TaskEntity.columnNames[4][0],
-    TaskEntity.columnNames[5][0],
-    TaskEntity.columnNames[6][0],
-    TaskEntity.columnNames[7][0],
-    TaskEntity.columnNames[8][0],
-    TaskEntity.columnNames[9][0],
-  ];
+  Database _database;
+  final List<String> whereClauses = const [" >= ?", " < ?"];
 
   /// Private constructor of TaskDatabase class.
   TaskDatabase._();
 
   /// Public method for initializing the database.
   Future<void> initializeDatabase() async {
-    // Checking to see if the [_database] object is null.
+    final String debug = 'TaskDatabase - initializeDatabase -';
     if (_database == null) {
-      // We will call [initDatabase] method to initialize [_database]
-      // with a new Database type object.
-      print('TaskDatabase - initializeDatabase - '); // TODO REMOVE THIS
-
       try {
         _database = await _initDatabase();
-        print('Database created!'); // TODO REMOVE THIS
+        print('$debug Database created!'); // TODO DEBUG PRINTS
       } catch (e) {
         // TODO IMPLEMENT EXCEPTION HANDLING
-        print('Problem creating database!'); // TODO REMOVE THIS
+        print('$debug Problem creating database!\n$e'); // TODO DEBUG PRINTS
       }
     }
 
@@ -55,100 +32,92 @@ class TaskDatabase {
 
   /// Public method for creating the necessary views of the database main table.
   Future<void> createViews() async {
-    print("TaskDatabase - createviews - ");
+    final String debug = "TaskDatabase - createviews -"; // TODO DEBUG PRINTS
     try {
       await _database.execute(_buildTableViewCreateStatement(0));
       await _database.execute(_buildTableViewCreateStatement(1));
 
-      print('Views created successfully!');
+      print('$debug Views created successfully!');
     } catch (e) {
       // TODO IMPLEMENT EXCEPTION HANDLING
-      print("Views couldn't be created! " + e.toString()); // TODO REMOVE THIS
+      print("$debug Views couldn't be created!\n$e"); // TODO DEBUG PRINTS
     }
   }
 
   /// Public method for inserting a new task into the database.
   Future<bool> insertTask(TaskEntity task) async {
-    print('TaskDatabase - insertTask - '); // TODO REMOVE THIS
+    final String debug = 'TaskDatabase - insertTask -'; // TODO DEBUG PRINTS
     try {
-      final int result = await _database.insert(
-        TaskEntity.tableName,
-        TaskEntity.toMap(task, true),
-      );
+      final int result = await _database.insert(taskTableName, toMap(task));
 
       if (result != 0) {
-        print('Successful insertion!'); // TODO REMOVE THIS
+        print('$debug Successful insertion!'); // TODO DEBUG PRINTS
         return true;
       }
     } catch (e) {
       // TODO IMPLEMENT EXCEPTION HANDLING
-      print('failed insertion! ' + e.toString()); // TODO REMOVE THIS
+      print('$debug failed insertion! $e'); // TODO DEBUG PRINTS
     }
     return false;
   }
 
   /// Public method for removing an existing task from the database.
   Future<bool> removeTask(TaskEntity task) async {
-    print('TaskDatabase - removeTask - '); // TODO REMOVE THIS
+    final String debug = 'TaskDatabase - removeTask -'; // TODO DEBUG PRINTS
 
     try {
-      final int result = await _database.delete(
-        TaskEntity.tableName,
-        where: (TaskEntity.primaryKey + " = ?"),
-        whereArgs: [task.id],
-      );
+      final int result =
+          await _database.delete(taskTableName, where: "$primaryKey = ${task.id}");
       if (result != 0) {
-        print('removal successful!'); // TODO REMOVE THIS
+        print('$debug removal successful!'); // TODO DEBUG PRINTS
         return true;
       }
     } catch (e) {
       // TODO IMPLEMENT EXCEPTION HANDLING
-      print('exception occured! ' + e.toString()); // TODO REMOVE THIS
+      print('$debug exception occured! $e'); // TODO DEBUG PRINTS
     }
 
-    print('removal failed!'); // TODO REMOVE THIS
+    print('$debug removal failed!'); // TODO DEBUG PRINTS
     return false;
   }
 
   /// Public method for updating existing task information.
   Future<bool> updateTask(TaskEntity task) async {
-    print('TaskDatabase - updateTaske - '); // TODO REMOVE THIS
+    final String debug = 'TaskDatabase - updateTaske -'; // TODO DEBUG PRINTS
 
     try {
-      Map<String, dynamic> myMap = TaskEntity.toMap(task, true);
-      print(myMap); // TODO REMOVE THIS
+      Map<String, dynamic> myMap = toMap(task);
+      print(myMap); // TODO DEBUG PRINTS
       final int result = await _database.update(
-        TaskEntity.tableName,
+        taskTableName,
         myMap,
-        where: TaskEntity.primaryKey + " = ?",
-        whereArgs: [task.id],
+        where: "${columnData[7][0]} = ?",
+        whereArgs: [task.setDate.toString()],
       );
 
-      print('Result of update: ' + result?.toString());
+      print('$debug Result of update: $result');
 
       if (result != 0) {
-        print('Update successful!'); // TODO REMOVE THIS
+        print('$debug Update successful!'); // TODO DEBUG PRINTS
         return true;
       }
     } catch (e) {
       // TODO IMPLEMENT EXCEPTION HANDLING
-      print('Exception occured!'); // TODO REMOVE THIS
-      print(e);
+      print('$debug Exception occured! $e'); // TODO DEBUG PRINTS
     }
 
-    print('Update failed!'); // TODO REMOVE THIS
-
+    print('$debug Update failed!'); // TODO DEBUG PRINTS
     return false;
   }
 
   // Returns information of a single task
   Future<TaskEntity> getTaskDetails(TaskEntity task) async {
     final List<dynamic> result = await _database.query(
-      TaskEntity.tableName,
-      where: columns[7] + ' = ?',
+      taskTableName,
+      where: '${columnData[7][0]} = ?',
       whereArgs: [task.setDate.toString()],
     );
-    return TaskEntity.fromMap(result[0]);
+    return fromMap(result[0]);
   }
 
   /// Public method for retrieving tasks of three types. Type is
@@ -159,7 +128,7 @@ class TaskDatabase {
   /// is before current date.
   /// Type 3: Completed tasks. Has complete date.
   Future<List<TaskEntity>> getTasks(int type) async {
-    print('TaskDatabase - getTasks - '); // TODO REMOVE THIS
+    final debug = 'TaskDatabase - getTasks -'; // TODO DEBUG PRINTS
     final List<TaskEntity> resultList = [];
 
     try {
@@ -168,44 +137,37 @@ class TaskDatabase {
         case 1: // Upcoming
         case 2: // Overdue
           result = await _database.query(
-            TaskEntity.tableViewNames[0],
-            where: TaskEntity.columnNames[1][0] + whereClauses[type - 1],
+            taskTableViewNames[0],
+            where: columnData[1][0] + whereClauses[type - 1],
             whereArgs: [DateTime.now().toString()],
-            orderBy: TaskEntity.columnNames[1][0],
-            columns: columns,
+            orderBy: columnData[1][0],
           );
           break;
         case 3: // Completed
           result = await _database.query(
-            TaskEntity.tableViewNames[1],
-            orderBy: TaskEntity.columnNames[1][0],
-            columns: columns,
+            taskTableViewNames[1],
+            orderBy: columnData[1][0],
           );
           break;
         default: // All
           result = await _database.query(
-            TaskEntity.tableName,
-            orderBy: TaskEntity.columnNames[1][0],
-            columns: columns,
+            taskTableName,
+            orderBy: columnData[1][0],
           );
           break;
       }
 
-      print("Length of list from DBMS = " +
-          result?.length.toString()); // TODO REMOVE THIS
+      print("$debug DBMS length = ${result.length}"); // TODO DEBUG PRINTS
 
       if (result != null) {
-        for (Map<String, dynamic> entry in result) {
-          final TaskEntity task = TaskEntity.fromMap(entry);
-          resultList.add(task);
-        }
+        for (Map<String, dynamic> entry in result)
+          resultList.add(fromMap(entry));
 
-        print("Length of the created list is " +
-            resultList.length.toString()); // TODO REMOVE THIS
+        print("$debug parsed length ${resultList.length}"); // TODO DEBUG PRINTS
       }
     } catch (e) {
       // TODO IMPLEMENT EXCEPTION HANDLING
-      print('Exception occured!' + e.toString()); // TODO REMOVE THIS
+      print('$debug Exception occured!\n$e'); // TODO DEBUG PRINTS
     }
 
     return resultList;
@@ -217,60 +179,44 @@ class TaskDatabase {
     // Get directory and file path
     final Directory documentsDirectory =
         await getApplicationDocumentsDirectory();
-    final String path =
-        join(documentsDirectory.path, TaskEntity.databaseFileName);
+    final String path = join(documentsDirectory.path, taskDatabaseFileName);
 
     // Open database file and create a table if it doesn't exist.
-    return await openDatabase(
-      path,
-      version: 1,
-      onOpen: (db) {},
-      onCreate: (Database db, int version) async {
-        await db.execute(_buildTableCreateStatement());
-      },
-    );
+    return await openDatabase(path, version: 1, onOpen: (db) {},
+        onCreate: (Database db, int version) async {
+      await db.execute(_buildTableCreateStatement());
+    });
   }
 
   /// Private method for building the table which will contain all the task related
   /// information.
   String _buildTableCreateStatement() {
-    final int numberOfColumns = TaskEntity.columnNames.length - 1;
-    final String ending = ", CONSTRAINT TASKS_PRIMARY_KEY PRIMARY KEY(" +
-        TaskEntity.primaryKey +
-        "))";
-    String statement = "CREATE TABLE " + TaskEntity.tableName + " (";
+    final int numberOfColumns = columnData.length - 1;
+    String statement = "CREATE TABLE $taskTableName (";
 
     // Creating the column name and column type portion
     for (int i = 0; i <= numberOfColumns; ++i)
-      statement += columns[i] +
-          " " +
-          TaskEntity.columnNames[i][1] +
-          " " +
-          TaskEntity.columnNames[i][2] +
-          (i < numberOfColumns ? ", " : ")");
+      statement +=
+          "${columnData[i][0]} ${columnData[i][1]} ${columnData[i][2]}" +
+              (i < numberOfColumns ? ", " : ")");
 
     print('TaskDatabase - _buildTableCreateStatement - ' +
-        statement); // TODO REMOVE THIS
+        statement); // TODO DEBUG PRINTS
 
     return statement;
   }
 
   /// Private method for creating views of the table.
   String _buildTableViewCreateStatement(int view) {
-    String statement =
-        "CREATE VIEW " + TaskEntity.tableViewNames[view] + " AS SELECT ";
-    final String ending = " FROM " +
-        TaskEntity.tableName +
-        " WHERE " +
-        columns[6] +
-        " is " +
+    String statement = "CREATE VIEW ${taskTableViewNames[view]} AS SELECT ";
+    final String ending = " FROM $taskTableName WHERE ${columnData[6][0]} is " +
         (view == 1 ? "NOT NULL" : "NULL");
-    final len = TaskEntity.columnNames.length - 1;
+    final len = columnData.length - 1;
 
     for (int i = 0; i <= len; ++i)
-      statement += TaskEntity.columnNames[i][0] + (i < len ? ", " : ending);
+      statement += columnData[i][0] + (i < len ? ", " : ending);
 
-    print(statement); // TODO REMOVE THIS
+    print(statement); // TODO DEBUG PRINTS
 
     return statement;
   }
