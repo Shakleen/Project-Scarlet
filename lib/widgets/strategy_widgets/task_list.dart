@@ -1,96 +1,54 @@
 import 'package:flutter/material.dart';
-import 'package:project_scarlet/bloc/strategy/bloc_provider.dart';
-import 'package:project_scarlet/bloc/strategy/task_bloc.dart';
+import 'package:project_scarlet/bloc/bloc_provider.dart';
+import 'package:project_scarlet/bloc/task_bloc.dart';
 import 'package:project_scarlet/entities/task_entity.dart';
-import 'package:project_scarlet/widgets/strategy_widgets/task_card.dart';
+import 'package:project_scarlet/widgets/strategy_widgets/task_dismissible.dart';
 
-/// [TaskList] class is resposible for displaying the list of tasks
-/// in a specific tab which is a stateful class.
-class TaskList extends StatelessWidget {
+/// A class for showing the tasks stored in the database in the form of a list.
+///
+/// The widget takes a [tabType] parameter which defines what type of task to display.
+/// [tabType] 0 means upcoming, 1 means overdue and 2 means completed.
+class TaskList extends StatefulWidget {
   final int tabType;
-  TaskBloc bloc;
 
-  TaskList(this.tabType);
+  TaskList({Key key, @required this.tabType}) : super(key: key);
 
   @override
+  State<StatefulWidget> createState() => _TaskListState();
+}
+
+/// State class for [TaskList].
+///
+/// This class utilizes a [StreamBuilder] to get the list of tasks as a stream and
+/// then displays them onto the screen. It uses [widget.tabType] to use the proper
+/// stream in the [taskBloc] which it gets via the [BlocProvider] class. If it has
+/// data to display it builds the list otherwise a progress indicator is shown.
+class _TaskListState extends State<TaskList> {
+  @override
   Widget build(BuildContext context) {
-    bloc = BlocProvider.of<TaskBloc>(context);
-    print('Task list builder called!');
+    final TaskBloc taskBloc = BlocProvider.of<TaskBloc>(context);
 
     return StreamBuilder<List<TaskEntity>>(
-      stream: bloc.getStream(tabType),
+      stream: taskBloc.getStream(widget.tabType),
       builder:
           (BuildContext context, AsyncSnapshot<List<TaskEntity>> snapshot) {
         if (snapshot.hasData) {
-          if (snapshot.data.length > 0) return _buildListView(snapshot.data);
+          if (snapshot.data.length > 0)
+            return ListView.builder(
+              itemCount: snapshot.data.length,
+              itemBuilder: (BuildContext context, int index) {
+                return TaskDismissible(
+                  key: Key(snapshot.data[index].setDate.toString()),
+                  task: snapshot.data[index],
+                  tabType: widget.tabType,
+                );
+              },
+            );
           return Container(height: 0.0, width: 0.0);
         }
 
         return Center(child: CircularProgressIndicator());
       },
-    );
-  }
-
-  /// Method that builds the list of [TaskCard] type objects to display on the screen.
-  ///
-  /// Dismissible is used for dissmissing tasks. Swiping from end to start removes and
-  /// from start to end completes a task. Dissmiss action is handled by [_handleOnDismiss]
-  /// function.
-  Widget _buildListView(List<TaskEntity> taskList) {
-    return ListView.builder(
-      itemCount: taskList.length,
-      itemBuilder: (BuildContext context, int index) {
-        return Dismissible(
-          child: TaskCard(task: taskList[index], tabType: tabType),
-          background: _buildContainer(true),
-          // For completion.
-          secondaryBackground: _buildContainer(false),
-          // For remove.
-          key: Key(taskList[index].setDate.toString()),
-          direction: tabType == 2 // Tab type = 2 means Completed tab
-              ? DismissDirection.endToStart // Swipe to only delete
-              : DismissDirection.horizontal,
-          // Swipe to both complete and delete
-          onDismissed: (DismissDirection direction) {
-            if (direction == DismissDirection.endToStart)
-              bloc.deleteTask(taskList[index]);
-            else
-              bloc.completeTask(taskList[index]);
-          },
-          dismissThresholds: {
-            DismissDirection.endToStart: 0.9,
-            DismissDirection.startToEnd: 0.9,
-          },
-        );
-      },
-    );
-  }
-
-  /// Method for building the container of the dissmissable widget.
-  ///
-  /// [mode] true means complete and false means remove.
-  Widget _buildContainer(bool mode) {
-    IconData icon;
-    MainAxisAlignment mainAxisAlignment;
-    Color color;
-
-    if (mode) {
-      color = Colors.green;
-      icon = Icons.check;
-      mainAxisAlignment = MainAxisAlignment.start;
-    } else {
-      color = Colors.red;
-      icon = Icons.delete;
-      mainAxisAlignment = MainAxisAlignment.end;
-    }
-
-    return Container(
-      color: color,
-      child: Row(
-        children: <Widget>[Icon(icon, size: 35.0, color: Colors.white)],
-        mainAxisAlignment: mainAxisAlignment,
-      ),
-      padding: EdgeInsets.symmetric(horizontal: 25.0),
     );
   }
 }

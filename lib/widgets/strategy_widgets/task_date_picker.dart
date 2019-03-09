@@ -34,7 +34,7 @@ class _TaskDatePicker extends State<TaskDatePicker> {
           RaisedButton(
             color: buttonColor,
             child: Text(
-              StandardValues.dateFormatter.format(widget.dateTime),
+              dateFormatter.format(widget.dateTime),
               style: Theme.of(context)
                   .textTheme
                   .body1

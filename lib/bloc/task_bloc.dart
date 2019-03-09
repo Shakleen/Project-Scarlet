@@ -1,9 +1,8 @@
 import 'dart:async';
 
-import 'package:project_scarlet/bloc/strategy/bloc_provider.dart';
+import 'package:project_scarlet/bloc/bloc_provider.dart';
 import 'package:project_scarlet/controller/task_database.dart';
 import 'package:project_scarlet/controller/task_notification.dart';
-import 'package:project_scarlet/controller/task_stack.dart';
 import 'package:project_scarlet/entities/task_entity.dart';
 
 class TaskBloc implements BlocBase {

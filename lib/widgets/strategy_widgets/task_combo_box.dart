@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 
-class ComboBox extends StatefulWidget {
+class TaskComboBox extends StatefulWidget {
   int choice;
   final Map<int, List<dynamic>> levels;
   final Map<String, dynamic> formData;
   final String labelName;
 
-  ComboBox(this.levels, this.formData, this.labelName, [this.choice = 0]);
+  TaskComboBox(this.levels, this.formData, this.labelName, [this.choice = 0]);
 
   @override
-  State<StatefulWidget> createState() => _ComboBoxState();
+  State<StatefulWidget> createState() => _TaskComboBoxState();
 }
 
-class _ComboBoxState extends State<ComboBox> {
+class _TaskComboBoxState extends State<TaskComboBox> {
   List<DropdownMenuItem<int>> _dropDownMenuItems;
   int _currentChoice;
 

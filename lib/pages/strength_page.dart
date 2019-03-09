@@ -1,25 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:project_scarlet/widgets/ui_elements/side_drawer.dart';
 
-import '../widgets/ui_elements/side_drawer.dart';
+class StrengthPage extends StatefulWidget {
+  StrengthPage({Key key}) : super(key: key);
 
-class StrengthPage extends StatelessWidget {
+  @override
+  State<StatefulWidget> createState() => _StrengthPageState();
+}
+
+class _StrengthPageState extends State<StrengthPage> {
+  final String _page = 'Strength Page';
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Title of the app bar
+      key: ValueKey('$_page'),
       appBar: AppBar(
-        title: Text(
-          'Strength',
-          style: Theme.of(context).textTheme.title,
-        ),
+        key: ValueKey('$_page AppBar'),
+        title: Text('$_page', style: Theme.of(context).textTheme.title),
       ),
-
-      // Side drawer
-      drawer: SideDrawer(1),
-
-      body: Center(
-        child: Text('This is the strength page!'),
-      ),
+      drawer: SideDrawer(key: ValueKey('$_page Appbar'), activeNumber: 1),
+      body: Center(child: Text('This is the $_page!')),
     );
   }
 }

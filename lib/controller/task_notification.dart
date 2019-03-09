@@ -24,14 +24,12 @@ class TaskNotification {
       DateTime scheduledNotificationDateTime =
           task.dueDate.subtract(Duration(minutes: 5));
       NotificationDetails platformChannelSpecifics = NotificationDetails(
-        StandardValues.notificationDetails[0][0],
-        StandardValues.notificationDetails[0][1],
-      );
+          notificationDetails[0][0], notificationDetails[0][1]);
 
       await notificationsPlugin.schedule(
         task.id,
         task.name,
-        'Scheduled at ' + StandardValues.dateFormatter.format(task.dueDate),
+        'Scheduled at ' + dateFormatter.format(task.dueDate),
         scheduledNotificationDateTime,
         platformChannelSpecifics,
       );

@@ -1,25 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:project_scarlet/widgets/ui_elements/side_drawer.dart';
 
-import '../widgets/ui_elements/side_drawer.dart';
+class SettingsPage extends StatefulWidget {
+  SettingsPage({Key key}) : super(key: key);
 
-class SettingsPage extends StatelessWidget {
+  @override
+  State<StatefulWidget> createState() => _SettingsPageState();
+}
+
+class _SettingsPageState extends State<SettingsPage> {
+  final String _page = 'Settings Page';
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Title of the app bar
+      key: ValueKey('$_page'),
       appBar: AppBar(
-        title: Text(
-          'Settings',
-          style: Theme.of(context).textTheme.title,
-        ),
+        key: ValueKey('$_page AppBar'),
+        title: Text('$_page', style: Theme.of(context).textTheme.title),
       ),
-
-      // Side drawer
-      drawer: SideDrawer(6),
-
-      body: Center(
-        child: Text('This is the settings page!'),
-      ),
+      drawer: SideDrawer(key: ValueKey('$_page Appbar'), activeNumber: 6),
+      body: Center(child: Text('This is the $_page!')),
     );
   }
 }

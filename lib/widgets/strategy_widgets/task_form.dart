@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:project_scarlet/entities/task_entity.dart';
 import 'package:project_scarlet/widgets/strategy_widgets/task_date_picker.dart';
 import 'package:project_scarlet/widgets/strategy_widgets/task_form_field.dart';
-import 'package:project_scarlet/widgets/strategy_widgets/combo_box.dart';
+import 'package:project_scarlet/widgets/strategy_widgets/task_combo_box.dart';
 
 class TaskForm extends StatefulWidget {
   final TaskEntity inputTask;
@@ -114,8 +114,8 @@ class _TaskForm extends State<TaskForm> {
     children.add(SizedBox(height: 10.0));
     children.add(Row(
       children: <Widget>[
-        ComboBox(priorityData, _formData, columnData[3][0], priority),
-        ComboBox(difficultyData, _formData, columnData[4][0], difficulty)
+        TaskComboBox(priorityData, _formData, columnData[3][0], priority),
+        TaskComboBox(difficultyData, _formData, columnData[4][0], difficulty)
       ],
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
     ));

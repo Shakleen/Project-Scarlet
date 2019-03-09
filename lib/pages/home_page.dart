@@ -1,25 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:project_scarlet/widgets/ui_elements/side_drawer.dart';
 
-import '../widgets/ui_elements/side_drawer.dart';
+/// Class for creating the home screen of the app.
+class HomePage extends StatefulWidget {
+  HomePage({Key key}) : super(key: key);
 
-class HomePage extends StatelessWidget {
+  @override
+  State<StatefulWidget> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  final String _page = 'Home Page';
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Title of the app bar
+      key: ValueKey(_page),
       appBar: AppBar(
-        title: Text(
-          'Home',
-          style: Theme.of(context).textTheme.title,
-        ),
+        key: ValueKey('$_page AppBar'),
+        title: Text('$_page', style: Theme.of(context).textTheme.title),
       ),
-
-      // Side drawer
-      drawer: SideDrawer(0),
-
-      body: Center(
-        child: Text('This is the home page!'),
-      ),
+      drawer: SideDrawer(key: ValueKey('$_page Appbar'), activeNumber: 0),
+      body: Center(child: Text('This is the $_page!')),
     );
   }
 }

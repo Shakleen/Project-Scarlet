@@ -2,24 +2,26 @@ import 'package:flutter/material.dart';
 
 import '../widgets/ui_elements/side_drawer.dart';
 
-class AboutPage extends StatelessWidget {
+class AboutPage extends StatefulWidget {
+  AboutPage({Key key}) : super(key: key);
+
+  @override
+  State<StatefulWidget> createState() => _AboutPageState();
+}
+
+class _AboutPageState extends State<AboutPage> {
+  final String _page = 'About Page';
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Title of the app bar
+      key: ValueKey(_page),
       appBar: AppBar(
-        title: Text(
-          'About',
-          style: Theme.of(context).textTheme.title,
-        ),
+        key: ValueKey('$_page AppBar'),
+        title: Text('$_page', style: Theme.of(context).textTheme.title),
       ),
-
-      // Side drawer
-      drawer: SideDrawer(7),
-
-      body: Center(
-        child: Text('This is the about page!'),
-      ),
+      drawer: SideDrawer(key: ValueKey('$_page Appbar'), activeNumber: 7),
+      body: Center(child: Text('This is the $_page!')),
     );
   }
 }
