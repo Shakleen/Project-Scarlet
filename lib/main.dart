@@ -12,7 +12,22 @@ import 'package:project_scarlet/presentation/standard_values.dart';
 
 main() {
   TaskDatabase.taskDatabase.initializeDatabase().whenComplete(() {
-    TaskDatabase.taskDatabase.createViews().whenComplete(() {});
+    TaskDatabase.taskDatabase.createViews().whenComplete(() {
+//      for (int i = 0; i < 10000; ++i) {
+//        final int mod = i % 4;
+//        TaskDatabase.taskDatabase.insertTask(TaskEntity(
+//          name: "This is a long name for the task $i",
+//          description: "This is a very very very long description to overload the memory $i",
+//          location: "This is a very very very long location to overload the memory $i",
+//          dueDate: DateTime.now().add(Duration(days: i)),
+//          setDate: DateTime.now().add(Duration(minutes: i)),
+//          priority: mod,
+//          difficulty: mod,
+//          completeDate: null,
+//        ));
+//      }
+//      print('10K values insertion successful!');
+    });
   });
   runApp(MyApp());
 }

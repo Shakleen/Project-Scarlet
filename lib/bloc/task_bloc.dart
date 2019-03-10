@@ -23,21 +23,13 @@ class TaskBloc implements BlocBase {
   Stream<List<TaskEntity>> get taskUpcomingStream =>
       _taskUpcomingController.stream;
 
-  Sink<List<TaskEntity>> get taskUpcomingSink => _taskUpcomingController.sink;
-
   Stream<List<TaskEntity>> get taskOverDueStream =>
       _taskOverDueController.stream;
-
-  Sink<List<TaskEntity>> get taskOverDueSink => _taskOverDueController.sink;
 
   Stream<List<TaskEntity>> get taskCompletedStream =>
       _taskCompletedController.stream;
 
-  Sink<List<TaskEntity>> get taskCompletedSink => _taskCompletedController.sink;
-
   Stream<List<TaskEntity>> get taskAllStream => _taskAllController.stream;
-
-  Sink<List<TaskEntity>> get taskAllSink => _taskAllController.sink;
 
   Stream getStream(int i) {
     switch (i) {
@@ -83,6 +75,7 @@ class TaskBloc implements BlocBase {
   }
 
   addTask(TaskEntity task, {bool mode: true}) {
+    //print('${task.name} ${task.id} ${task.description} ${task.location} ${task.setDate} ${task.completeDate} ${task.dueDate} ${task.difficulty} ${task.priority}');
     TaskDatabase.taskDatabase.insertTask(task).then((bool condition) {
       if (condition) {
         TaskDatabase.taskDatabase
@@ -155,5 +148,9 @@ class TaskBloc implements BlocBase {
     getUpcomingTasks();
     getOverDueTasks();
     getCompletedTasks();
+  }
+
+  Future<TaskEntity> getTaskDetails(TaskEntity task) {
+    return TaskDatabase.taskDatabase.getTaskDetails(task);
   }
 }

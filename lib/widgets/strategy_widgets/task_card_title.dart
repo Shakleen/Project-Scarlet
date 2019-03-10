@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:project_scarlet/widgets/strategy_widgets/information.dart';
+import 'package:project_scarlet/widgets/strategy_widgets/info_builder.dart';
 
 class TaskCardTitle extends StatelessWidget {
   final List<List> info;
@@ -11,7 +11,7 @@ class TaskCardTitle extends StatelessWidget {
       Column(children: List<Widget>.generate(info.length, _itemBuilder));
 
   Widget _itemBuilder(int index) {
-    return Information(
+    return InfoBuilder(
       key: Key('Task card title ${info[index][0]}'),
       text: info[index][0],
       textStyle: info[index][1],

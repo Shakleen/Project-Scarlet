@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class Information extends StatelessWidget {
+class InfoBuilder extends StatelessWidget {
   final IconData icon;
   final String text;
   final Color iconColor;
@@ -8,7 +8,7 @@ class Information extends StatelessWidget {
   final double width;
   final List<Widget> list = [];
 
-  Information({
+  InfoBuilder({
     Key key,
     @required this.text,
     @required this.textStyle,

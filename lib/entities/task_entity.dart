@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../presentation/custom_icons.dart';
 
 /// Entity class for tasks.
@@ -63,14 +64,15 @@ DateTime convertDate(dynamic input) => input != null
     : null;
 
 int convertInt(dynamic input) =>
-    input.runtimeType == int ? input : int.parse(input);
+    input != null ? input.runtimeType == int ? input : int.parse(input) : null;
 
 Map<String, dynamic> toMap(TaskEntity task) {
   final Map<String, dynamic> map = {};
-
+//  print('TaskEntity toMap');
   for (int key in columnData.keys) {
     final String value = task.getTaskInfo(key)?.toString(),
         column = columnData[key][0];
+//    print('$column = $value');
     map[column] = value;
   }
 
@@ -120,14 +122,24 @@ final List<String> taskTableViewNames = const [
   "TasksCompleted"
 ];
 
-TaskEntity fromMap(Map<String, dynamic> map) => TaskEntity(
+TaskEntity fromMap(Map<String, dynamic> map) {
+  if (map.keys.contains(columnData[4][0])) {
+    return TaskEntity(
       name: map[columnData[0][0]],
       dueDate: convertDate(map[columnData[1][0]]),
       description: map[columnData[2][0]],
       priority: convertInt(map[columnData[3][0]]),
       difficulty: convertInt(map[columnData[4][0]]),
       location: map[columnData[5][0]],
-      completeDate: convertDate(map[columnData[6][0]]),
       setDate: convertDate(map[columnData[7][0]]),
-      id: convertInt(map[columnData[8][0]]),
+      completeDate: convertDate(map[columnData[6][0]]),
     );
+  }
+  return TaskEntity(
+    name: map[columnData[0][0]],
+    dueDate: convertDate(map[columnData[1][0]]),
+    priority: convertInt(map[columnData[3][0]]),
+    setDate: convertDate(map[columnData[7][0]]),
+    completeDate: convertDate(map[columnData[6][0]]),
+  );
+}

@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:project_scarlet/entities/task_entity.dart';
+import 'package:project_scarlet/widgets/strategy_widgets/task_combo_box.dart';
 import 'package:project_scarlet/widgets/strategy_widgets/task_date_picker.dart';
 import 'package:project_scarlet/widgets/strategy_widgets/task_form_field.dart';
-import 'package:project_scarlet/widgets/strategy_widgets/task_combo_box.dart';
 
+/// A class for inputting or changing already exsting tasks via a form.
 class TaskForm extends StatefulWidget {
   final TaskEntity inputTask;
-  final Function addTask, updateTask;
+  final void Function(TaskEntity, {bool mode}) addTask, updateTask;
 
-  TaskForm(this.inputTask, this.addTask, this.updateTask);
+  TaskForm({Key key, this.inputTask, this.addTask, this.updateTask})
+      : super(key: key);
 
   @override
   _TaskForm createState() => _TaskForm();
@@ -23,6 +25,13 @@ class _TaskForm extends State<TaskForm> {
 
   @override
   Widget build(BuildContext context) {
+    final double deviceWidth = MediaQuery
+        .of(context)
+        .size
+        .width,
+        targetWidth = deviceWidth > 550.0 ? 500.0 : deviceWidth * 0.95,
+        targetPadding = deviceWidth - targetWidth;
+
     return GestureDetector(
       onTap: () {
         FocusScope.of(context).requestFocus(FocusNode());
@@ -34,13 +43,21 @@ class _TaskForm extends State<TaskForm> {
             style: Theme.of(context).textTheme.title,
           ),
         ),
-        body: _buildForm(context),
+        body: Container(
+          margin: EdgeInsets.all(10.0),
+          child: Form(
+            autovalidate: true,
+            key: _formKey,
+            child: ListView(
+              padding: EdgeInsets.symmetric(horizontal: targetPadding / 2.0),
+              children: _buildChildren(),
+            ),
+          ),
+        ),
       ),
     );
   }
 
-  /// This method creates and saves the task by using the [addTask] function
-  /// passed into it.
   void _submitForm() {
     if (!_formKey.currentState.validate()) return;
 
@@ -52,24 +69,6 @@ class _TaskForm extends State<TaskForm> {
     widget.inputTask == null ? widget.addTask(task) : widget.updateTask(task);
 
     Navigator.pop(context);
-  }
-
-  Widget _buildForm(BuildContext context) {
-    final double deviceWidth = MediaQuery.of(context).size.width,
-        targetWidth = deviceWidth > 550.0 ? 500.0 : deviceWidth * 0.95,
-        targetPadding = deviceWidth - targetWidth;
-
-    return Container(
-      margin: EdgeInsets.all(10.0),
-      child: Form(
-        autovalidate: true,
-        key: _formKey,
-        child: ListView(
-          padding: EdgeInsets.symmetric(horizontal: targetPadding / 2.0),
-          children: _buildChildren(),
-        ),
-      ),
-    );
   }
 
   List<Widget> _buildChildren() {
