@@ -25,21 +25,22 @@ class StrategicPage extends StatefulWidget {
 class _StrategicPageState extends State<StrategicPage> {
   final String _page = 'Strategy Page';
   final taskBloc = new TaskBloc();
-  final List<Widget> tabs = [], tabBarViews = [];
+  final List<Widget> tabs = []; //, tabBarViews = [];
+  final Map<String, List> tabData = const {
+    'Upcoming': [Icons.event_note, 0],
+    'Overdue': [Icons.event_busy, 1],
+    'Completed': [Icons.event_available, 2],
+  };
 
   @override
   void initState() {
-    final Map<String, List> tabData = const {
-      'Upcoming': [Icons.event_note, 0],
-      'Overdue': [Icons.event_busy, 1],
-      'Completed': [Icons.event_available, 2],
-    };
     for (String key in tabData.keys) {
       final int tabNumber = tabData[key][1];
       final IconData icon = tabData[key][0];
 
-      tabs.add(new Tab(key: ValueKey('$_page $key Tab'), text: key, icon: Icon(icon)));
-      tabBarViews.add(new TaskList(key: ValueKey('$_page $key TabView'), tabType: tabNumber));
+      tabs.add(new Tab(
+          key: ValueKey('$_page $key Tab'), text: key, icon: Icon(icon)));
+//      tabBarViews.add(new TaskList(key: ValueKey('$_page $key TabView'), tabType: tabNumber));
     }
 
     super.initState();
@@ -54,6 +55,7 @@ class _StrategicPageState extends State<StrategicPage> {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
+      initialIndex: 0,
       key: ValueKey('$_page DefaultTabController'),
 
       // There will be 3 tabs which are upcoming, overdue and completed tabs.
@@ -77,18 +79,22 @@ class _StrategicPageState extends State<StrategicPage> {
           ),
 
           // Main page body is the tab bar view
-          body: TabBarView(children: tabBarViews),
+          body: TabBarView(children: <Widget>[
+            new TaskList(tabType: 0),
+            new TaskList(tabType: 1),
+            new TaskList(tabType: 2),
+          ]),
 
           // FAB for adding new tasks.
           floatingActionButton: StrategyFAB(key: ValueKey('$_page FAB')),
 
           // Centering the FAB
           floatingActionButtonLocation:
-              FloatingActionButtonLocation.centerDocked,
+          FloatingActionButtonLocation.centerDocked,
 
           // Bottom navigation bar for undo, sort, search and redo buttons.
           bottomNavigationBar:
-              StrategyBottomAppBar(key: ValueKey('$_page BottomAppBar')),
+          StrategyBottomAppBar(key: ValueKey('$_page BottomAppBar')),
         ),
       ),
     );

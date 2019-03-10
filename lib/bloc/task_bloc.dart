@@ -6,18 +6,35 @@ import 'package:project_scarlet/controller/task_notification.dart';
 import 'package:project_scarlet/entities/task_entity.dart';
 
 class TaskBloc implements BlocBase {
-  final _taskAllController = StreamController<List<TaskEntity>>.broadcast();
   final _taskUpcomingController =
       StreamController<List<TaskEntity>>.broadcast();
   final _taskOverDueController = StreamController<List<TaskEntity>>.broadcast();
   final _taskCompletedController =
       StreamController<List<TaskEntity>>.broadcast();
+  int _upcomingTaskOffSet,
+      _upcomingTaskAmount,
+      _overDueTaskOffSet,
+      _overDueTaskAmount,
+      _completedTaskOffSet,
+      _completedTaskAmount;
 
   TaskBloc() {
-    getUpcomingTasks();
-    getOverDueTasks();
-    getCompletedTasks();
-    getAllTasks();
+    _upcomingTaskAmount = _completedTaskAmount = _overDueTaskAmount = 10;
+    _upcomingTaskOffSet = _completedTaskOffSet = _overDueTaskOffSet = 0;
+  }
+
+  void increment(int type) {
+    switch (type) {
+      case 0:
+        _upcomingTaskOffSet += _upcomingTaskAmount;
+        break;
+      case 1:
+        _overDueTaskOffSet += _overDueTaskAmount;
+        break;
+      case 2:
+        _completedTaskOffSet += _completedTaskAmount;
+        break;
+    }
   }
 
   Stream<List<TaskEntity>> get taskUpcomingStream =>
@@ -29,9 +46,7 @@ class TaskBloc implements BlocBase {
   Stream<List<TaskEntity>> get taskCompletedStream =>
       _taskCompletedController.stream;
 
-  Stream<List<TaskEntity>> get taskAllStream => _taskAllController.stream;
-
-  Stream getStream(int i) {
+  Stream<List<TaskEntity>> getStream(int i) {
     switch (i) {
       case 0:
         getUpcomingTasks();
@@ -43,7 +58,20 @@ class TaskBloc implements BlocBase {
         getCompletedTasks();
         return taskCompletedStream;
       default:
-        return taskAllStream;
+        return null;
+    }
+  }
+
+  int getOffset(int type) {
+    switch (type) {
+      case 0:
+        return _upcomingTaskOffSet;
+      case 1:
+        return _overDueTaskOffSet;
+      case 2:
+        return _completedTaskOffSet;
+      default:
+        return null;
     }
   }
 
@@ -52,44 +80,48 @@ class TaskBloc implements BlocBase {
     _taskUpcomingController.close();
     _taskOverDueController.close();
     _taskCompletedController.close();
-    _taskAllController.close();
-  }
-
-  void getAllTasks() async {
-    _taskAllController.sink.add(await TaskDatabase.taskDatabase.getTasks(0));
   }
 
   void getUpcomingTasks() async {
+    print('Get upcoming tasks called!');
     _taskUpcomingController.sink
-        .add(await TaskDatabase.taskDatabase.getTasks(1));
+        .add(await TaskDatabase.taskDatabase.getTasksByOffset(
+      type: 1,
+      offset: _upcomingTaskOffSet,
+      limit: _upcomingTaskAmount,
+    ));
+    _upcomingTaskOffSet += _upcomingTaskAmount;
   }
 
   void getOverDueTasks() async {
+    print('Get Over due tasks called!');
     _taskOverDueController.sink
-        .add(await TaskDatabase.taskDatabase.getTasks(2));
+        .add(await TaskDatabase.taskDatabase.getTasksByOffset(
+      type: 2,
+      offset: _overDueTaskOffSet,
+      limit: _overDueTaskAmount,
+    ));
+    _overDueTaskOffSet += _overDueTaskAmount;
   }
 
   void getCompletedTasks() async {
+    print('Get completed tasks called!');
     _taskCompletedController.sink
-        .add(await TaskDatabase.taskDatabase.getTasks(3));
+        .add(await TaskDatabase.taskDatabase.getTasksByOffset(
+      type: 3,
+      offset: _completedTaskOffSet,
+      limit: _completedTaskAmount,
+    ));
+    _completedTaskOffSet += _completedTaskAmount;
   }
 
   addTask(TaskEntity task, {bool mode: true}) {
-    //print('${task.name} ${task.id} ${task.description} ${task.location} ${task.setDate} ${task.completeDate} ${task.dueDate} ${task.difficulty} ${task.priority}');
     TaskDatabase.taskDatabase.insertTask(task).then((bool condition) {
       if (condition) {
         TaskDatabase.taskDatabase
             .getTaskDetails(task)
             .then((TaskEntity detailedTask) {
           TaskNotification().scheduleNotification(detailedTask);
-//          if (mode) {
-//            TaskStack.taskStack.addOperation(TaskOperation(
-//                beforeValue: detailedTask,
-//                afterValue: detailedTask,
-//                type: 1,
-//                perform: this.addTask,
-//                revert: this.deleteTask));
-//          }
         });
       }
     });
@@ -99,14 +131,6 @@ class TaskBloc implements BlocBase {
   deleteTask(TaskEntity task, {bool mode: false}) {
     TaskDatabase.taskDatabase.removeTask(task).then((bool status) {
       TaskNotification().cancelNotification(task);
-//      if (mode) {
-//        TaskStack.taskStack.addOperation(TaskOperation(
-//            beforeValue: task,
-//            afterValue: task,
-//            type: 2,
-//            perform: this.removeTask,
-//            revert: this.addTask));
-//      }
     });
     getUpcomingTasks();
     getCompletedTasks();
@@ -114,14 +138,7 @@ class TaskBloc implements BlocBase {
   }
 
   updateTask(TaskEntity task, {bool mode: false}) {
-    TaskDatabase.taskDatabase.updateTask(task).then((bool condition) {
-//      if (condition)
-//        TaskDatabase.taskDatabase
-//            .getTaskDetails(task)
-//            .then((TaskEntity detailedTask) {
-//          TaskNotification().scheduleNotification(detailedTask);
-//        });
-    });
+    TaskDatabase.taskDatabase.updateTask(task).then((bool condition) {});
     getUpcomingTasks();
     getOverDueTasks();
   }
@@ -135,14 +152,6 @@ class TaskBloc implements BlocBase {
             .getTaskDetails(modifiedTask)
             .then((TaskEntity detailedTask) {
           TaskNotification().cancelNotification(detailedTask);
-//          if (mode) {
-//            TaskStack.taskStack.addOperation(TaskOperation(
-//                beforeValue: task,
-//                afterValue: detailedTask,
-//                type: 3,
-//                perform: this.updateTask,
-//                revert: this.updateTask));
-//          }
         });
     });
     getUpcomingTasks();

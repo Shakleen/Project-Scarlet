@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:project_scarlet/controller/task_database.dart';
+import 'package:project_scarlet/entities/task_entity.dart';
 import 'package:project_scarlet/pages/about_page.dart';
 import 'package:project_scarlet/pages/home_page.dart';
 import 'package:project_scarlet/pages/play_game_page.dart';
@@ -13,20 +14,23 @@ import 'package:project_scarlet/presentation/standard_values.dart';
 main() {
   TaskDatabase.taskDatabase.initializeDatabase().whenComplete(() {
     TaskDatabase.taskDatabase.createViews().whenComplete(() {
-//      for (int i = 0; i < 10000; ++i) {
-//        final int mod = i % 4;
-//        TaskDatabase.taskDatabase.insertTask(TaskEntity(
-//          name: "This is a long name for the task $i",
-//          description: "This is a very very very long description to overload the memory $i",
-//          location: "This is a very very very long location to overload the memory $i",
-//          dueDate: DateTime.now().add(Duration(days: i)),
-//          setDate: DateTime.now().add(Duration(minutes: i)),
-//          priority: mod,
-//          difficulty: mod,
-//          completeDate: null,
-//        ));
-//      }
-//      print('10K values insertion successful!');
+      for (int i = 0; i < 10000; ++i) {
+        final int mod = i % 4;
+        TaskDatabase.taskDatabase.insertTask(TaskEntity(
+          name: "Task no $i",
+          description: "This is a very very very long description to overload the memory so bear with me a little bit cause I am desperate $i",
+          location: "This is a very very very long location to overload the memory so bear with me a little bit cause I am desperate $i",
+          dueDate: mod == 1 ? DateTime.now().add(Duration(hours: i)) : DateTime
+              .now().subtract(Duration(minutes: i)),
+          setDate: DateTime.now().add(Duration(minutes: i)),
+          priority: mod,
+          difficulty: mod,
+          completeDate: mod == 0
+              ? DateTime.now().add(Duration(minutes: 2))
+              : null,
+        ));
+      }
+      print('10K values insertion successful!');
     });
   });
   runApp(MyApp());

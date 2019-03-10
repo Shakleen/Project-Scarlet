@@ -131,8 +131,9 @@ class TaskDatabase {
   /// Type 2: Overdue tasks. No complete date and due date
   /// is before current date.
   /// Type 3: Completed tasks. Has complete date.
-  Future<List<TaskEntity>> getTasks(int type) async {
-//     final debug = 'TaskDatabase - getTasks -'; // TODO DEBUG PRINTS
+  Future<List<TaskEntity>> getTasksByOffset(
+      {int type, int offset, int limit}) async {
+//     final debug = 'TaskDatabase - getTasksByOffSet -'; // TODO DEBUG PRINTS
     final List<TaskEntity> resultList = [];
 
     try {
@@ -145,18 +146,24 @@ class TaskDatabase {
             where: '${columnData[1][0]} ${whereClauses[type - 1]}',
             whereArgs: [DateTime.now().toString()],
             orderBy: columnData[1][0],
+            limit: limit,
+            offset: offset,
           );
           break;
         case 3: // Completed
           result = await _database.query(
             taskTableViewNames[1],
             orderBy: columnData[1][0],
+            limit: limit,
+            offset: offset,
           );
           break;
         default: // All
           result = await _database.query(
             taskTableName,
             orderBy: columnData[1][0],
+            limit: limit,
+            offset: offset,
           );
           break;
       }
