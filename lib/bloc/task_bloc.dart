@@ -3,7 +3,9 @@ import 'dart:async';
 import 'package:project_scarlet/bloc/bloc_provider.dart';
 import 'package:project_scarlet/controller/task_database.dart';
 import 'package:project_scarlet/controller/task_notification.dart';
+import 'package:project_scarlet/controller/task_manager.dart';
 import 'package:project_scarlet/entities/task_entity.dart';
+import 'package:project_scarlet/entities/task_operation.dart';
 
 class TaskBloc implements BlocBase {
   final _taskUpcomingController =
@@ -19,7 +21,7 @@ class TaskBloc implements BlocBase {
       _completedTaskAmount;
 
   TaskBloc() {
-    _upcomingTaskAmount = _completedTaskAmount = _overDueTaskAmount = 10;
+    _upcomingTaskAmount = _completedTaskAmount = _overDueTaskAmount = 6;
     _upcomingTaskOffSet = _completedTaskOffSet = _overDueTaskOffSet = 0;
   }
 
@@ -76,14 +78,12 @@ class TaskBloc implements BlocBase {
   }
 
   dispose() {
-    print('Disposing _taskcontroller!');
     _taskUpcomingController.close();
     _taskOverDueController.close();
     _taskCompletedController.close();
   }
 
   void getUpcomingTasks() async {
-    print('Get upcoming tasks called!');
     _taskUpcomingController.sink
         .add(await TaskDatabase.taskDatabase.getTasksByOffset(
       type: 1,
@@ -91,10 +91,10 @@ class TaskBloc implements BlocBase {
       limit: _upcomingTaskAmount,
     ));
     _upcomingTaskOffSet += _upcomingTaskAmount;
+    _overDueTaskOffSet = _completedTaskOffSet = 0;
   }
 
   void getOverDueTasks() async {
-    print('Get Over due tasks called!');
     _taskOverDueController.sink
         .add(await TaskDatabase.taskDatabase.getTasksByOffset(
       type: 2,
@@ -102,10 +102,10 @@ class TaskBloc implements BlocBase {
       limit: _overDueTaskAmount,
     ));
     _overDueTaskOffSet += _overDueTaskAmount;
+    _upcomingTaskOffSet = _completedTaskOffSet = 0;
   }
 
   void getCompletedTasks() async {
-    print('Get completed tasks called!');
     _taskCompletedController.sink
         .add(await TaskDatabase.taskDatabase.getTasksByOffset(
       type: 3,
@@ -113,53 +113,73 @@ class TaskBloc implements BlocBase {
       limit: _completedTaskAmount,
     ));
     _completedTaskOffSet += _completedTaskAmount;
+    _upcomingTaskOffSet = _overDueTaskOffSet = 0;
   }
 
-  addTask(TaskEntity task, {bool mode: true}) {
-    TaskDatabase.taskDatabase.insertTask(task).then((bool condition) {
-      if (condition) {
-        TaskDatabase.taskDatabase
-            .getTaskDetails(task)
-            .then((TaskEntity detailedTask) {
-          TaskNotification().scheduleNotification(detailedTask);
-        });
-      }
-    });
-    getUpcomingTasks();
-  }
+  Future<bool> addTask(TaskEntity task) =>
+      TaskDatabase.taskDatabase.insertTask(task)..then((bool status) {
+        _afterAdd(status, task);
+        return status;
+      });
 
-  deleteTask(TaskEntity task, {bool mode: false}) {
-    TaskDatabase.taskDatabase.removeTask(task).then((bool status) {
-      TaskNotification().cancelNotification(task);
-    });
-    getUpcomingTasks();
-    getCompletedTasks();
-    getOverDueTasks();
-  }
+  Future<bool> deleteTask(TaskEntity task) =>
+      TaskDatabase.taskDatabase.removeTask(task).then((bool status) {
+        _afterDelete(status, task);
+        return status;
+      });
 
-  updateTask(TaskEntity task, {bool mode: false}) {
-    TaskDatabase.taskDatabase.updateTask(task).then((bool condition) {});
-    getUpcomingTasks();
-    getOverDueTasks();
-  }
+  Future<bool> updateTask(TaskEntity task) =>
+      TaskDatabase.taskDatabase.updateTask(task);
 
-  completeTask(TaskEntity task, {bool mode: false}) {
+  Future<bool> completeTask(TaskEntity task) {
     final TaskEntity modifiedTask = task;
     modifiedTask.completeDate = DateTime.now();
-    TaskDatabase.taskDatabase.updateTask(modifiedTask).then((bool condition) {
-      if (condition)
-        TaskDatabase.taskDatabase
-            .getTaskDetails(modifiedTask)
-            .then((TaskEntity detailedTask) {
-          TaskNotification().cancelNotification(detailedTask);
-        });
+    return TaskDatabase.taskDatabase
+        .updateTask(modifiedTask)
+        .then((bool status) {
+      _afterComplete(status, task);
+      return status;
     });
-    getUpcomingTasks();
-    getOverDueTasks();
-    getCompletedTasks();
   }
 
-  Future<TaskEntity> getTaskDetails(TaskEntity task) {
-    return TaskDatabase.taskDatabase.getTaskDetails(task);
+  Future<TaskEntity> getTaskDetails(TaskEntity task) =>
+      TaskDatabase.taskDatabase.getTaskDetails(task);
+
+  void _addOperation(
+    TaskEntity task,
+    Future<bool> Function(TaskEntity task) toRevert,
+  ) =>
+      TaskManager.taskManager.addOperation(TaskOperation(
+        task: task,
+        revertOperation: toRevert,
+      ));
+
+  void _afterComplete(bool status, TaskEntity task) {
+    if (status) {
+      TaskDatabase.taskDatabase
+          .getTaskDetails(task)
+          .then((TaskEntity detailedTask) {
+        TaskNotification().cancelNotification(detailedTask);
+        task.completeDate = null;
+        _addOperation(task, updateTask);
+      });
+    }
+  }
+
+  void _afterDelete(bool status, TaskEntity task) {
+    if (status) {
+      TaskNotification().cancelNotification(task);
+      _addOperation(task, addTask);
+    }
+  }
+
+  void _afterAdd(bool status, TaskEntity task) {
+    if (status) {
+      TaskDatabase.taskDatabase
+          .getTaskDetails(task)
+          .then((TaskEntity detailedTask) {
+        TaskNotification().scheduleNotification(detailedTask);
+      });
+    }
   }
 }

@@ -13,11 +13,13 @@ import 'package:project_scarlet/widgets/strategy_widgets/task_dismiss_container.
 class TaskDismissible extends StatelessWidget {
   final TaskEntity task;
   final int tabType;
+  final void Function(TaskEntity task, bool type) removeTaskFromList;
 
   TaskDismissible({
     Key key,
     @required this.task,
     @required this.tabType,
+    @required this.removeTaskFromList,
   }) : super(key: key);
 
   @override
@@ -53,10 +55,17 @@ class TaskDismissible extends StatelessWidget {
 
       // Function to call based on which way swiped
       onDismissed: (DismissDirection direction) {
-        if (direction == DismissDirection.endToStart)
+        bool type;
+
+        if (direction == DismissDirection.endToStart) {
           taskBloc.deleteTask(task);
-        else
+          type = true;
+        } else {
           taskBloc.completeTask(task);
+          type = false;
+        }
+
+        removeTaskFromList(task, type);
       },
       dismissThresholds: {
         DismissDirection.endToStart: 0.9,

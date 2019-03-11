@@ -15,7 +15,11 @@ class TaskCard extends StatefulWidget {
   final TaskEntity task;
   final int tabType;
 
-  TaskCard({Key key, this.task, this.tabType}) : super(key: key);
+  TaskCard({
+    Key key,
+    @required this.task,
+    @required this.tabType,
+  }) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _TaskCardState();
@@ -66,11 +70,11 @@ class _TaskCardState extends State<TaskCard> {
         Navigator.push(
           context,
           MaterialPageRoute(
-              builder: (context) =>
-                  TaskForm(
-                      inputTask: _taskEntity,
-                      addTask: taskBloc.addTask,
-                      updateTask: taskBloc.updateTask)),
+              builder: (context) => TaskForm(
+                    inputTask: _taskEntity,
+                    addTask: taskBloc.addTask,
+                    updateTask: taskBloc.updateTask,
+                  )),
         );
       },
     );

@@ -21,11 +21,11 @@ class StrategyFAB extends StatelessWidget {
         Navigator.push(
             context,
             MaterialPageRoute(
-                builder: (context) =>
-                    TaskForm(
-                        inputTask: null,
-                        addTask: taskBloc.addTask,
-                        updateTask: taskBloc.updateTask)));
+                builder: (context) => TaskForm(
+                      inputTask: null,
+                      addTask: taskBloc.addTask,
+                      updateTask: taskBloc.updateTask,
+                    )));
       },
     );
   }

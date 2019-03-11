@@ -7,10 +7,14 @@ import 'package:project_scarlet/widgets/strategy_widgets/task_form_field.dart';
 /// A class for inputting or changing already exsting tasks via a form.
 class TaskForm extends StatefulWidget {
   final TaskEntity inputTask;
-  final void Function(TaskEntity, {bool mode}) addTask, updateTask;
+  final Future<bool> Function(TaskEntity) addTask, updateTask;
 
-  TaskForm({Key key, this.inputTask, this.addTask, this.updateTask})
-      : super(key: key);
+  TaskForm({
+    Key key,
+    @required this.inputTask,
+    @required this.addTask,
+    @required this.updateTask,
+  }) : super(key: key);
 
   @override
   _TaskForm createState() => _TaskForm();
@@ -25,10 +29,7 @@ class _TaskForm extends State<TaskForm> {
 
   @override
   Widget build(BuildContext context) {
-    final double deviceWidth = MediaQuery
-        .of(context)
-        .size
-        .width,
+    final double deviceWidth = MediaQuery.of(context).size.width,
         targetWidth = deviceWidth > 550.0 ? 500.0 : deviceWidth * 0.95,
         targetPadding = deviceWidth - targetWidth;
 
@@ -66,7 +67,11 @@ class _TaskForm extends State<TaskForm> {
         (widget.inputTask != null) ? widget.inputTask.setDate : DateTime.now();
 
     final TaskEntity task = fromMap(_formData);
-    widget.inputTask == null ? widget.addTask(task) : widget.updateTask(task);
+    if (widget.inputTask == null) {
+      widget.addTask(task);
+    } else {
+      widget.updateTask(task);
+    }
 
     Navigator.pop(context);
   }

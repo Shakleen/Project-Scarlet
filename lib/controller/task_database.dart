@@ -64,27 +64,27 @@ class TaskDatabase {
 
   /// Public method for removing an existing task from the database.
   Future<bool> removeTask(TaskEntity task) async {
-//     final String debug = 'TaskDatabase - removeTask -'; // TODO DEBUG PRINTS
+     final String debug = 'TaskDatabase - removeTask -'; // TODO DEBUG PRINTS
 
     try {
       final int result = await _database.delete(taskTableName,
-          where: "$primaryKey = ${task.id}");
+          where: "${columnData[7][0]} = ?", whereArgs: [task.setDate.toString()]);
       if (result != 0) {
-//         print('$debug removal successful!'); // TODO DEBUG PRINTS
+         print('$debug removal successful!'); // TODO DEBUG PRINTS
         return true;
       }
     } catch (e) {
       // TODO IMPLEMENT EXCEPTION HANDLING
-//       print('$debug exception occured! $e'); // TODO DEBUG PRINTS
+       print('$debug exception occured! $e'); // TODO DEBUG PRINTS
     }
 
-//     print('$debug removal failed!'); // TODO DEBUG PRINTS
+     print('$debug removal failed!'); // TODO DEBUG PRINTS
     return false;
   }
 
   /// Public method for updating existing task information.
   Future<bool> updateTask(TaskEntity task) async {
-//     final String debug = 'TaskDatabase - updateTaske -'; // TODO DEBUG PRINTS
+     final String debug = 'TaskDatabase - updateTaske -'; // TODO DEBUG PRINTS
 
     try {
       Map<String, dynamic> myMap = toMap(task);
@@ -96,18 +96,18 @@ class TaskDatabase {
         whereArgs: [task.setDate.toString()],
       );
 
-//       print('$debug Result of update: $result');// TODO DEBUG PRINTS
+       print('$debug Result of update: $result');// TODO DEBUG PRINTS
 
       if (result != 0) {
-//         print('$debug Update successful!'); // TODO DEBUG PRINTS
+         print('$debug Update successful!'); // TODO DEBUG PRINTS
         return true;
       }
     } catch (e) {
       // TODO IMPLEMENT EXCEPTION HANDLING
-//       print('$debug Exception occured! $e'); // TODO DEBUG PRINTS
+       print('$debug Exception occured! $e'); // TODO DEBUG PRINTS
     }
 
-//     print('$debug Update failed!'); // TODO DEBUG PRINTS
+     print('$debug Update failed!'); // TODO DEBUG PRINTS
     return false;
   }
 

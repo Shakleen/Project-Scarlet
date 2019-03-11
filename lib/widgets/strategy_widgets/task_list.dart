@@ -27,12 +27,12 @@ class _TaskListState extends State<TaskList> {
   final List<TaskEntity> _listToDisplay = [];
   ScrollController _controller;
   int len = 0;
-  SnackBar _snackBar;
+  SnackBar _loadingSnackBar, _deletedSnackBar, _completedSnackBar;
 
   @override
   void initState() {
-    _snackBar = SnackBar(
-      duration: Duration(seconds: 1),
+    _loadingSnackBar = SnackBar(
+      duration: Duration(milliseconds: 500),
       content: Row(
         children: <Widget>[
           Text("Loading more, please wait"),
@@ -42,6 +42,19 @@ class _TaskListState extends State<TaskList> {
         crossAxisAlignment: CrossAxisAlignment.center,
       ),
     );
+
+    _deletedSnackBar = SnackBar(
+      duration: Duration(seconds: 2),
+      content: Text('Task deleted successfully'),
+      backgroundColor: Colors.red,
+    );
+
+    _completedSnackBar = SnackBar(
+      duration: Duration(seconds: 2),
+      content: Text('Task completed successfully'),
+      backgroundColor: Colors.green,
+    );
+
     _controller = new ScrollController();
     super.initState();
   }
@@ -80,6 +93,7 @@ class _TaskListState extends State<TaskList> {
                       key: Key(_listToDisplay[index].setDate.toString()),
                       task: _listToDisplay[index],
                       tabType: widget.tabType,
+                      removeTaskFromList: _removeFromList,
                     );
                   },
                 ),
@@ -93,10 +107,22 @@ class _TaskListState extends State<TaskList> {
     );
   }
 
+  void _removeFromList(TaskEntity task, bool type) {
+    setState(() {
+      _listToDisplay.remove(task);
+
+      Scaffold.of(context).hideCurrentSnackBar();
+      Scaffold.of(context).showSnackBar(
+        type ? _deletedSnackBar : _completedSnackBar,
+      );
+    });
+  }
+
   bool _handleScrollNotification(ScrollNotification notification) {
     if (notification is ScrollEndNotification) {
       if (_controller.position.extentAfter == 0) {
-        Scaffold.of(context).showSnackBar(_snackBar);
+        Scaffold.of(context).hideCurrentSnackBar();
+        Scaffold.of(context).showSnackBar(_loadingSnackBar);
         setState(() {});
       }
     }

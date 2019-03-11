@@ -37,23 +37,3 @@ final List<dynamic> pageDetails = const [
   ['settings', '/settings', Icons.settings],
   ['about', '/about', Icons.info],
 ];
-ThemeData defaultTheme = ThemeData(
-  primaryColor: Colors.blue,
-  accentColor: Colors.blueAccent,
-  backgroundColor: Colors.white,
-  fontFamily: 'Roboto',
-  brightness: Brightness.light,
-  accentColorBrightness: Brightness.light,
-  textTheme: TextTheme(
-    title: TextStyle(color: Colors.white),
-    subtitle: TextStyle(color: Colors.black),
-    subhead: TextStyle(color: Colors.blueAccent),
-    body1: TextStyle(color: Colors.black),
-    display1: TextStyle(color: Colors.black),
-  ),
-  iconTheme: IconThemeData(color: Colors.white70, size: 26),
-  secondaryHeaderColor: Colors.black54,
-  buttonColor: Colors.blue,
-  primaryColorLight: Colors.blue[75],
-  bottomAppBarColor: Colors.blue,
-);
