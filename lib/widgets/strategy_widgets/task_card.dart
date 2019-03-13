@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:project_scarlet/bloc/bloc_provider.dart';
-import 'package:project_scarlet/bloc/task_bloc.dart';
+import 'package:project_scarlet/bloc/task_database_bloc.dart';
+import 'package:project_scarlet/bloc/task_list_bloc.dart';
 import 'package:project_scarlet/entities/task_entity.dart';
 import 'package:project_scarlet/presentation/standard_values.dart';
 import 'package:project_scarlet/widgets/strategy_widgets/info_builder.dart';
@@ -13,12 +14,10 @@ import 'package:project_scarlet/widgets/strategy_widgets/task_form.dart';
 /// More information is revealed on tap.
 class TaskCard extends StatefulWidget {
   final TaskEntity task;
-  final int tabType;
 
   TaskCard({
     Key key,
     @required this.task,
-    @required this.tabType,
   }) : super(key: key);
 
   @override
@@ -28,7 +27,8 @@ class TaskCard extends StatefulWidget {
 class _TaskCardState extends State<TaskCard> {
   final List<List> _title = [], _children = [];
   final List<Widget> _childrenWidgets = [];
-  TaskBloc taskBloc;
+  TaskDatabaseBloc _taskBloc;
+  TaskListBloc _taskListBloc;
   TaskEntity _taskEntity;
   TextStyle _head, _sub;
   double _deviceWidth;
@@ -41,7 +41,8 @@ class _TaskCardState extends State<TaskCard> {
 
   @override
   Widget build(BuildContext context) {
-    taskBloc = BlocProvider.of<TaskBloc>(context);
+    _taskListBloc = BlocProvider.of<TaskListBloc>(context);
+    _taskBloc = BlocProvider.of<TaskDatabaseBloc>(context);
     _head = Theme.of(context).textTheme.display1;
     _sub = Theme.of(context).textTheme.subtitle;
     _deviceWidth = MediaQuery.of(context).size.width;
@@ -72,8 +73,9 @@ class _TaskCardState extends State<TaskCard> {
           MaterialPageRoute(
               builder: (context) => TaskForm(
                     inputTask: _taskEntity,
-                    addTask: taskBloc.addTask,
-                    updateTask: taskBloc.updateTask,
+                addTask: _taskBloc.addTask,
+                updateTask: _taskBloc.updateTask,
+                showSnackBar: _taskListBloc.updateTask,
                   )),
         );
       },
@@ -88,13 +90,13 @@ class _TaskCardState extends State<TaskCard> {
     _title.add([_taskEntity.name, _head, null, null, partial]);
     _title.add([dueDate, _sub, Icons.schedule, Colors.black, partial]);
 
-    if (widget.tabType == 2)
+    if (_taskListBloc.tabType == 2)
       _title.add([complete, _sub, Icons.check_circle, Colors.green, partial]);
   }
 
   void _onExpanded(bool value) {
     if (value == true && _childrenWidgets.isEmpty) {
-      taskBloc.getTaskDetails(_taskEntity).then((TaskEntity returnedTask) {
+      _taskBloc.getTaskDetails(_taskEntity).then((TaskEntity returnedTask) {
         setState(() {
           _taskEntity = returnedTask;
           _populateChildrenList();

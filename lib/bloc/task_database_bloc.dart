@@ -2,42 +2,28 @@ import 'dart:async';
 
 import 'package:project_scarlet/bloc/bloc_provider.dart';
 import 'package:project_scarlet/controller/task_database.dart';
-import 'package:project_scarlet/controller/task_notification.dart';
 import 'package:project_scarlet/controller/task_manager.dart';
+import 'package:project_scarlet/controller/task_notification.dart';
 import 'package:project_scarlet/entities/task_entity.dart';
 import 'package:project_scarlet/entities/task_operation.dart';
 
-class TaskBloc implements BlocBase {
-  final _taskUpcomingController =
+class TaskDatabaseBloc implements BlocBase {
+  final StreamController<List<TaskEntity>> _taskUpcomingController =
       StreamController<List<TaskEntity>>.broadcast();
-  final _taskOverDueController = StreamController<List<TaskEntity>>.broadcast();
-  final _taskCompletedController =
+  final StreamController<List<TaskEntity>> _taskOverDueController =
       StreamController<List<TaskEntity>>.broadcast();
-  int _upcomingTaskOffSet,
-      _upcomingTaskAmount,
-      _overDueTaskOffSet,
-      _overDueTaskAmount,
-      _completedTaskOffSet,
-      _completedTaskAmount;
+  final StreamController<List<TaskEntity>> _taskCompletedController =
+  StreamController<List<TaskEntity>>.broadcast();
+  int _upcomingOffSet, _upcomingAmount;
+  int _overDueOffSet, _overDueAmount;
+  int _completedOffSet, _completedAmount;
 
-  TaskBloc() {
-    _upcomingTaskAmount = _completedTaskAmount = _overDueTaskAmount = 6;
-    _upcomingTaskOffSet = _completedTaskOffSet = _overDueTaskOffSet = 0;
+  TaskDatabaseBloc() {
+    _upcomingAmount = _completedAmount = _overDueAmount = 6;
+    _upcomingOffSet = _completedOffSet = _overDueOffSet = 0;
   }
 
-  void increment(int type) {
-    switch (type) {
-      case 0:
-        _upcomingTaskOffSet += _upcomingTaskAmount;
-        break;
-      case 1:
-        _overDueTaskOffSet += _overDueTaskAmount;
-        break;
-      case 2:
-        _completedTaskOffSet += _completedTaskAmount;
-        break;
-    }
-  }
+
 
   Stream<List<TaskEntity>> get taskUpcomingStream =>
       _taskUpcomingController.stream;
@@ -67,11 +53,11 @@ class TaskBloc implements BlocBase {
   int getOffset(int type) {
     switch (type) {
       case 0:
-        return _upcomingTaskOffSet;
+        return _upcomingOffSet;
       case 1:
-        return _overDueTaskOffSet;
+        return _overDueOffSet;
       case 2:
-        return _completedTaskOffSet;
+        return _completedOffSet;
       default:
         return null;
     }
@@ -87,40 +73,41 @@ class TaskBloc implements BlocBase {
     _taskUpcomingController.sink
         .add(await TaskDatabase.taskDatabase.getTasksByOffset(
       type: 1,
-      offset: _upcomingTaskOffSet,
-      limit: _upcomingTaskAmount,
+      offset: _upcomingOffSet,
+      limit: _upcomingAmount,
     ));
-    _upcomingTaskOffSet += _upcomingTaskAmount;
-    _overDueTaskOffSet = _completedTaskOffSet = 0;
+    _upcomingOffSet += _upcomingAmount;
+    _overDueOffSet = _completedOffSet = 0;
   }
 
   void getOverDueTasks() async {
     _taskOverDueController.sink
         .add(await TaskDatabase.taskDatabase.getTasksByOffset(
       type: 2,
-      offset: _overDueTaskOffSet,
-      limit: _overDueTaskAmount,
+      offset: _overDueOffSet,
+      limit: _overDueAmount,
     ));
-    _overDueTaskOffSet += _overDueTaskAmount;
-    _upcomingTaskOffSet = _completedTaskOffSet = 0;
+    _overDueOffSet += _overDueAmount;
+    _upcomingOffSet = _completedOffSet = 0;
   }
 
   void getCompletedTasks() async {
     _taskCompletedController.sink
         .add(await TaskDatabase.taskDatabase.getTasksByOffset(
       type: 3,
-      offset: _completedTaskOffSet,
-      limit: _completedTaskAmount,
+      offset: _completedOffSet,
+      limit: _completedAmount,
     ));
-    _completedTaskOffSet += _completedTaskAmount;
-    _upcomingTaskOffSet = _overDueTaskOffSet = 0;
+    _completedOffSet += _completedAmount;
+    _upcomingOffSet = _overDueOffSet = 0;
   }
 
   Future<bool> addTask(TaskEntity task) =>
-      TaskDatabase.taskDatabase.insertTask(task)..then((bool status) {
-        _afterAdd(status, task);
-        return status;
-      });
+      TaskDatabase.taskDatabase.insertTask(task)
+        ..then((bool status) {
+          _afterAdd(status, task);
+          return status;
+        });
 
   Future<bool> deleteTask(TaskEntity task) =>
       TaskDatabase.taskDatabase.removeTask(task).then((bool status) {

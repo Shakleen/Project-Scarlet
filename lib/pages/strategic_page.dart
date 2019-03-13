@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:project_scarlet/bloc/bloc_provider.dart';
-import 'package:project_scarlet/bloc/task_bloc.dart';
-import 'package:project_scarlet/widgets/strategy_widgets/Strategy_FAB.dart';
+import 'package:project_scarlet/bloc/task_database_bloc.dart';
 import 'package:project_scarlet/widgets/strategy_widgets/task_list.dart';
 import 'package:project_scarlet/widgets/strategy_widgets/task_operation_undo.dart';
+import 'package:project_scarlet/widgets/strategy_widgets/task_search_button.dart';
 import 'package:project_scarlet/widgets/ui_elements/side_drawer.dart';
 
 /// Class for constructing the strategy page.
@@ -24,7 +24,7 @@ class StrategicPage extends StatefulWidget {
 /// has a subsequent tab bar view whose information are sorted in [_tabBarViews] list.
 class _StrategicPageState extends State<StrategicPage> {
   final String _page = 'Strategy Page';
-  final _taskBloc = new TaskBloc();
+  final _taskBloc = new TaskDatabaseBloc();
   final List<Widget> _tabs = [], _tabBarViews = [];
   final List<Widget> _appBarButtons = [];
 
@@ -45,10 +45,7 @@ class _StrategicPageState extends State<StrategicPage> {
           key: ValueKey('$_page $key TabView'), tabType: _tabData[key][1]));
     }
 
-    _appBarButtons.add(IconButton(
-      icon: Icon(Icons.search),
-      onPressed: () {},
-    ));
+    _appBarButtons.add(TaskSearchButton());
     _appBarButtons.add(TaskOperationUndo());
 
     super.initState();
@@ -70,7 +67,7 @@ class _StrategicPageState extends State<StrategicPage> {
       length: _tabs.length,
 
       // We use a bloc provider to provide taskBloc to the tabs for accessing the methods.
-      child: BlocProvider(
+      child: BlocProvider<TaskDatabaseBloc>(
         key: ValueKey('$_page BlocProvider'),
 
         // Each tab has a separate stream in the taskBloc.
@@ -93,9 +90,6 @@ class _StrategicPageState extends State<StrategicPage> {
 
           // Main page body is the tab bar view
           body: TabBarView(children: _tabBarViews),
-
-          // FAB for adding new tasks.
-          floatingActionButton: StrategyFAB(key: ValueKey('$_page FAB')),
         ),
       ),
     );

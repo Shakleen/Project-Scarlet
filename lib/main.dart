@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:project_scarlet/controller/task_database.dart';
-import 'package:project_scarlet/entities/task_entity.dart';
 import 'package:project_scarlet/pages/about_page.dart';
 import 'package:project_scarlet/pages/home_page.dart';
 import 'package:project_scarlet/pages/play_game_page.dart';
@@ -60,6 +59,7 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
+    // Material creates a default theme and routes for navigation.
     return MaterialApp(
       // For debugging purposes TODO DEBUG
       // showPerformanceOverlay: true,
@@ -77,7 +77,8 @@ class _MyAppState extends State<MyApp> {
         // Brightness 
         brightness: Brightness.light,
         primaryColorBrightness: Brightness.dark,
-        accentColorBrightness: Brightness.light,
+        accentColorBrightness: Brightness.dark,
+        errorColor: Colors.red,
 
         highlightColor: Colors.white,
         backgroundColor: Colors.white,
@@ -97,7 +98,11 @@ class _MyAppState extends State<MyApp> {
         buttonColor: Colors.blue,
         bottomAppBarColor: Colors.blue,
       ),
+
+      // Home page
       home: new HomePage(key: ValueKey('HomePage')),
+
+      // Navigation routes.
       routes: {
         pageDetails[1][1]: (BuildContext context) =>
             new StrengthPage(key: ValueKey('StrengthPage')),

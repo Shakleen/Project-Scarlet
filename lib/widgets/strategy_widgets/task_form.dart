@@ -8,12 +8,14 @@ import 'package:project_scarlet/widgets/strategy_widgets/task_form_field.dart';
 class TaskForm extends StatefulWidget {
   final TaskEntity inputTask;
   final Future<bool> Function(TaskEntity) addTask, updateTask;
+  final void Function(TaskEntity task, bool status) showSnackBar;
 
   TaskForm({
     Key key,
     @required this.inputTask,
     @required this.addTask,
     @required this.updateTask,
+    @required this.showSnackBar,
   }) : super(key: key);
 
   @override
@@ -67,11 +69,20 @@ class _TaskForm extends State<TaskForm> {
         (widget.inputTask != null) ? widget.inputTask.setDate : DateTime.now();
 
     final TaskEntity task = fromMap(_formData);
-    if (widget.inputTask == null) {
-      widget.addTask(task);
-    } else {
-      widget.updateTask(task);
-    }
+    if (widget.inputTask == null)
+      widget.addTask(task).then((bool status) {
+        if (status) {
+          widget.showSnackBar(task, status);
+        }
+        return status;
+      });
+    else
+      widget.updateTask(task).then((bool status) {
+        if (status) {
+          widget.showSnackBar(task, status);
+        }
+        return status;
+      });
 
     Navigator.pop(context);
   }

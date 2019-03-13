@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:project_scarlet/bloc/bloc_provider.dart';
-import 'package:project_scarlet/bloc/task_bloc.dart';
+import 'package:project_scarlet/bloc/task_database_bloc.dart';
+import 'package:project_scarlet/bloc/task_list_bloc.dart';
 import 'package:project_scarlet/entities/task_entity.dart';
 import 'package:project_scarlet/widgets/strategy_widgets/task_dismissible.dart';
+import 'package:project_scarlet/widgets/strategy_widgets/task_fab.dart';
 
 /// A class for showing the tasks stored in the database in the form of a list.
 ///
@@ -27,7 +29,9 @@ class _TaskListState extends State<TaskList> {
   final List<TaskEntity> _listToDisplay = [];
   ScrollController _controller;
   int len = 0;
-  SnackBar _loadingSnackBar, _deletedSnackBar, _completedSnackBar;
+  SnackBar _loadingSnackBar;
+  TaskListBloc _taskListBloc;
+  TaskDatabaseBloc _taskBloc;
 
   @override
   void initState() {
@@ -43,19 +47,15 @@ class _TaskListState extends State<TaskList> {
       ),
     );
 
-    _deletedSnackBar = SnackBar(
-      duration: Duration(seconds: 2),
-      content: Text('Task deleted successfully'),
-      backgroundColor: Colors.red,
-    );
-
-    _completedSnackBar = SnackBar(
-      duration: Duration(seconds: 2),
-      content: Text('Task completed successfully'),
-      backgroundColor: Colors.green,
-    );
-
     _controller = new ScrollController();
+
+    _taskListBloc = TaskListBloc(
+      tabType: widget.tabType,
+      completeTask: _handleCompleteTask,
+      removeTask: _handleRemoveTask,
+      updateTask: _handleUpdateTask,
+      addTask: _handleAddTask,
+    );
     super.initState();
   }
 
@@ -67,55 +67,114 @@ class _TaskListState extends State<TaskList> {
 
   @override
   Widget build(BuildContext context) {
-    final TaskBloc _taskBloc = BlocProvider.of<TaskBloc>(context);
+    _taskBloc = BlocProvider.of<TaskDatabaseBloc>(context);
 
-    return StreamBuilder<List<TaskEntity>>(
-      stream: _taskBloc.getStream(widget.tabType),
-      builder:
-          (BuildContext context, AsyncSnapshot<List<TaskEntity>> snapshot) {
-        if (snapshot.hasData) {
-          if (snapshot.data.length > 0) {
-            if (_listToDisplay.isEmpty)
-              _listToDisplay.addAll(snapshot.data);
-            else if (_listToDisplay[len] != snapshot.data[0]) {
-              len += snapshot.data.length;
-              _listToDisplay.addAll(snapshot.data);
-            }
+    return BlocProvider<TaskListBloc>(
+      // The bloc that is to be available to the children of the widget
+      bloc: _taskListBloc,
 
-            return NotificationListener<ScrollNotification>(
-              onNotification: _handleScrollNotification,
-              child: Scrollbar(
-                child: ListView.builder(
-                  controller: _controller,
-                  itemCount: _listToDisplay.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    return TaskDismissible(
-                      key: Key(_listToDisplay[index].setDate.toString()),
-                      task: _listToDisplay[index],
-                      tabType: widget.tabType,
-                      removeTaskFromList: _removeFromList,
-                    );
-                  },
+      // The widget of the bloc
+      child: Scaffold(
+        floatingActionButton: TaskFAB(),
+        body: StreamBuilder<List<TaskEntity>>(
+          stream: _taskBloc.getStream(widget.tabType),
+          builder:
+              (BuildContext context, AsyncSnapshot<List<TaskEntity>> snapshot) {
+            if (snapshot.hasData) {
+              if (snapshot.data.length > 0) {
+                if (_listToDisplay.isEmpty)
+                  _listToDisplay.addAll(snapshot.data);
+                else if (_listToDisplay[len] != snapshot.data[0]) {
+                  len += snapshot.data.length;
+                  _listToDisplay.addAll(snapshot.data);
+                }
+              }
+
+              return NotificationListener<ScrollNotification>(
+                onNotification: _handleScrollNotification,
+                child: Scrollbar(
+                  child: ListView.builder(
+                    controller: _controller,
+                    itemCount: _listToDisplay.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      return TaskDismissible(
+                        key: Key(_listToDisplay[index].setDate.toString()),
+                        task: _listToDisplay[index],
+                      );
+                    },
+                  ),
                 ),
-              ),
-            );
-          }
-          return Container(height: 0.0, width: 0.0);
-        }
-        return Center(child: CircularProgressIndicator());
-      },
+              );
+            } else if (snapshot.connectionState == ConnectionState.active)
+              return Center(child: CircularProgressIndicator());
+
+            return Container(height: 0.0, width: 0.0);
+          },
+        ),
+      ),
     );
   }
 
-  void _removeFromList(TaskEntity task, bool type) {
-    setState(() {
-      _listToDisplay.remove(task);
+  Widget _showSnackBar(String text, Color color) {
+    Scaffold.of(context).hideCurrentSnackBar();
+    Scaffold.of(context).showSnackBar(SnackBar(
+      duration: Duration(seconds: 2),
+      content: Text(text),
+      backgroundColor: color,
+    ));
+  }
 
-      Scaffold.of(context).hideCurrentSnackBar();
-      Scaffold.of(context).showSnackBar(
-        type ? _deletedSnackBar : _completedSnackBar,
-      );
-    });
+  void _handleAddTask(TaskEntity task, bool status) {
+    if (status) {
+      _showSnackBar('${task.name} scheduled!', Theme
+          .of(context)
+          .primaryColor);
+      setState(() {});
+    } else
+      _showSnackBar('Couldn\'t add ${task.name}', Theme
+          .of(context)
+          .errorColor);
+  }
+
+  void _handleCompleteTask(TaskEntity task, bool status) {
+    if (status) {
+      _listToDisplay.remove(task);
+      _showSnackBar('${task.name} completed!', Theme
+          .of(context)
+          .primaryColor);
+      setState(() {});
+    } else
+      _showSnackBar(
+          'Couldn\'t complete ${task.name}', Theme
+          .of(context)
+          .errorColor);
+  }
+
+  void _handleRemoveTask(TaskEntity task, bool status) {
+    if (status) {
+      _listToDisplay.remove(task);
+      _showSnackBar('${task.name} removed!', Theme
+          .of(context)
+          .primaryColor);
+      setState(() {});
+    } else
+      _showSnackBar(
+          'Couldn\'t remove ${task.name}', Theme
+          .of(context)
+          .errorColor);
+  }
+
+  void _handleUpdateTask(TaskEntity task, bool status) {
+    if (status) {
+      _showSnackBar('${task.name} updated!', Theme
+          .of(context)
+          .primaryColor);
+      setState(() {});
+    } else
+      _showSnackBar(
+          'Couldn\'t update ${task.name}', Theme
+          .of(context)
+          .errorColor);
   }
 
   bool _handleScrollNotification(ScrollNotification notification) {
