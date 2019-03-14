@@ -6,14 +6,13 @@ import '../presentation/custom_icons.dart';
 class TaskEntity {
   String name, description, location;
   int id, priority, difficulty;
-  DateTime dueDate, completeDate, setDate;
+  DateTime dueDate, setDate;
 
   /// Constructor for class.
   TaskEntity({
     @required String name,
     @required DateTime dueDate,
     DateTime setDate,
-    DateTime completeDate,
     String description,
     String location,
     int priority = 0,
@@ -28,7 +27,6 @@ class TaskEntity {
       ..priority = priority
       ..difficulty = difficulty
       ..location = location
-      ..completeDate = completeDate
       ..id = id;
   }
 
@@ -48,10 +46,8 @@ class TaskEntity {
       case 5:
         return this.location;
       case 6:
-        return this.completeDate;
-      case 7:
         return this.setDate;
-      case 8:
+      case 7:
         return this.id;
       default:
         return null;
@@ -68,11 +64,9 @@ int convertInt(dynamic input) =>
 
 Map<String, dynamic> toMap(TaskEntity task) {
   final Map<String, dynamic> map = {};
-//  print('TaskEntity toMap');
   for (int key in columnData.keys) {
     final String value = task.getTaskInfo(key)?.toString(),
         column = columnData[key][0];
-//    print('$column = $value');
     map[column] = value;
   }
 
@@ -100,9 +94,8 @@ final Map<int, List<dynamic>> priorityData = const {
   3: ["Priority", "INTEGER", "DEFAULT 0"],
   4: ["Difficulty", "INTEGER", "DEFAULT 0"],
   5: ["Location", "TEXT", "DEFAULT NULL"],
-  6: ["CompleteDate", "DATETIME", "DEFAULT NULL"],
-  7: ["SetDate", "DATETIME", "NOT NULL"],
-  8: ["ID", "INTEGER", "PRIMARY KEY AUTOINCREMENT"],
+      6: ["SetDate", "DATETIME", "NOT NULL"],
+      7: ["ID", "INTEGER", "PRIMARY KEY AUTOINCREMENT"],
 };
 final Map<String, dynamic> taskFormData = {
   columnData[0][0]: null, // Name
@@ -111,16 +104,12 @@ final Map<String, dynamic> taskFormData = {
   columnData[3][0]: 0, // Priority
   columnData[4][0]: 0, // Difficulty
   columnData[5][0]: null, // Location
-  columnData[7][0]: DateTime.now(), // Set date
-  columnData[8][0]: 0, // ID
+  columnData[7][0]: 0, // ID
 };
-final String primaryKey = columnData[8][0],
+final String primaryKey = columnData[7][0],
     taskTableName = "Tasks",
-    taskDatabaseFileName = "TasksDatabase.db";
-final List<String> taskTableViewNames = const [
-  "TasksPending",
-  "TasksCompleted"
-];
+    taskDatabaseFileName = "TasksDatabase.db",
+    taskTableViewName = "TasksPending";
 
 TaskEntity fromMap(Map<String, dynamic> map) {
   if (map.keys.contains(columnData[4][0])) {
@@ -131,15 +120,13 @@ TaskEntity fromMap(Map<String, dynamic> map) {
       priority: convertInt(map[columnData[3][0]]),
       difficulty: convertInt(map[columnData[4][0]]),
       location: map[columnData[5][0]],
-      setDate: convertDate(map[columnData[7][0]]),
-      completeDate: convertDate(map[columnData[6][0]]),
+      setDate: convertDate(map[columnData[6][0]]),
     );
   }
   return TaskEntity(
     name: map[columnData[0][0]],
     dueDate: convertDate(map[columnData[1][0]]),
     priority: convertInt(map[columnData[3][0]]),
-    setDate: convertDate(map[columnData[7][0]]),
-    completeDate: convertDate(map[columnData[6][0]]),
+    setDate: convertDate(map[columnData[6][0]]),
   );
 }

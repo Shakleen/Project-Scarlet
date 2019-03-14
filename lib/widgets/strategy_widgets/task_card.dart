@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:project_scarlet/bloc/bloc_provider.dart';
+import 'package:project_scarlet/bloc/task_bloc.dart';
 import 'package:project_scarlet/bloc/task_database_bloc.dart';
 import 'package:project_scarlet/bloc/task_list_bloc.dart';
 import 'package:project_scarlet/entities/task_entity.dart';
 import 'package:project_scarlet/presentation/standard_values.dart';
 import 'package:project_scarlet/widgets/strategy_widgets/info_builder.dart';
-import 'package:project_scarlet/widgets/strategy_widgets/task_card_title.dart';
 import 'package:project_scarlet/widgets/strategy_widgets/task_form.dart';
 
 /// A class for displaying task related information.
@@ -13,12 +13,7 @@ import 'package:project_scarlet/widgets/strategy_widgets/task_form.dart';
 /// The name, set date and complete date (if not null) is displayed by default.
 /// More information is revealed on tap.
 class TaskCard extends StatefulWidget {
-  final TaskEntity task;
-
-  TaskCard({
-    Key key,
-    @required this.task,
-  }) : super(key: key);
+  TaskCard({Key key}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _TaskCardState();
@@ -26,26 +21,15 @@ class TaskCard extends StatefulWidget {
 
 class _TaskCardState extends State<TaskCard> {
   final List<List> _title = [], _children = [];
-  final List<Widget> _childrenWidgets = [];
-  TaskDatabaseBloc _taskBloc;
+  TaskDatabaseBloc _taskDBMSBloc;
   TaskListBloc _taskListBloc;
-  TaskEntity _taskEntity;
-  TextStyle _head, _sub;
-  double _deviceWidth;
-
-  @override
-  void initState() {
-    _taskEntity = widget.task;
-    super.initState();
-  }
+  TaskBloc _taskBloc;
 
   @override
   Widget build(BuildContext context) {
     _taskListBloc = BlocProvider.of<TaskListBloc>(context);
-    _taskBloc = BlocProvider.of<TaskDatabaseBloc>(context);
-    _head = Theme.of(context).textTheme.display1;
-    _sub = Theme.of(context).textTheme.subtitle;
-    _deviceWidth = MediaQuery.of(context).size.width;
+    _taskDBMSBloc = BlocProvider.of<TaskDatabaseBloc>(context);
+    _taskBloc = BlocProvider.of<TaskBloc>(context);
     if (_title.isEmpty) _populateTitleList();
 
     return GestureDetector(
@@ -56,12 +40,12 @@ class _TaskCardState extends State<TaskCard> {
           ),
         ),
         child: ExpansionTile(
-          title: TaskCardTitle(info: _title),
-          children: _childrenWidgets,
+          title: Column(children: _title.map(_buildInfo).toList()),
+          children: _children.map(_buildInfo).toList(),
           initiallyExpanded: false,
           trailing: Icon(
-            priorityData[_taskEntity.priority][1],
-            color: priorityData[_taskEntity.priority][2],
+            priorityData[_taskBloc.task.priority][1],
+            color: priorityData[_taskBloc.task.priority][2],
           ),
           onExpansionChanged: _onExpanded,
         ),
@@ -72,9 +56,9 @@ class _TaskCardState extends State<TaskCard> {
           context,
           MaterialPageRoute(
               builder: (context) => TaskForm(
-                    inputTask: _taskEntity,
-                addTask: _taskBloc.addTask,
-                updateTask: _taskBloc.updateTask,
+                inputTask: _taskBloc.task,
+                addTask: _taskDBMSBloc.addTask,
+                updateTask: _taskDBMSBloc.updateTask,
                 showSnackBar: _taskListBloc.updateTask,
                   )),
         );
@@ -82,60 +66,44 @@ class _TaskCardState extends State<TaskCard> {
     );
   }
 
+  InfoBuilder _buildInfo(List l) =>
+      InfoBuilder(
+          key: Key('${l[0]}'),
+          text: l[0],
+          icon: l[1],
+          iconColor: l[2],
+          type: l[3]);
+
   void _populateTitleList() {
-    final double partial = _deviceWidth * 0.7;
-    final String dueDate = dateFormatter.format(_taskEntity.dueDate);
-    final String complete = dateFormatter.format(_taskEntity.setDate);
-
-    _title.add([_taskEntity.name, _head, null, null, partial]);
-    _title.add([dueDate, _sub, Icons.schedule, Colors.black, partial]);
-
-    if (_taskListBloc.tabType == 2)
-      _title.add([complete, _sub, Icons.check_circle, Colors.green, partial]);
+    final String dueDate = dateFormatter.format(_taskBloc.task.dueDate);
+    _title.add([_taskBloc.task.name, null, null, null]);
+    _title.add([dueDate, Icons.schedule, Colors.black, true]);
   }
 
   void _onExpanded(bool value) {
-    if (value == true && _childrenWidgets.isEmpty) {
-      _taskBloc.getTaskDetails(_taskEntity).then((TaskEntity returnedTask) {
-        setState(() {
-          _taskEntity = returnedTask;
-          _populateChildrenList();
-          _childrenWidgets.addAll(List.generate(_children.length, _generate));
-        });
+    if (value == true && _children.isEmpty) {
+      _taskBloc.getTaskDetails().then((bool value) {
+        if (value)
+          setState(() {
+            _populateChildrenList();
+          });
       });
     }
   }
 
-  Widget _generate(int index) {
-    return Container(
-      child: InfoBuilder(
-        key: Key('Task card title ${_children[index][0]}'),
-        text: _children[index][0],
-        textStyle: _children[index][1],
-        icon: _children[index][2],
-        iconColor: _children[index][3],
-        width: _children[index][4],
-      ),
-      margin: const EdgeInsets.only(left: 15.0),
-    );
-  }
-
   void _populateChildrenList() {
-    final double full = _deviceWidth * 0.85;
-    final String setDate = dateFormatter.format(_taskEntity.setDate);
-    final String difficulty = difficultyData[_taskEntity.difficulty][0];
-    final String description = _taskEntity.description;
-    final String location = _taskEntity.location;
+    final String setDate = dateFormatter.format(_taskBloc.task.setDate);
+    final String difficulty = difficultyData[_taskBloc.task.difficulty][0];
+    final String description = _taskBloc.task.description;
+    final String location = _taskBloc.task.location;
 
     if (description != null)
-      _children
-          .add([description, _sub, Icons.description, Colors.indigo, full]);
+      _children.add([description, Icons.description, Colors.indigo, false]);
 
     if (location != null)
-      _children
-          .add([location, _sub, Icons.location_on, Colors.deepOrange, full]);
+      _children.add([location, Icons.location_on, Colors.deepOrange, false]);
 
-    _children.add([setDate, _sub, Icons.save, Colors.black, full]);
-    _children.add([difficulty, _sub, Icons.adjust, Colors.indigo, full]);
+    _children.add([setDate, Icons.save, Colors.black, false]);
+    _children.add([difficulty, Icons.adjust, Colors.indigo, false]);
   }
 }

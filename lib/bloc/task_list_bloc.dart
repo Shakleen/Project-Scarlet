@@ -4,8 +4,8 @@ import 'package:project_scarlet/entities/task_entity.dart';
 class TaskListBloc implements BlocBase {
   final void Function(TaskEntity task, bool status) removeTask,
       completeTask,
-      updateTask,
-      addTask;
+      updateTask;
+
   final int tabType;
 
   TaskListBloc({
@@ -13,7 +13,6 @@ class TaskListBloc implements BlocBase {
     this.updateTask,
     this.removeTask,
     this.completeTask,
-    this.addTask,
   });
 
   @override

@@ -15,7 +15,7 @@ class TaskForm extends StatefulWidget {
     @required this.inputTask,
     @required this.addTask,
     @required this.updateTask,
-    @required this.showSnackBar,
+    this.showSnackBar,
   }) : super(key: key);
 
   @override
@@ -34,6 +34,8 @@ class _TaskForm extends State<TaskForm> {
     final double deviceWidth = MediaQuery.of(context).size.width,
         targetWidth = deviceWidth > 550.0 ? 500.0 : deviceWidth * 0.95,
         targetPadding = deviceWidth - targetWidth;
+    final String title =
+    widget.inputTask == null ? 'Add new task' : 'Edit task details';
 
     return GestureDetector(
       onTap: () {
@@ -41,10 +43,10 @@ class _TaskForm extends State<TaskForm> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text(
-            'Edit task details',
-            style: Theme.of(context).textTheme.title,
-          ),
+          title: Text(title, style: Theme
+              .of(context)
+              .textTheme
+              .title),
         ),
         body: Container(
           margin: EdgeInsets.all(10.0),
@@ -71,16 +73,12 @@ class _TaskForm extends State<TaskForm> {
     final TaskEntity task = fromMap(_formData);
     if (widget.inputTask == null)
       widget.addTask(task).then((bool status) {
-        if (status) {
-          widget.showSnackBar(task, status);
-        }
+        widget.showSnackBar(task, status);
         return status;
       });
     else
       widget.updateTask(task).then((bool status) {
-        if (status) {
-          widget.showSnackBar(task, status);
-        }
+        widget.showSnackBar(task, status);
         return status;
       });
 

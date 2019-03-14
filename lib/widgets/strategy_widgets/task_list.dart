@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:project_scarlet/bloc/bloc_provider.dart';
+import 'package:project_scarlet/bloc/task_bloc.dart';
 import 'package:project_scarlet/bloc/task_database_bloc.dart';
 import 'package:project_scarlet/bloc/task_list_bloc.dart';
 import 'package:project_scarlet/entities/task_entity.dart';
 import 'package:project_scarlet/widgets/strategy_widgets/task_dismissible.dart';
-import 'package:project_scarlet/widgets/strategy_widgets/task_fab.dart';
 
 /// A class for showing the tasks stored in the database in the form of a list.
 ///
@@ -26,9 +26,10 @@ class TaskList extends StatefulWidget {
 /// stream in the [_taskBloc] which it gets via the [BlocProvider] class. If it has
 /// data to display it builds the list otherwise a progress indicator is shown.
 class _TaskListState extends State<TaskList> {
+  final String _key = "TaskList";
   final List<TaskEntity> _listToDisplay = [];
   ScrollController _controller;
-  int len = 0;
+  int _len = 0;
   SnackBar _loadingSnackBar;
   TaskListBloc _taskListBloc;
   TaskDatabaseBloc _taskBloc;
@@ -36,25 +37,24 @@ class _TaskListState extends State<TaskList> {
   @override
   void initState() {
     _loadingSnackBar = SnackBar(
+      key: ValueKey('$_key Loading Snackbar'),
       duration: Duration(milliseconds: 500),
       content: Row(
+        key: ValueKey('$_key Loading Snackbar Row'),
         children: <Widget>[
           Text("Loading more, please wait"),
-          CircularProgressIndicator(),
+          CircularProgressIndicator(key: ValueKey('$_key Progress Indication')),
         ],
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.center,
       ),
     );
-
-    _controller = new ScrollController();
-
+    _controller = ScrollController();
     _taskListBloc = TaskListBloc(
       tabType: widget.tabType,
       completeTask: _handleCompleteTask,
       removeTask: _handleRemoveTask,
       updateTask: _handleUpdateTask,
-      addTask: _handleAddTask,
     );
     super.initState();
   }
@@ -70,70 +70,72 @@ class _TaskListState extends State<TaskList> {
     _taskBloc = BlocProvider.of<TaskDatabaseBloc>(context);
 
     return BlocProvider<TaskListBloc>(
+      key: ValueKey('$_key Bloc Provider'),
       // The bloc that is to be available to the children of the widget
       bloc: _taskListBloc,
 
       // The widget of the bloc
-      child: Scaffold(
-        floatingActionButton: TaskFAB(),
-        body: StreamBuilder<List<TaskEntity>>(
-          stream: _taskBloc.getStream(widget.tabType),
-          builder:
-              (BuildContext context, AsyncSnapshot<List<TaskEntity>> snapshot) {
-            if (snapshot.hasData) {
-              if (snapshot.data.length > 0) {
-                if (_listToDisplay.isEmpty)
-                  _listToDisplay.addAll(snapshot.data);
-                else if (_listToDisplay[len] != snapshot.data[0]) {
-                  len += snapshot.data.length;
-                  _listToDisplay.addAll(snapshot.data);
-                }
+      child: StreamBuilder<List<TaskEntity>>(
+        key: ValueKey('$_key Stream Builder'),
+        stream: _taskBloc.getStream(),
+        builder:
+            (BuildContext context, AsyncSnapshot<List<TaskEntity>> snapshot) {
+          if (snapshot.hasData) {
+            if (snapshot.data.length > 0) {
+              if (_listToDisplay.isEmpty)
+                _listToDisplay.addAll(snapshot.data);
+              else if (_listToDisplay[_len] != snapshot.data[0]) {
+                _len += snapshot.data.length;
+                _listToDisplay.addAll(snapshot.data);
               }
+            }
 
-              return NotificationListener<ScrollNotification>(
-                onNotification: _handleScrollNotification,
-                child: Scrollbar(
-                  child: ListView.builder(
-                    controller: _controller,
-                    itemCount: _listToDisplay.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      return TaskDismissible(
+            return NotificationListener<ScrollNotification>(
+              key: ValueKey('$_key NotificationListener'),
+              onNotification: _handleScrollNotification,
+              child: Scrollbar(
+                key: ValueKey('$_key Scrollbar'),
+                child: ListView.builder(
+                  key: ValueKey('$_key ListView.builder'),
+                  controller: _controller,
+                  itemCount: _listToDisplay.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    return BlocProvider(
+                      child: TaskDismissible(
                         key: Key(_listToDisplay[index].setDate.toString()),
-                        task: _listToDisplay[index],
-                      );
-                    },
-                  ),
+                      ),
+                      bloc: new TaskBloc(task: _listToDisplay[index]),
+                    );
+                  },
                 ),
-              );
-            } else if (snapshot.connectionState == ConnectionState.active)
-              return Center(child: CircularProgressIndicator());
+              ),
+            );
+          } else if (snapshot.connectionState == ConnectionState.active)
+            return Center(
+              key: ValueKey('$_key Center'),
+              child: CircularProgressIndicator(
+                key: ValueKey('$_key CircularProgressIndicator'),
+              ),
+            );
 
-            return Container(height: 0.0, width: 0.0);
-          },
-        ),
+          return Container(
+            key: ValueKey('$_key Container'),
+            height: 0.0,
+            width: 0.0,
+          );
+        },
       ),
     );
   }
 
-  Widget _showSnackBar(String text, Color color) {
+  void _showSnackBar(String text, Color color) {
     Scaffold.of(context).hideCurrentSnackBar();
     Scaffold.of(context).showSnackBar(SnackBar(
+      key: ValueKey('$_key Show Snack Bar'),
       duration: Duration(seconds: 2),
       content: Text(text),
       backgroundColor: color,
     ));
-  }
-
-  void _handleAddTask(TaskEntity task, bool status) {
-    if (status) {
-      _showSnackBar('${task.name} scheduled!', Theme
-          .of(context)
-          .primaryColor);
-      setState(() {});
-    } else
-      _showSnackBar('Couldn\'t add ${task.name}', Theme
-          .of(context)
-          .errorColor);
   }
 
   void _handleCompleteTask(TaskEntity task, bool status) {
@@ -142,7 +144,6 @@ class _TaskListState extends State<TaskList> {
       _showSnackBar('${task.name} completed!', Theme
           .of(context)
           .primaryColor);
-      setState(() {});
     } else
       _showSnackBar(
           'Couldn\'t complete ${task.name}', Theme
@@ -156,7 +157,6 @@ class _TaskListState extends State<TaskList> {
       _showSnackBar('${task.name} removed!', Theme
           .of(context)
           .primaryColor);
-      setState(() {});
     } else
       _showSnackBar(
           'Couldn\'t remove ${task.name}', Theme
@@ -165,16 +165,14 @@ class _TaskListState extends State<TaskList> {
   }
 
   void _handleUpdateTask(TaskEntity task, bool status) {
-    if (status) {
-      _showSnackBar('${task.name} updated!', Theme
-          .of(context)
-          .primaryColor);
-      setState(() {});
-    } else
-      _showSnackBar(
-          'Couldn\'t update ${task.name}', Theme
-          .of(context)
-          .errorColor);
+    status
+        ? _showSnackBar('${task.name} updated!', Theme
+        .of(context)
+        .primaryColor)
+        : _showSnackBar(
+        'Couldn\'t update ${task.name}', Theme
+        .of(context)
+        .errorColor);
   }
 
   bool _handleScrollNotification(ScrollNotification notification) {

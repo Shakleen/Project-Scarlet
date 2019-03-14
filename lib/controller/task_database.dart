@@ -10,7 +10,15 @@ import 'package:sqflite/sqflite.dart';
 class TaskDatabase {
   static final TaskDatabase taskDatabase = TaskDatabase._();
   Database _database;
-  final List<String> whereClauses = const [" >= ?", " < ?"];
+  final List<String> _whereClauses = const [" >= ?", " < ?"];
+  final DateTime _today = new DateTime(
+      DateTime
+          .now()
+          .year, DateTime
+      .now()
+      .month, DateTime
+      .now()
+      .day);
 
   /// Private constructor of TaskDatabase class.
   TaskDatabase._();
@@ -35,8 +43,7 @@ class TaskDatabase {
   Future<void> createViews() async {
 //     final String debug = "TaskDatabase - createviews -"; // TODO DEBUG PRINTS
     try {
-      await _database.execute(_buildTableViewCreateStatement(0));
-      await _database.execute(_buildTableViewCreateStatement(1));
+      await _database.execute(_buildTableViewCreateStatement());
 
 //       print('$debug Views created successfully!');// TODO DEBUG PRINTS
     } catch (e) {
@@ -64,27 +71,28 @@ class TaskDatabase {
 
   /// Public method for removing an existing task from the database.
   Future<bool> removeTask(TaskEntity task) async {
-     final String debug = 'TaskDatabase - removeTask -'; // TODO DEBUG PRINTS
+    final String debug = 'TaskDatabase - removeTask -'; // TODO DEBUG PRINTS
 
     try {
       final int result = await _database.delete(taskTableName,
-          where: "${columnData[7][0]} = ?", whereArgs: [task.setDate.toString()]);
+          where: "${columnData[6][0]} = ?",
+          whereArgs: [task.setDate.toString()]);
       if (result != 0) {
-         print('$debug removal successful!'); // TODO DEBUG PRINTS
+        print('$debug removal successful!'); // TODO DEBUG PRINTS
         return true;
       }
     } catch (e) {
       // TODO IMPLEMENT EXCEPTION HANDLING
-       print('$debug exception occured! $e'); // TODO DEBUG PRINTS
+      print('$debug exception occured! $e'); // TODO DEBUG PRINTS
     }
 
-     print('$debug removal failed!'); // TODO DEBUG PRINTS
+    print('$debug removal failed!'); // TODO DEBUG PRINTS
     return false;
   }
 
   /// Public method for updating existing task information.
   Future<bool> updateTask(TaskEntity task) async {
-     final String debug = 'TaskDatabase - updateTaske -'; // TODO DEBUG PRINTS
+    final String debug = 'TaskDatabase - updateTaske -'; // TODO DEBUG PRINTS
 
     try {
       Map<String, dynamic> myMap = toMap(task);
@@ -92,22 +100,22 @@ class TaskDatabase {
       final int result = await _database.update(
         taskTableName,
         myMap,
-        where: "${columnData[7][0]} = ?",
+        where: "${columnData[6][0]} = ?",
         whereArgs: [task.setDate.toString()],
       );
 
-       print('$debug Result of update: $result');// TODO DEBUG PRINTS
+      print('$debug Result of update: $result'); // TODO DEBUG PRINTS
 
       if (result != 0) {
-         print('$debug Update successful!'); // TODO DEBUG PRINTS
+        print('$debug Update successful!'); // TODO DEBUG PRINTS
         return true;
       }
     } catch (e) {
       // TODO IMPLEMENT EXCEPTION HANDLING
-       print('$debug Exception occured! $e'); // TODO DEBUG PRINTS
+      print('$debug Exception occured! $e'); // TODO DEBUG PRINTS
     }
 
-     print('$debug Update failed!'); // TODO DEBUG PRINTS
+    print('$debug Update failed!'); // TODO DEBUG PRINTS
     return false;
   }
 
@@ -117,7 +125,7 @@ class TaskDatabase {
 //    print('$debug task ${task.name} set date is ${task.setDate}');// TODO DEBUG PRINTS
     final List<dynamic> result = await _database.query(
       taskTableName,
-      where: '${columnData[7][0]} = ?',
+      where: '${columnData[6][0]} = ?',
       whereArgs: [task.setDate.toString()],
     );
 //    print('$debug result set is $result');// TODO DEBUG PRINTS
@@ -131,54 +139,40 @@ class TaskDatabase {
   /// Type 2: Overdue tasks. No complete date and due date
   /// is before current date.
   /// Type 3: Completed tasks. Has complete date.
-  Future<List<TaskEntity>> getTasksByOffset(
-      {int type, int offset, int limit}) async {
-//     final debug = 'TaskDatabase - getTasksByOffSet -'; // TODO DEBUG PRINTS
+  Future<List<TaskEntity>> getTasks({int type, int offset, int limit}) async {
+//    final debug = 'TaskDatabase - getTasksByOffSet -'; // TODO DEBUG PRINTS
     final List<TaskEntity> resultList = [];
 
     try {
       List<Map<String, dynamic>> result;
       switch (type) {
-        case 1: // Upcoming
-        case 2: // Overdue
+        case 0:
+        case 1:
           result = await _database.query(
-            taskTableViewNames[0],
-            where: '${columnData[1][0]} ${whereClauses[type - 1]}',
-            whereArgs: [DateTime.now().toString()],
-            orderBy: columnData[1][0],
-            limit: limit,
-            offset: offset,
-          );
-          break;
-        case 3: // Completed
-          result = await _database.query(
-            taskTableViewNames[1],
+            taskTableViewName,
+            where: '${columnData[1][0]} ${_whereClauses[type]}',
+            whereArgs: [_today.toString()],
             orderBy: columnData[1][0],
             limit: limit,
             offset: offset,
           );
           break;
         default: // All
-          result = await _database.query(
-            taskTableName,
-            orderBy: columnData[1][0],
-            limit: limit,
-            offset: offset,
-          );
-          break;
+          result = await _database.query(taskTableName,
+              orderBy: columnData[1][0], limit: limit, offset: offset);
       }
 
-//       print("$debug DBMS length = ${result.length}"); // TODO DEBUG PRINTS
+//      print("$debug DBMS length = ${result.length}"); // TODO DEBUG PRINTS
 
       if (result != null) {
         for (Map<String, dynamic> entry in result)
           resultList.add(fromMap(entry));
 
-//         print("$debug parsed length ${resultList.length}"); // TODO DEBUG PRINTS
+//        print("$debug parsed length ${resultList.length}"); // TODO DEBUG PRINTS
       }
     } catch (e) {
       // TODO IMPLEMENT EXCEPTION HANDLING
-//       print('$debug Exception occured!\n$e'); // TODO DEBUG PRINTS
+//      print('$debug Exception occured!\n$e'); // TODO DEBUG PRINTS
     }
 
     return resultList;
@@ -217,22 +211,19 @@ class TaskDatabase {
   }
 
   /// Private method for creating views of the table.
-  String _buildTableViewCreateStatement(int view) {
-    String statement = "CREATE VIEW ${taskTableViewNames[view]} AS SELECT ";
-    final String ending = " FROM $taskTableName WHERE ${columnData[6][0]} is " +
-        (view == 1 ? "NOT NULL" : "NULL");
+  String _buildTableViewCreateStatement() {
+    String statement = "CREATE VIEW $taskTableViewName AS SELECT ";
     final List<String> columns = [
       "Name",
       "DueDate",
       "Priority",
-      "CompleteDate",
       "SetDate",
       "ID"
     ];
     final len = columns.length - 1;
 
     for (int i = 0; i <= len; ++i)
-      statement += columns[i] + (i < len ? ", " : ending);
+      statement += columns[i] + (i < len ? ", " : " FROM $taskTableName");
 
 //     print(statement); // TODO DEBUG PRINTS
 

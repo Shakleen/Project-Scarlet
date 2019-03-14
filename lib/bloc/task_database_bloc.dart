@@ -8,98 +8,46 @@ import 'package:project_scarlet/entities/task_entity.dart';
 import 'package:project_scarlet/entities/task_operation.dart';
 
 class TaskDatabaseBloc implements BlocBase {
-  final StreamController<List<TaskEntity>> _taskUpcomingController =
-      StreamController<List<TaskEntity>>.broadcast();
-  final StreamController<List<TaskEntity>> _taskOverDueController =
-      StreamController<List<TaskEntity>>.broadcast();
-  final StreamController<List<TaskEntity>> _taskCompletedController =
+  final StreamController<List<TaskEntity>> _taskListController =
   StreamController<List<TaskEntity>>.broadcast();
-  int _upcomingOffSet, _upcomingAmount;
-  int _overDueOffSet, _overDueAmount;
-  int _completedOffSet, _completedAmount;
+  final int _fetchAmount = 6;
+  int _current, _taskListOffset, _taskListAmount;
 
   TaskDatabaseBloc() {
-    _upcomingAmount = _completedAmount = _overDueAmount = 6;
-    _upcomingOffSet = _completedOffSet = _overDueOffSet = 0;
+    _taskListAmount = _fetchAmount;
+    _current = _taskListOffset = 0;
   }
 
+  Stream<List<TaskEntity>> get taskListStream => _taskListController.stream;
 
-
-  Stream<List<TaskEntity>> get taskUpcomingStream =>
-      _taskUpcomingController.stream;
-
-  Stream<List<TaskEntity>> get taskOverDueStream =>
-      _taskOverDueController.stream;
-
-  Stream<List<TaskEntity>> get taskCompletedStream =>
-      _taskCompletedController.stream;
-
-  Stream<List<TaskEntity>> getStream(int i) {
-    switch (i) {
-      case 0:
-        getUpcomingTasks();
-        return taskUpcomingStream;
-      case 1:
-        getOverDueTasks();
-        return taskOverDueStream;
-      case 2:
-        getCompletedTasks();
-        return taskCompletedStream;
-      default:
-        return null;
+  void changeStream(int i) {
+    if (_current != i) {
+      _current = i;
+      _taskListOffset = 0;
+      _taskListAmount = _fetchAmount;
     }
   }
 
-  int getOffset(int type) {
-    switch (type) {
-      case 0:
-        return _upcomingOffSet;
-      case 1:
-        return _overDueOffSet;
-      case 2:
-        return _completedOffSet;
-      default:
-        return null;
-    }
+  Stream<List<TaskEntity>> getStream() {
+    getTasks();
+    return taskListStream;
   }
 
-  dispose() {
-    _taskUpcomingController.close();
-    _taskOverDueController.close();
-    _taskCompletedController.close();
-  }
+  int getOffset(int type) => _taskListOffset;
 
-  void getUpcomingTasks() async {
-    _taskUpcomingController.sink
-        .add(await TaskDatabase.taskDatabase.getTasksByOffset(
-      type: 1,
-      offset: _upcomingOffSet,
-      limit: _upcomingAmount,
-    ));
-    _upcomingOffSet += _upcomingAmount;
-    _overDueOffSet = _completedOffSet = 0;
-  }
+  dispose() => _taskListController.close();
 
-  void getOverDueTasks() async {
-    _taskOverDueController.sink
-        .add(await TaskDatabase.taskDatabase.getTasksByOffset(
-      type: 2,
-      offset: _overDueOffSet,
-      limit: _overDueAmount,
-    ));
-    _overDueOffSet += _overDueAmount;
-    _upcomingOffSet = _completedOffSet = 0;
-  }
-
-  void getCompletedTasks() async {
-    _taskCompletedController.sink
-        .add(await TaskDatabase.taskDatabase.getTasksByOffset(
-      type: 3,
-      offset: _completedOffSet,
-      limit: _completedAmount,
-    ));
-    _completedOffSet += _completedAmount;
-    _upcomingOffSet = _overDueOffSet = 0;
+  void getTasks() async {
+    _taskListController.sink.add(await TaskDatabase.taskDatabase
+        .getTasks(
+      type: _current,
+      offset: _taskListOffset,
+      limit: _taskListAmount,
+    )
+        .then((List<TaskEntity> list) {
+      if (list.isNotEmpty) _taskListOffset += _taskListAmount;
+      return list;
+    }));
   }
 
   Future<bool> addTask(TaskEntity task) =>
@@ -118,40 +66,15 @@ class TaskDatabaseBloc implements BlocBase {
   Future<bool> updateTask(TaskEntity task) =>
       TaskDatabase.taskDatabase.updateTask(task);
 
-  Future<bool> completeTask(TaskEntity task) {
-    final TaskEntity modifiedTask = task;
-    modifiedTask.completeDate = DateTime.now();
-    return TaskDatabase.taskDatabase
-        .updateTask(modifiedTask)
-        .then((bool status) {
-      _afterComplete(status, task);
-      return status;
-    });
-  }
-
   Future<TaskEntity> getTaskDetails(TaskEntity task) =>
       TaskDatabase.taskDatabase.getTaskDetails(task);
 
-  void _addOperation(
-    TaskEntity task,
-    Future<bool> Function(TaskEntity task) toRevert,
-  ) =>
+  void _addOperation(TaskEntity task,
+      Future<bool> Function(TaskEntity task) toRevert,) =>
       TaskManager.taskManager.addOperation(TaskOperation(
         task: task,
         revertOperation: toRevert,
       ));
-
-  void _afterComplete(bool status, TaskEntity task) {
-    if (status) {
-      TaskDatabase.taskDatabase
-          .getTaskDetails(task)
-          .then((TaskEntity detailedTask) {
-        TaskNotification().cancelNotification(detailedTask);
-        task.completeDate = null;
-        _addOperation(task, updateTask);
-      });
-    }
-  }
 
   void _afterDelete(bool status, TaskEntity task) {
     if (status) {

@@ -20,10 +20,10 @@ import 'package:project_scarlet/presentation/standard_values.dart';
 main() {
   TaskDatabase.taskDatabase.initializeDatabase().whenComplete(() {
     TaskDatabase.taskDatabase.createViews().whenComplete(() {
-//      for (int i = 0; i < 10000; ++i) {
+//      for (int i = 0; i < 1000; ++i) {
 //        final int mod = i % 4, mod2 = i % 11, mod3 = i % 7;
 //        TaskDatabase.taskDatabase.insertTask(TaskEntity(
-//          name: "Task no $i",
+//          name: "Task $i" + (mod2 == 0 ? " done" : " not"),
 //          description: "This is a very very very long description to overload the memory so bear with me a little bit cause I am desperate $i",
 //          location: "This is a very very very long location to overload the memory so bear with me a little bit cause I am desperate $i",
 //          dueDate: mod3 == 0 ? DateTime.now().add(Duration(hours: i)) : DateTime
@@ -36,7 +36,7 @@ main() {
 //              : null,
 //        ));
 //      }
-//      print('10K values insertion successful!');
+//      print('1K values insertion successful!');
     });
   });
   runApp(MyApp(key: GlobalKey()));
@@ -49,7 +49,7 @@ class MyApp extends StatefulWidget {
   MyApp({Key key}) : super(key: key);
 
   @override
-  State<StatefulWidget> createState() => new _MyAppState();
+  State<StatefulWidget> createState() => _MyAppState();
 }
 
 /// Main application UI state.
@@ -62,7 +62,7 @@ class _MyAppState extends State<MyApp> {
     // Material creates a default theme and routes for navigation.
     return MaterialApp(
       // For debugging purposes TODO DEBUG
-      // showPerformanceOverlay: true,
+      showPerformanceOverlay: true,
 
       // Setting application theme
       theme: ThemeData(
@@ -74,7 +74,7 @@ class _MyAppState extends State<MyApp> {
         // Secondary color
         accentColor: Colors.blueAccent,
 
-        // Brightness 
+        // Brightness
         brightness: Brightness.light,
         primaryColorBrightness: Brightness.dark,
         accentColorBrightness: Brightness.dark,
@@ -100,24 +100,24 @@ class _MyAppState extends State<MyApp> {
       ),
 
       // Home page
-      home: new HomePage(key: ValueKey('HomePage')),
+      home: HomePage(key: ValueKey('HomePage')),
 
       // Navigation routes.
       routes: {
         pageDetails[1][1]: (BuildContext context) =>
-            new StrengthPage(key: ValueKey('StrengthPage')),
+            StrengthPage(key: ValueKey('StrengthPage')),
         pageDetails[2][1]: (BuildContext context) =>
-            new WisdomPage(key: ValueKey('WisdomPage')),
+            WisdomPage(key: ValueKey('WisdomPage')),
         pageDetails[3][1]: (BuildContext context) =>
-            new ResistancePage(key: ValueKey('ResistancePage')),
+            ResistancePage(key: ValueKey('ResistancePage')),
         pageDetails[4][1]: (BuildContext context) =>
-            new StrategicPage(key: ValueKey('StrategicPage')),
+            StrategicPage(key: ValueKey('StrategicPage')),
         pageDetails[5][1]: (BuildContext context) =>
-            new PlayGamePage(key: ValueKey('PlayGamePage')),
+            PlayGamePage(key: ValueKey('PlayGamePage')),
         pageDetails[6][1]: (BuildContext context) =>
-            new SettingsPage(key: ValueKey('SettingsPage')),
+            SettingsPage(key: ValueKey('SettingsPage')),
         pageDetails[7][1]: (BuildContext context) =>
-            new AboutPage(key: ValueKey('AboutPage')),
+            AboutPage(key: ValueKey('AboutPage')),
       },
     );
   }
